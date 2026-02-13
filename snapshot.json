@@ -1,0 +1,265 @@
+{
+  "generatedAt": "2026-02-13T16:23:43.025146Z",
+  "headline": {
+    "globalStatus": "unknown",
+    "alerts": 3,
+    "openRemediations": 0
+  },
+  "projects": [
+    {
+      "name": "Runtime Reliability",
+      "status": "unknown",
+      "summary": "Gateway, locks, cron health and remediations",
+      "lastUpdate": "2026-02-13T16:00:41.471161Z"
+    },
+    {
+      "name": "Outreach Engine",
+      "status": "alert",
+      "summary": "Queue 61 \u00b7 healthRows 0 \u00b7 paused 0",
+      "lastUpdate": "2026-02-13T15:58:46.232340Z"
+    },
+    {
+      "name": "Provider Budget/Capacity",
+      "status": "alert",
+      "summary": "Providers healthy: 0/4",
+      "lastUpdate": "2026-02-13T13:29:29.680879Z"
+    },
+    {
+      "name": "Agent Ops & Routing",
+      "status": "ok",
+      "summary": "Model-routing policy + ops-fix mini-agent active",
+      "lastUpdate": "2026-02-13T16:00:42.188309Z"
+    }
+  ],
+  "backburner": [
+    {
+      "name": "Ops rollout policy decisions",
+      "note": "Cron apply + recovery execution + thresholds"
+    },
+    {
+      "name": "Voice polish pass v2",
+      "note": "Improve C2.5 natural prosody when time permits"
+    }
+  ],
+  "latestUpdates": [
+    {
+      "item": "Unified incident dashboard",
+      "at": "2026-02-13T16:00:42.125635Z"
+    },
+    {
+      "item": "Auto-remediation report",
+      "at": "2026-02-13T16:00:41.597307Z"
+    },
+    {
+      "item": "Outreach telemetry health",
+      "at": "2026-02-13T16:00:41.534317Z"
+    },
+    {
+      "item": "Gemini skill sync",
+      "at": "2026-02-13T15:35:03.765024Z"
+    }
+  ],
+  "agents": {
+    "opsFixMiniAgent": {
+      "status": "active",
+      "lastRun": null,
+      "safeMode": true
+    }
+  },
+  "briefs": {
+    "morning": "2026-02-13T16:00:42.308960Z",
+    "evening": null
+  },
+  "outreach": {
+    "telemetry": {
+      "generatedAt": "2026-02-13T16:00:41.534046Z",
+      "overallStatus": "critical",
+      "summary": {
+        "checks": 6,
+        "failing": 2,
+        "critical": 1,
+        "warn": 1,
+        "createdAlerts": 0,
+        "createdTasks": 0
+      },
+      "checks": [
+        {
+          "code": "SENDER_HEALTH_FILE_PRESENT",
+          "severity": "critical",
+          "type": "file_exists",
+          "path": "output/sender_health_metrics.csv",
+          "status": "ok",
+          "detail": {
+            "exists": true
+          }
+        },
+        {
+          "code": "SENDER_HEALTH_MIN_ROWS",
+          "severity": "critical",
+          "type": "csv_min_rows",
+          "path": "output/sender_health_metrics.csv",
+          "status": "missing",
+          "detail": {
+            "rows": 0,
+            "min_rows": 1
+          }
+        },
+        {
+          "code": "SENDER_HEALTH_REQUIRED_COLUMNS",
+          "severity": "critical",
+          "type": "csv_required_columns",
+          "path": "output/sender_health_metrics.csv",
+          "status": "ok",
+          "detail": {
+            "missing_columns": [],
+            "required_columns": [
+              "bounce_rate",
+              "positive_reply_rate",
+              "reply_rate",
+              "sender_id",
+              "spam_rate"
+            ]
+          }
+        },
+        {
+          "code": "OP_SNAPSHOT_FRESH",
+          "severity": "warn",
+          "type": "json_freshness",
+          "path": "output/operational_snapshot.json",
+          "status": "ok",
+          "detail": {
+            "age_minutes": 1.92,
+            "max_age_minutes": 240
+          }
+        },
+        {
+          "code": "OP_SNAPSHOT_HAS_HEALTH_ROWS",
+          "severity": "warn",
+          "type": "json_min_value",
+          "path": "output/operational_snapshot.json",
+          "status": "missing",
+          "detail": {
+            "field": "healthRows",
+            "value": 0.0,
+            "min_value": 1.0
+          }
+        },
+        {
+          "code": "SENDER_STOPLIGHTS_PRESENT",
+          "severity": "warn",
+          "type": "json_array_min_length",
+          "path": "output/sender_risk_stoplights.json",
+          "status": "ok",
+          "detail": {
+            "field": "senders",
+            "length": 6,
+            "min_length": 1
+          }
+        }
+      ]
+    },
+    "snapshot": {
+      "generatedAt": "2026-02-13T15:58:46.231843Z",
+      "adaptiveQueueCount": 61,
+      "routeMix": {
+        "standard_short": 42,
+        "micro_audit_teaser": 19
+      },
+      "topRoute": {
+        "variant_id": "standard_short",
+        "component": "route",
+        "uses": "0",
+        "opens": "0",
+        "replies": "0",
+        "positive_replies": "0",
+        "meetings": "0",
+        "score": "0.0",
+        "last_updated": "2026-02-11T14:58:22.197281Z"
+      },
+      "topSubject": {
+        "variant_id": "0",
+        "component": "subject",
+        "uses": "0",
+        "opens": "0",
+        "replies": "0",
+        "positive_replies": "0",
+        "meetings": "0",
+        "score": "0.0",
+        "last_updated": "2026-02-11T13:57:28.658812Z"
+      },
+      "hotLeadCount": 0,
+      "pausedSenders": 0,
+      "healthRows": 0
+    },
+    "senderStoplights": {
+      "senders": [
+        {
+          "sender_id": "email_james",
+          "status": "active",
+          "stoplight": "gray",
+          "reason": "no_health_data",
+          "bounce_rate": 0.0,
+          "spam_rate": 0.0,
+          "reply_rate": 0.0,
+          "positive_reply_rate": 0.0,
+          "current_cap": 5
+        },
+        {
+          "sender_id": "email_gregory",
+          "status": "active",
+          "stoplight": "gray",
+          "reason": "no_health_data",
+          "bounce_rate": 0.0,
+          "spam_rate": 0.0,
+          "reply_rate": 0.0,
+          "positive_reply_rate": 0.0,
+          "current_cap": 5
+        },
+        {
+          "sender_id": "email_clio",
+          "status": "active",
+          "stoplight": "gray",
+          "reason": "no_health_data",
+          "bounce_rate": 0.0,
+          "spam_rate": 0.0,
+          "reply_rate": 0.0,
+          "positive_reply_rate": 0.0,
+          "current_cap": 5
+        },
+        {
+          "sender_id": "li_james",
+          "status": "pending",
+          "stoplight": "gray",
+          "reason": "no_health_data",
+          "bounce_rate": 0.0,
+          "spam_rate": 0.0,
+          "reply_rate": 0.0,
+          "positive_reply_rate": 0.0,
+          "current_cap": 20
+        },
+        {
+          "sender_id": "li_team1",
+          "status": "pending",
+          "stoplight": "gray",
+          "reason": "no_health_data",
+          "bounce_rate": 0.0,
+          "spam_rate": 0.0,
+          "reply_rate": 0.0,
+          "positive_reply_rate": 0.0,
+          "current_cap": 20
+        },
+        {
+          "sender_id": "li_sophie",
+          "status": "pending",
+          "stoplight": "gray",
+          "reason": "no_health_data",
+          "bounce_rate": 0.0,
+          "spam_rate": 0.0,
+          "reply_rate": 0.0,
+          "positive_reply_rate": 0.0,
+          "current_cap": 20
+        }
+      ]
+    }
+  }
+}

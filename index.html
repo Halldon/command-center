@@ -1,0 +1,77 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Clio Command Center</title>
+  <style>
+    body{margin:0;background:#060b14;color:#dbe7ff;font:14px/1.4 Inter,system-ui}
+    .wrap{padding:20px;max-width:1200px;margin:auto}
+    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+    .h{font-size:24px;font-weight:700}.muted{color:#90a4c7}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+    .card{background:#0c1524;border:1px solid #1b2a44;border-radius:12px;padding:12px}
+    .status{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:600;font-size:12px}
+    .ok{background:#123d2a;color:#7dffb4}.alert{background:#4a1720;color:#ff99a7}.unknown{background:#23324f;color:#bdd0ff}
+    ul{padding-left:18px;margin:8px 0} li{margin:4px 0}
+    .small{font-size:12px}
+    .section{margin-top:16px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <div>
+        <div class="h">🛰️ Clio Command Center</div>
+        <div class="muted" id="stamp">Loading...</div>
+      </div>
+      <button onclick="location.reload()">Refresh</button>
+    </div>
+
+    <div class="grid" id="projects"></div>
+
+    <div class="section grid">
+      <div class="card">
+        <h3>Latest Updates</h3>
+        <ul id="updates"></ul>
+      </div>
+      <div class="card">
+        <h3>Back Burner</h3>
+        <ul id="backburner"></ul>
+      </div>
+      <div class="card">
+        <h3>Agents</h3>
+        <ul id="agents"></ul>
+      </div>
+      <div class="card">
+        <h3>Executive Briefs</h3>
+        <ul id="briefs"></ul>
+      </div>
+    </div>
+  </div>
+
+<script>
+async function main(){
+  const r = await fetch('./snapshot.json?ts=' + Date.now());
+  const d = await r.json();
+  document.getElementById('stamp').textContent = `Generated: ${d.generatedAt} · Global: ${d.headline.globalStatus} · Alerts: ${d.headline.alerts}`;
+
+  const pj = document.getElementById('projects');
+  d.projects.forEach(p=>{
+    const cls = (p.status==='ok'?'ok':(p.status==='alert'?'alert':'unknown'));
+    pj.innerHTML += `<div class='card'><div><span class='status ${cls}'>${p.status}</span></div><h3>${p.name}</h3><div>${p.summary}</div><div class='small muted'>${p.lastUpdate||'n/a'}</div></div>`;
+  });
+
+  const upd = document.getElementById('updates');
+  (d.latestUpdates||[]).forEach(u=> upd.innerHTML += `<li>${u.item} <span class='small muted'>(${u.at||'n/a'})</span></li>`);
+  const bb = document.getElementById('backburner');
+  (d.backburner||[]).forEach(x=> bb.innerHTML += `<li><b>${x.name}</b> — ${x.note}</li>`);
+  const ag = document.getElementById('agents');
+  Object.entries(d.agents||{}).forEach(([k,v])=> ag.innerHTML += `<li><b>${k}</b>: ${v.status} · safeMode=${v.safeMode}</li>`);
+  const br = document.getElementById('briefs');
+  br.innerHTML = `<li>Morning: ${d.briefs?.morning||'n/a'}</li><li>Evening: ${d.briefs?.evening||'n/a'}</li>`;
+}
+main();
+</script>
+</body>
+</html>
