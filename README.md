@@ -32,6 +32,24 @@ cd /Users/j/.openclaw/workspace/command-center-app
 vercel --prod
 ```
 
+## WebMCP-lite Endpoint (new)
+
+A lightweight read-only structured tools endpoint is now available for agent/browser integrations:
+
+- Discovery: `/.well-known/webmcp.json`
+- API: `/api/webmcp`
+
+Example:
+
+```bash
+curl -s https://command-center-app.vercel.app/api/webmcp | jq
+curl -s https://command-center-app.vercel.app/api/webmcp \
+  -H 'content-type: application/json' \
+  -d '{"action":"call_tool","name":"get_attention_queue","arguments":{"limit":5}}' | jq
+```
+
+> Current mode is read-only and unauthenticated. Add auth before broad/public usage.
+
 Docs:
 - `docs/implementation-summary.md`
 - `docs/operator-quickstart.md`

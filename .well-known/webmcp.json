@@ -1,0 +1,16 @@
+{
+  "name": "command-center-webmcp",
+  "version": "0.1.0",
+  "description": "Read-only structured tool endpoint for Command Center snapshot data.",
+  "protocol": "webmcp-lite",
+  "endpoint": "/api/webmcp",
+  "auth": {
+    "type": "none",
+    "note": "Add auth before exposing publicly."
+  },
+  "capabilities": {
+    "read_only": true,
+    "list_tools": true,
+    "call_tool": true
+  }
+}
