@@ -1,77 +1,265 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Clio Command Center</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Command Center</title>
   <style>
-    body{margin:0;background:#060b14;color:#dbe7ff;font:14px/1.4 Inter,system-ui}
-    .wrap{padding:20px;max-width:1200px;margin:auto}
-    .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
-    .h{font-size:24px;font-weight:700}.muted{color:#90a4c7}
-    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-    .card{background:#0c1524;border:1px solid #1b2a44;border-radius:12px;padding:12px}
-    .status{display:inline-block;padding:3px 8px;border-radius:999px;font-weight:600;font-size:12px}
-    .ok{background:#123d2a;color:#7dffb4}.alert{background:#4a1720;color:#ff99a7}.unknown{background:#23324f;color:#bdd0ff}
-    ul{padding-left:18px;margin:8px 0} li{margin:4px 0}
-    .small{font-size:12px}
-    .section{margin-top:16px}
+    :root {
+      --bg: #060a12;
+      --bg2: #0a1220;
+      --panel: rgba(14, 22, 36, 0.75);
+      --line: #1f2b40;
+      --text: #dbe7ff;
+      --muted: #8da1c4;
+      --ok: #35d399;
+      --warn: #fbbf24;
+      --bad: #fb7185;
+      --unk: #93c5fd;
+      --glow: 0 0 0 1px rgba(120, 170, 255, 0.18), 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: radial-gradient(1200px 600px at 10% -20%, #1a2a48 0%, transparent 60%),
+                  radial-gradient(1000px 500px at 90% -10%, #1b3a3a 0%, transparent 60%),
+                  var(--bg);
+      color: var(--text);
+      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+
+    .wrap { max-width: 1360px; margin: 0 auto; padding: 18px; }
+
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 12px;
+      padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px;
+      background: linear-gradient(180deg, rgba(14,22,36,.9), rgba(9,15,27,.9)); box-shadow: var(--glow);
+      position: sticky; top: 10px; z-index: 20; backdrop-filter: blur(6px);
+    }
+
+    .title { font-size: 20px; font-weight: 750; letter-spacing: .2px; }
+    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
+    .ctrls { display: flex; gap: 8px; align-items: center; }
+
+    button, .pill {
+      border: 1px solid #2c3d5d; background: #111a2b; color: var(--text);
+      border-radius: 10px; padding: 8px 11px; font-weight: 600; cursor: pointer;
+    }
+    button:hover { filter: brightness(1.08); }
+
+    .kpi-grid {
+      margin-top: 14px;
+      display: grid; gap: 10px;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+    }
+    .kpi {
+      border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: var(--glow);
+      padding: 11px 12px;
+    }
+    .kpi .label { color: var(--muted); font-size: 12px; }
+    .kpi .val { font-size: 24px; margin-top: 4px; font-weight: 800; }
+
+    .status-chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+      border: 1px solid transparent;
+    }
+    .ok { color: #7ef5be; background: rgba(53, 211, 153, .15); border-color: rgba(53, 211, 153, .35); }
+    .alert { color: #ff9aae; background: rgba(251, 113, 133, .15); border-color: rgba(251, 113, 133, .35); }
+    .unknown { color: #b8d8ff; background: rgba(147, 197, 253, .14); border-color: rgba(147, 197, 253, .35); }
+
+    .grid { margin-top: 12px; display: grid; gap: 10px; grid-template-columns: repeat(12, 1fr); }
+    .card {
+      border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: var(--glow);
+      padding: 12px;
+    }
+    .card h3 { margin: 0 0 8px 0; font-size: 14px; letter-spacing: .2px; }
+    .small { color: var(--muted); font-size: 12px; }
+
+    .projects { grid-column: span 8; }
+    .updates { grid-column: span 4; }
+    .backburner { grid-column: span 4; }
+    .agents { grid-column: span 4; }
+    .briefs { grid-column: span 4; }
+
+    .project-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .project {
+      border: 1px solid #263857; border-radius: 10px; padding: 10px; background: rgba(13,20,34,.8);
+      min-height: 122px;
+    }
+    .project .name { font-weight: 700; margin: 7px 0 6px; }
+
+    ul { margin: 8px 0 0; padding-left: 18px; }
+    li { margin: 6px 0; }
+
+    .footer { margin-top: 12px; color: var(--muted); font-size: 11px; text-align: right; }
+
+    @media (max-width: 1100px) {
+      .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
+      .projects, .updates, .backburner, .agents, .briefs { grid-column: span 12; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <div class="top">
+    <div class="topbar">
       <div>
-        <div class="h">🛰️ Clio Command Center</div>
-        <div class="muted" id="stamp">Loading...</div>
+        <div class="title">🛰️ Command Center</div>
+        <div class="sub" id="stamp">Loading operational snapshot…</div>
       </div>
-      <button onclick="location.reload()">Refresh</button>
+      <div class="ctrls">
+        <span class="pill" id="autorefresh">Auto-refresh: ON</span>
+        <button id="refreshBtn">Refresh</button>
+      </div>
     </div>
 
-    <div class="grid" id="projects"></div>
+    <div class="kpi-grid">
+      <div class="kpi"><div class="label">Global Status</div><div class="val" id="kpiStatus">—</div></div>
+      <div class="kpi"><div class="label">Open Alerts</div><div class="val" id="kpiAlerts">—</div></div>
+      <div class="kpi"><div class="label">Open Remediations</div><div class="val" id="kpiRem">—</div></div>
+      <div class="kpi"><div class="label">Project Cards</div><div class="val" id="kpiProjects">—</div></div>
+    </div>
 
-    <div class="section grid">
-      <div class="card">
-        <h3>Latest Updates</h3>
+    <div class="grid">
+      <section class="card projects">
+        <h3>Mission Projects</h3>
+        <div class="project-list" id="projects"></div>
+      </section>
+
+      <section class="card updates">
+        <h3>Latest System Updates</h3>
         <ul id="updates"></ul>
-      </div>
-      <div class="card">
+      </section>
+
+      <section class="card backburner">
         <h3>Back Burner</h3>
         <ul id="backburner"></ul>
-      </div>
-      <div class="card">
-        <h3>Agents</h3>
+      </section>
+
+      <section class="card agents">
+        <h3>Agent Operations</h3>
         <ul id="agents"></ul>
-      </div>
-      <div class="card">
+      </section>
+
+      <section class="card briefs">
         <h3>Executive Briefs</h3>
         <ul id="briefs"></ul>
-      </div>
+      </section>
     </div>
+
+    <div class="footer">Tip: press <b>R</b> to refresh · Data source: <code>snapshot.json</code></div>
   </div>
 
 <script>
-async function main(){
+let autoRefresh = true;
+let timer = null;
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function cls(status){
+  if(status === 'ok') return 'ok';
+  if(status === 'alert' || status === 'critical' || status === 'high') return 'alert';
+  return 'unknown';
+}
+
+function relTime(iso){
+  if(!iso) return 'n/a';
+  const d = new Date(iso);
+  if(isNaN(d)) return iso;
+  const s = Math.floor((Date.now() - d.getTime()) / 1000);
+  if(s < 60) return `${s}s ago`;
+  if(s < 3600) return `${Math.floor(s/60)}m ago`;
+  if(s < 86400) return `${Math.floor(s/3600)}h ago`;
+  return `${Math.floor(s/86400)}d ago`;
+}
+
+async function loadData(){
   const r = await fetch('./snapshot.json?ts=' + Date.now());
-  const d = await r.json();
-  document.getElementById('stamp').textContent = `Generated: ${d.generatedAt} · Global: ${d.headline.globalStatus} · Alerts: ${d.headline.alerts}`;
+  if(!r.ok) throw new Error('snapshot fetch failed');
+  return r.json();
+}
+
+function render(d){
+  const global = d?.headline?.globalStatus || 'unknown';
+  const alerts = d?.headline?.alerts ?? 0;
+  const rem = d?.headline?.openRemediations ?? 0;
+  const projects = d?.projects || [];
+
+  document.getElementById('kpiStatus').textContent = String(global).toUpperCase();
+  document.getElementById('kpiAlerts').textContent = alerts;
+  document.getElementById('kpiRem').textContent = rem;
+  document.getElementById('kpiProjects').textContent = projects.length;
+
+  const stamp = `Generated ${d.generatedAt || 'n/a'} · ${relTime(d.generatedAt)} · Global ${global} · Alerts ${alerts}`;
+  document.getElementById('stamp').textContent = stamp;
 
   const pj = document.getElementById('projects');
-  d.projects.forEach(p=>{
-    const cls = (p.status==='ok'?'ok':(p.status==='alert'?'alert':'unknown'));
-    pj.innerHTML += `<div class='card'><div><span class='status ${cls}'>${p.status}</span></div><h3>${p.name}</h3><div>${p.summary}</div><div class='small muted'>${p.lastUpdate||'n/a'}</div></div>`;
+  pj.innerHTML = '';
+  projects.forEach(p => {
+    const c = cls(p.status);
+    pj.innerHTML += `
+      <article class="project">
+        <span class="status-chip ${c}">${esc(p.status || 'unknown')}</span>
+        <div class="name">${esc(p.name || 'Unnamed project')}</div>
+        <div>${esc(p.summary || 'No summary')}</div>
+        <div class="small" style="margin-top:8px;">Updated ${esc(relTime(p.lastUpdate))}</div>
+      </article>`;
   });
 
-  const upd = document.getElementById('updates');
-  (d.latestUpdates||[]).forEach(u=> upd.innerHTML += `<li>${u.item} <span class='small muted'>(${u.at||'n/a'})</span></li>`);
-  const bb = document.getElementById('backburner');
-  (d.backburner||[]).forEach(x=> bb.innerHTML += `<li><b>${x.name}</b> — ${x.note}</li>`);
+  const updates = document.getElementById('updates');
+  updates.innerHTML = '';
+  (d.latestUpdates || []).forEach(u => {
+    updates.innerHTML += `<li>${esc(u.item || 'Update')} <span class="small">(${esc(relTime(u.at))})</span></li>`;
+  });
+
+  const back = document.getElementById('backburner');
+  back.innerHTML = '';
+  (d.backburner || []).forEach(x => back.innerHTML += `<li><b>${esc(x.name)}</b> — ${esc(x.note)}</li>`);
+
   const ag = document.getElementById('agents');
-  Object.entries(d.agents||{}).forEach(([k,v])=> ag.innerHTML += `<li><b>${k}</b>: ${v.status} · safeMode=${v.safeMode}</li>`);
+  ag.innerHTML = '';
+  Object.entries(d.agents || {}).forEach(([name,v]) => {
+    ag.innerHTML += `<li><b>${esc(name)}</b>: ${esc(v.status || 'unknown')} · safeMode=${esc(String(v.safeMode))}</li>`;
+  });
+
   const br = document.getElementById('briefs');
-  br.innerHTML = `<li>Morning: ${d.briefs?.morning||'n/a'}</li><li>Evening: ${d.briefs?.evening||'n/a'}</li>`;
+  br.innerHTML = `
+    <li>Morning: ${esc(relTime(d?.briefs?.morning))}</li>
+    <li>Evening: ${esc(relTime(d?.briefs?.evening))}</li>
+  `;
 }
-main();
+
+async function refresh(){
+  try {
+    const d = await loadData();
+    render(d);
+  } catch (e) {
+    document.getElementById('stamp').textContent = 'Snapshot unavailable — check deployment sync.';
+    console.error(e);
+  }
+}
+
+function setAuto(on){
+  autoRefresh = on;
+  const pill = document.getElementById('autorefresh');
+  pill.textContent = `Auto-refresh: ${on ? 'ON' : 'OFF'}`;
+  if(timer) clearInterval(timer);
+  if(on) timer = setInterval(refresh, 30000);
+}
+
+window.addEventListener('keydown', (e)=>{
+  if(e.key.toLowerCase() === 'r') refresh();
+  if(e.key.toLowerCase() === 'a') setAuto(!autoRefresh);
+});
+
+document.getElementById('refreshBtn').addEventListener('click', refresh);
+document.getElementById('autorefresh').addEventListener('click', ()=> setAuto(!autoRefresh));
+
+refresh();
+setAuto(true);
 </script>
 </body>
 </html>
