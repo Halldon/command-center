@@ -1,16 +1,39 @@
-# Clio Command Center (Vercel)
+# Command Center App (Operator Edition)
 
-Static deployment of the Command Center UI.
+Static Vercel app powered by deterministic snapshot artifacts generated in:
 
-## Local sync before deploy
+- `/Users/j/.openclaw/workspace/ops/scripts`
+- `/Users/j/.openclaw/workspace/ops/output/command_center`
+
+## Build + Sync Snapshot
 
 ```bash
-python3 /Users/j/.openclaw/workspace/ops/scripts/build_command_center_snapshot.py
-cp /Users/j/.openclaw/workspace/ops/output/command_center/snapshot.json ./snapshot.json
+bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh
+```
+
+That runs:
+
+1. `synthesize_command_center_signals.py` (backfill/mock synthesis)
+2. `build_command_center_snapshot.py` (snapshot schema v2)
+3. copy to `command-center-app/snapshot.json`
+
+## Local Smoke
+
+```bash
+cd /Users/j/.openclaw/workspace/command-center-app
+python3 -m http.server 4173
+# open http://localhost:4173
 ```
 
 ## Deploy
 
 ```bash
+cd /Users/j/.openclaw/workspace/command-center-app
 vercel --prod
 ```
+
+Docs:
+- `docs/implementation-summary.md`
+- `docs/operator-quickstart.md`
+- `docs/rollback.md`
+- `docs/verification.md`

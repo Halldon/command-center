@@ -6,98 +6,257 @@
   <title>Command Center</title>
   <style>
     :root {
-      --bg: #060a12;
-      --bg2: #0a1220;
-      --panel: rgba(14, 22, 36, 0.75);
-      --line: #1f2b40;
-      --text: #dbe7ff;
-      --muted: #8da1c4;
-      --ok: #35d399;
+      --bg: #050911;
+      --bg2: #0b1629;
+      --panel: rgba(11, 19, 33, 0.88);
+      --panel-soft: rgba(11, 18, 30, 0.62);
+      --line: #21314d;
+      --text: #dbe8ff;
+      --muted: #8ea4cc;
+      --ok: #34d399;
       --warn: #fbbf24;
       --bad: #fb7185;
-      --unk: #93c5fd;
-      --glow: 0 0 0 1px rgba(120, 170, 255, 0.18), 0 8px 30px rgba(0, 0, 0, 0.35);
+      --info: #7dd3fc;
+      --chip: rgba(95, 128, 186, 0.2);
+      --glow: 0 0 0 1px rgba(120, 170, 255, 0.12), 0 12px 28px rgba(0, 0, 0, 0.36);
     }
 
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      background: radial-gradient(1200px 600px at 10% -20%, #1a2a48 0%, transparent 60%),
-                  radial-gradient(1000px 500px at 90% -10%, #1b3a3a 0%, transparent 60%),
-                  var(--bg);
       color: var(--text);
       font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      background:
+        radial-gradient(1200px 580px at 0% -15%, #1a2a48 0%, transparent 58%),
+        radial-gradient(900px 500px at 100% -10%, #1b3d40 0%, transparent 55%),
+        var(--bg);
     }
 
-    .wrap { max-width: 1360px; margin: 0 auto; padding: 18px; }
+    .wrap { max-width: 1520px; margin: 0 auto; padding: 16px 18px 28px; }
 
     .topbar {
-      display: flex; justify-content: space-between; align-items: center; gap: 12px;
-      padding: 14px 16px; border: 1px solid var(--line); border-radius: 14px;
-      background: linear-gradient(180deg, rgba(14,22,36,.9), rgba(9,15,27,.9)); box-shadow: var(--glow);
-      position: sticky; top: 10px; z-index: 20; backdrop-filter: blur(6px);
+      position: sticky;
+      top: 10px;
+      z-index: 30;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(11,18,30,.95), rgba(8,14,24,.95));
+      box-shadow: var(--glow);
+      backdrop-filter: blur(8px);
     }
 
-    .title { font-size: 20px; font-weight: 750; letter-spacing: .2px; }
-    .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
-    .ctrls { display: flex; gap: 8px; align-items: center; }
+    .title { font-size: 20px; font-weight: 800; letter-spacing: 0.2px; }
+    .sub { margin-top: 2px; color: var(--muted); font-size: 12px; }
 
-    button, .pill {
-      border: 1px solid #2c3d5d; background: #111a2b; color: var(--text);
-      border-radius: 10px; padding: 8px 11px; font-weight: 600; cursor: pointer;
-    }
-    button:hover { filter: brightness(1.08); }
+    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
 
-    .kpi-grid {
-      margin-top: 14px;
-      display: grid; gap: 10px;
-      grid-template-columns: repeat(4, minmax(180px, 1fr));
+    button, .pill, select, input {
+      border: 1px solid #2d4164;
+      background: #111d31;
+      color: var(--text);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-weight: 600;
+      font-size: 12px;
     }
+
+    button { cursor: pointer; }
+    button:hover { filter: brightness(1.1); }
+
+    input { width: 100%; font-weight: 500; }
+
+    .kpis {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(5, minmax(160px, 1fr));
+    }
+
     .kpi {
-      border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: var(--glow);
-      padding: 11px 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel-soft);
+      box-shadow: var(--glow);
     }
-    .kpi .label { color: var(--muted); font-size: 12px; }
-    .kpi .val { font-size: 24px; margin-top: 4px; font-weight: 800; }
+
+    .kpi .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .35px; }
+    .kpi .val { margin-top: 5px; font-size: 24px; font-weight: 850; }
+
+    .grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(12, 1fr);
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--panel);
+      box-shadow: var(--glow);
+      padding: 12px;
+      min-height: 92px;
+    }
+
+    .card h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: 0.25px; }
+    .small { color: var(--muted); font-size: 12px; }
+
+    .span-12 { grid-column: span 12; }
+    .span-8 { grid-column: span 8; }
+    .span-6 { grid-column: span 6; }
+    .span-4 { grid-column: span 4; }
 
     .status-chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      border-radius: 999px; padding: 3px 9px; font-size: 11px; font-weight: 700; text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
       border: 1px solid transparent;
     }
-    .ok { color: #7ef5be; background: rgba(53, 211, 153, .15); border-color: rgba(53, 211, 153, .35); }
+
+    .ok { color: #7ef5be; background: rgba(53, 211, 153, .15); border-color: rgba(53, 211, 153, .34); }
+    .warn { color: #ffdb8d; background: rgba(251, 191, 36, .16); border-color: rgba(251, 191, 36, .4); }
     .alert { color: #ff9aae; background: rgba(251, 113, 133, .15); border-color: rgba(251, 113, 133, .35); }
     .unknown { color: #b8d8ff; background: rgba(147, 197, 253, .14); border-color: rgba(147, 197, 253, .35); }
 
-    .grid { margin-top: 12px; display: grid; gap: 10px; grid-template-columns: repeat(12, 1fr); }
-    .card {
-      border: 1px solid var(--line); border-radius: 12px; background: var(--panel); box-shadow: var(--glow);
-      padding: 12px;
+    .attention-list {
+      display: grid;
+      gap: 8px;
     }
-    .card h3 { margin: 0 0 8px 0; font-size: 14px; letter-spacing: .2px; }
-    .small { color: var(--muted); font-size: 12px; }
 
-    .projects { grid-column: span 8; }
-    .updates { grid-column: span 4; }
-    .backburner { grid-column: span 4; }
-    .agents { grid-column: span 4; }
-    .briefs { grid-column: span 4; }
+    .attention-item {
+      border: 1px solid #2a3e60;
+      border-radius: 10px;
+      padding: 10px;
+      background: rgba(10, 17, 30, 0.85);
+    }
 
-    .project-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+    .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+    .row .left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+    .score {
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 999px;
+      border: 1px solid #32507f;
+      color: #bdd7ff;
+      background: rgba(36, 58, 92, .4);
+    }
+
+    .action-row { margin-top: 7px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+    .delta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-top: 8px; }
+    .delta {
+      border: 1px solid #2a3f63;
+      border-radius: 10px;
+      background: rgba(10, 16, 28, 0.72);
+      padding: 8px;
+    }
+
+    .signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
+    .signal {
+      border: 1px solid #2a3f63;
+      border-radius: 10px;
+      background: rgba(10, 16, 28, 0.72);
+      padding: 9px;
+    }
+
+    .spark {
+      margin-top: 6px;
+      font-size: 11px;
+      color: #9db4dc;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .list { margin: 0; padding-left: 18px; }
+    .list li { margin: 6px 0; }
+
+    .audit {
+      max-height: 230px;
+      overflow: auto;
+      border: 1px solid #2b4065;
+      border-radius: 10px;
+      background: rgba(10, 16, 27, 0.7);
+      padding: 8px;
+    }
+
+    .audit-item { padding: 7px; border-bottom: 1px dashed #32486f; }
+    .audit-item:last-child { border-bottom: none; }
+
+    .scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 8px; }
+    .scenario {
+      border: 1px solid #2b4068;
+      border-radius: 10px;
+      padding: 9px;
+      background: rgba(9, 15, 27, 0.7);
+    }
+
+    .scenario.recommended { border-color: #3f6ca8; box-shadow: inset 0 0 0 1px rgba(110, 170, 255, 0.22); }
+
+    .mem-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr auto;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
     .project {
-      border: 1px solid #263857; border-radius: 10px; padding: 10px; background: rgba(13,20,34,.8);
-      min-height: 122px;
+      border: 1px solid #2a3f63;
+      border-radius: 10px;
+      padding: 9px;
+      background: rgba(9, 16, 30, 0.7);
     }
-    .project .name { font-weight: 700; margin: 7px 0 6px; }
 
-    ul { margin: 8px 0 0; padding-left: 18px; }
-    li { margin: 6px 0; }
+    .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
 
-    .footer { margin-top: 12px; color: var(--muted); font-size: 11px; text-align: right; }
+    .hidden { display: none !important; }
 
-    @media (max-width: 1100px) {
-      .kpi-grid { grid-template-columns: repeat(2, minmax(160px, 1fr)); }
-      .projects, .updates, .backburner, .agents, .briefs { grid-column: span 12; }
+    .footer {
+      margin-top: 12px;
+      color: var(--muted);
+      text-align: right;
+      font-size: 11px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 14px;
+      bottom: 14px;
+      z-index: 40;
+      background: rgba(11, 20, 34, 0.95);
+      border: 1px solid #36598b;
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #cde2ff;
+      box-shadow: var(--glow);
+      opacity: 0;
+      transform: translateY(6px);
+      transition: all .2s ease;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    @media (max-width: 1240px) {
+      .kpis { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
+      .span-8, .span-6, .span-4 { grid-column: span 12; }
+      .split { grid-template-columns: 1fr; }
+      .mem-form { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -105,85 +264,594 @@
   <div class="wrap">
     <div class="topbar">
       <div>
-        <div class="title">🛰️ Command Center</div>
-        <div class="sub" id="stamp">Loading operational snapshot…</div>
+        <div class="title">🛰️ Command Center · Operator Edition</div>
+        <div class="sub" id="stamp">Loading snapshot…</div>
       </div>
       <div class="ctrls">
-        <span class="pill" id="autorefresh">Auto-refresh: ON</span>
+        <span class="pill" id="safeModePill">Console mode: DRY-RUN</span>
+        <span class="pill" id="autoRefreshPill">Auto-refresh: ON</span>
+        <button id="focusToggleBtn">Toggle Focus</button>
         <button id="refreshBtn">Refresh</button>
       </div>
     </div>
 
-    <div class="kpi-grid">
+    <div class="kpis">
       <div class="kpi"><div class="label">Global Status</div><div class="val" id="kpiStatus">—</div></div>
-      <div class="kpi"><div class="label">Open Alerts</div><div class="val" id="kpiAlerts">—</div></div>
-      <div class="kpi"><div class="label">Open Remediations</div><div class="val" id="kpiRem">—</div></div>
-      <div class="kpi"><div class="label">Project Cards</div><div class="val" id="kpiProjects">—</div></div>
+      <div class="kpi"><div class="label">Attention Queue</div><div class="val" id="kpiAttention">—</div></div>
+      <div class="kpi"><div class="label">SLA Breaches</div><div class="val" id="kpiBreaches">—</div></div>
+      <div class="kpi"><div class="label">Forecast Confidence</div><div class="val" id="kpiForecast">—</div></div>
+      <div class="kpi"><div class="label">Trust/Security</div><div class="val" id="kpiTrust">—</div></div>
     </div>
 
     <div class="grid">
-      <section class="card projects">
-        <h3>Mission Projects</h3>
-        <div class="project-list" id="projects"></div>
+      <section class="card span-8" id="attentionCard">
+        <h3>1) Attention Queue</h3>
+        <div class="small" id="attentionSummary">Loading…</div>
+        <div class="attention-list" id="attentionList"></div>
       </section>
 
-      <section class="card updates">
-        <h3>Latest System Updates</h3>
-        <ul id="updates"></ul>
+      <section class="card span-4" id="briefCard">
+        <h3>2) Executive Daily Brief (60s)</h3>
+        <div id="briefSummary" class="small">Loading…</div>
+        <ul class="list" id="briefHighlights"></ul>
+        <div class="delta-grid" id="briefDeltas"></div>
       </section>
 
-      <section class="card backburner">
-        <h3>Back Burner</h3>
-        <ul id="backburner"></ul>
+      <section class="card span-6" id="decisionCard">
+        <h3>3) Decision Console</h3>
+        <div class="small" id="decisionMeta"></div>
+        <div id="decisionControls"></div>
+        <h3 style="margin-top:10px;">Audit Trail</h3>
+        <div class="audit" id="decisionAudit"></div>
       </section>
 
-      <section class="card agents">
-        <h3>Agent Operations</h3>
-        <ul id="agents"></ul>
+      <section class="card span-6" id="reliabilityCard">
+        <h3>4) Reliability Radar</h3>
+        <div class="signal-grid" id="reliabilitySignals"></div>
       </section>
 
-      <section class="card briefs">
-        <h3>Executive Briefs</h3>
-        <ul id="briefs"></ul>
+      <section class="card span-4" id="revenueCard">
+        <h3>5) Revenue / Pipeline Truth</h3>
+        <div id="revenueMain"></div>
+        <ul class="list" id="revenueLeakage"></ul>
       </section>
 
-      <section class="card backburner">
-        <h3>Decisions Needed</h3>
-        <ul id="decisions"></ul>
+      <section class="card span-4" id="focusCard">
+        <h3>6) Personal Focus Mode</h3>
+        <div id="focusMain" class="small"></div>
+        <ul class="list" id="focusIndicators"></ul>
       </section>
 
-      <section class="card updates">
-        <h3>Incident Feed</h3>
-        <ul id="incidents"></ul>
+      <section class="card span-4" id="explainCard">
+        <h3>7) Explainability Panel</h3>
+        <div id="explainList"></div>
+      </section>
+
+      <section class="card span-6" id="trustCard">
+        <h3>8) Trust / Security Center</h3>
+        <div id="trustMain" class="small"></div>
+        <div class="split" style="margin-top:8px;">
+          <div><h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Checks</h4><div id="trustChecks"></div></div>
+          <div><h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Blast Radius Preview</h4><div id="blastPreview"></div></div>
+        </div>
+      </section>
+
+      <section class="card span-6" id="scenarioCard">
+        <h3>9) Scenario Simulator</h3>
+        <div class="small" id="scenarioMeta"></div>
+        <div class="scenario-grid" id="scenarioGrid"></div>
+      </section>
+
+      <section class="card span-6" id="memoryCard">
+        <h3>10) Operator Memory / Learning Loop</h3>
+        <div class="small" id="memoryMeta"></div>
+        <ul class="list" id="memoryPrefs"></ul>
+        <div class="mem-form">
+          <input id="prefKey" placeholder="preference key" />
+          <input id="prefValue" placeholder="value" />
+          <button id="savePrefBtn">Save Preference</button>
+        </div>
+      </section>
+
+      <section class="card span-6" id="classicCard">
+        <h3>Legacy Mission Panels (preserved)</h3>
+        <div class="projects" id="projects"></div>
+      </section>
+
+      <section class="card span-6" id="classicMetaCard">
+        <h3>Latest Updates & Decisions</h3>
+        <div class="split">
+          <div>
+            <div class="small">Latest Updates</div>
+            <ul class="list" id="updates"></ul>
+          </div>
+          <div>
+            <div class="small">Decisions Needed</div>
+            <ul class="list" id="decisions"></ul>
+          </div>
+        </div>
       </section>
     </div>
 
-    <div class="footer">Tip: press <b>R</b> to refresh · Data source: <code>snapshot.json</code></div>
+    <div class="footer">R = refresh · A = toggle auto-refresh · Data source: <code>snapshot.json</code></div>
   </div>
 
-<script>
-let autoRefresh = true;
-let timer = null;
+  <div id="toast" class="toast"></div>
 
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+<script>
+const state = {
+  data: null,
+  autoRefresh: true,
+  timer: null,
+  focusOverride: null,
+  localAudit: loadLocal('cc.local.audit', []),
+  localPrefs: loadLocal('cc.local.prefs', {}),
+};
+
+function loadLocal(key, fallback){
+  try {
+    const raw = localStorage.getItem(key);
+    if(!raw) return fallback;
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+}
+
+function saveLocal(key, value){
+  localStorage.setItem(key, JSON.stringify(value));
+}
+
+function esc(v){
+  return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 function cls(status){
-  if(status === 'ok') return 'ok';
-  if(status === 'alert' || status === 'critical' || status === 'high') return 'alert';
+  const s = String(status || '').toLowerCase();
+  if(['ok','healthy','good'].includes(s)) return 'ok';
+  if(['critical','alert','high'].includes(s)) return 'alert';
+  if(['warn','warning','degraded'].includes(s)) return 'warn';
   return 'unknown';
 }
 
 function relTime(iso){
   if(!iso) return 'n/a';
   const d = new Date(iso);
-  if(isNaN(d)) return iso;
-  const s = Math.floor((Date.now() - d.getTime()) / 1000);
+  if(Number.isNaN(d.getTime())) return String(iso);
+  const s = Math.floor((Date.now() - d.getTime())/1000);
+  if(s < 0){
+    const a = Math.abs(s);
+    if(a < 60) return `in ${a}s`;
+    if(a < 3600) return `in ${Math.floor(a/60)}m`;
+    return `in ${Math.floor(a/3600)}h`;
+  }
   if(s < 60) return `${s}s ago`;
   if(s < 3600) return `${Math.floor(s/60)}m ago`;
   if(s < 86400) return `${Math.floor(s/3600)}h ago`;
   return `${Math.floor(s/86400)}d ago`;
+}
+
+function fmtPercent(v, digits=0){
+  const n = Number(v);
+  if(Number.isNaN(n)) return 'n/a';
+  return `${(n*100).toFixed(digits)}%`;
+}
+
+function fmtMoney(v){
+  const n = Number(v);
+  if(Number.isNaN(n)) return 'n/a';
+  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
+}
+
+function showToast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(()=> el.classList.remove('show'), 1600);
+}
+
+async function copyText(text){
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function addLocalAudit(action, detail){
+  const row = {
+    ts: new Date().toISOString(),
+    actor: 'operator-local',
+    action,
+    result: 'queued',
+    rollbackAvailable: true,
+    detail,
+  };
+  state.localAudit = [row, ...(state.localAudit || [])].slice(0, 40);
+  saveLocal('cc.local.audit', state.localAudit);
+}
+
+function featureEnabled(flag){
+  const ff = state.data?.featureFlags || {};
+  if(flag in ff) return !!ff[flag];
+  return true;
+}
+
+function applyFeatureVisibility(){
+  const map = {
+    attentionQueue: 'attentionCard',
+    executiveDailyBrief: 'briefCard',
+    decisionConsole: 'decisionCard',
+    reliabilityRadar: 'reliabilityCard',
+    revenuePipeline: 'revenueCard',
+    personalFocusMode: 'focusCard',
+    explainability: 'explainCard',
+    trustSecurity: 'trustCard',
+    scenarioSimulator: 'scenarioCard',
+    operatorMemory: 'memoryCard',
+    classicPanels: 'classicCard',
+  };
+  Object.entries(map).forEach(([flag, id]) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.classList.toggle('hidden', !featureEnabled(flag));
+  });
+}
+
+function renderTop(){
+  const d = state.data || {};
+  const h = d.headline || {};
+  const attention = d.attentionQueue || {};
+  const rev = d.revenuePipeline || {};
+  const trust = d.trustSecurity || {};
+
+  document.getElementById('kpiStatus').textContent = String(h.globalStatus || 'unknown').toUpperCase();
+  document.getElementById('kpiAttention').textContent = (attention.summary?.total ?? 0);
+  document.getElementById('kpiBreaches').textContent = (attention.summary?.breached ?? 0);
+  document.getElementById('kpiForecast').textContent = `${Math.round((rev.forecastConfidence?.score ?? 0) * 100)}%`;
+  document.getElementById('kpiTrust').textContent = String(trust.overallStatus || 'unknown').toUpperCase();
+
+  const safeMode = (d.decisionConsole?.globalMode || 'dry-run').toUpperCase();
+  document.getElementById('safeModePill').textContent = `Console mode: ${safeMode}`;
+
+  const stamp = `Generated ${d.generatedAt || 'n/a'} · ${relTime(d.generatedAt)} · Schema ${d.schemaVersion || 'legacy'}`;
+  document.getElementById('stamp').textContent = stamp;
+}
+
+function attentionBias(item){
+  const bias = state.data?.operatorMemory?.recommendationBiasing?.weights || {};
+  const localCritical = state.localPrefs?.criticalOnly === true;
+  let factor = 1;
+  const tags = item.tags || [];
+  if(tags.includes('reliability')) factor *= Number(bias.reliability || 1);
+  if(tags.includes('revenue')) factor *= Number(bias.revenue || 1);
+  if(tags.includes('trust')) factor *= Number(bias.trust || 1);
+  if(localCritical && ['critical','high'].includes(String(item.severity||'').toLowerCase())) factor *= 1.15;
+  return factor;
+}
+
+function renderAttention(){
+  const q = state.data?.attentionQueue || {};
+  const listEl = document.getElementById('attentionList');
+  listEl.innerHTML = '';
+
+  const items = [...(q.items || [])].sort((a,b)=> ((b.score||0) * attentionBias(b)) - ((a.score||0) * attentionBias(a)));
+
+  const summary = q.summary || {};
+  document.getElementById('attentionSummary').innerHTML =
+    `Ranked by impact/urgency/confidence · <b>${summary.total || 0}</b> items · <b>${summary.breached || 0}</b> SLA breached`;
+
+  if(!items.length){
+    listEl.innerHTML = '<div class="small">No priority items.</div>';
+    return;
+  }
+
+  items.forEach(item => {
+    const c = cls(item.severity || item.status);
+    const remaining = item.sla?.remainingMinutes;
+    const slaText = typeof remaining === 'number' ? `${remaining >= 0 ? `${remaining}m left` : `${Math.abs(remaining)}m overdue`}` : 'SLA n/a';
+    const score = ((item.score || 0) * attentionBias(item)).toFixed(1);
+
+    listEl.innerHTML += `
+      <article class="attention-item">
+        <div class="row">
+          <div class="left">
+            <span class="status-chip ${c}">${esc(item.severity || 'unknown')}</span>
+            <span class="score">#${esc(item.rank || '?')} · score ${esc(score)}</span>
+            <span class="small">${esc(item.source || 'source')}</span>
+          </div>
+          <div class="small" data-sla-target="${esc(item.sla?.targetAt || '')}">${esc(slaText)}</div>
+        </div>
+        <div style="font-weight:700; margin-top:6px;">${esc(item.title || 'Untitled')}</div>
+        <div class="small" style="margin-top:2px;">${esc(item.summary || '')}</div>
+        <div class="action-row">
+          <button class="copy-action" data-cmd="${esc(item.recommendedAction?.command || '')}" data-id="${esc(item.id || '')}">Copy recommended action</button>
+          <button class="queue-action" data-cmd="${esc(item.recommendedAction?.command || '')}" data-label="${esc(item.title || '')}">Queue dry-run</button>
+          <button class="copy-rollback" data-cmd="${esc(item.recommendedAction?.rollbackCommand || '')}" data-id="${esc(item.id || '')}">Copy rollback</button>
+        </div>
+      </article>
+    `;
+  });
+}
+
+function renderBrief(){
+  const b = state.data?.executiveDailyBrief || {};
+  document.getElementById('briefSummary').innerHTML =
+    `<div><b>${esc(b.summary || 'No summary.')}</b></div><div class="small">Read time: ${esc(b.readTimeSeconds || 60)}s</div>`;
+
+  const highlights = document.getElementById('briefHighlights');
+  highlights.innerHTML = '';
+  const lines = [...(b.highlights || []), ...(b.risks || []).slice(0,2)];
+  lines.forEach(line => highlights.innerHTML += `<li>${esc(line)}</li>`);
+  if(!lines.length) highlights.innerHTML = '<li class="small">No highlights.</li>';
+
+  const deltas = document.getElementById('briefDeltas');
+  deltas.innerHTML = '';
+  (b.deltas || []).forEach(d => {
+    const dir = d.direction === 'up' ? '↑' : d.direction === 'down' ? '↓' : '→';
+    deltas.innerHTML += `
+      <div class="delta">
+        <div class="small">${esc(d.metric)}</div>
+        <div style="font-weight:750; margin-top:2px;">${esc(d.after)} ${esc(d.unit || '')}</div>
+        <div class="small">${dir} ${esc(d.delta)}</div>
+      </div>
+    `;
+  });
+  if(!deltas.innerHTML) deltas.innerHTML = '<div class="small">No delta data.</div>';
+}
+
+function renderDecisionConsole(){
+  const dc = state.data?.decisionConsole || {};
+  document.getElementById('decisionMeta').textContent =
+    `Safe controls enabled: ${dc.safeControlsEnabled ? 'yes' : 'no'} · Mode: ${dc.globalMode || 'dry-run'}`;
+
+  const controls = document.getElementById('decisionControls');
+  controls.innerHTML = '';
+  (dc.controls || []).forEach(c => {
+    controls.innerHTML += `
+      <div class="attention-item" style="margin-bottom:7px;">
+        <div class="row">
+          <div class="left">
+            <span class="status-chip ${cls(c.risk === 'high' ? 'alert' : c.risk === 'medium' ? 'warn' : 'ok')}">${esc(c.risk || 'low')} risk</span>
+            <div style="font-weight:700;">${esc(c.label || 'Control')}</div>
+          </div>
+        </div>
+        <div class="small">${esc(c.description || '')}</div>
+        <div class="action-row">
+          <button class="queue-control" data-cmd="${esc(c.command || '')}" data-label="${esc(c.label || '')}">Queue (dry-run)</button>
+          <button class="copy-rollback" data-cmd="${esc(c.rollback || '')}">Copy rollback</button>
+        </div>
+      </div>
+    `;
+  });
+
+  const audit = [...(dc.auditTrail || []), ...(state.localAudit || [])]
+    .sort((a,b)=> new Date(b.ts || 0) - new Date(a.ts || 0))
+    .slice(0, 24);
+
+  const auditEl = document.getElementById('decisionAudit');
+  auditEl.innerHTML = '';
+  audit.forEach(row => {
+    auditEl.innerHTML += `
+      <div class="audit-item">
+        <div class="row">
+          <div style="font-weight:700;">${esc(row.action || 'action')}</div>
+          <div class="small">${esc(relTime(row.ts))}</div>
+        </div>
+        <div class="small">${esc(row.actor || 'actor')} · ${esc(row.result || '')}</div>
+        ${row.detail ? `<div class="small">${esc(row.detail)}</div>` : ''}
+      </div>
+    `;
+  });
+  if(!auditEl.innerHTML) auditEl.innerHTML = '<div class="small">No audit events.</div>';
+}
+
+function miniSpark(values){
+  if(!Array.isArray(values) || !values.length) return '—';
+  return values.slice(-12).map(v => Number(v).toFixed(1)).join(' · ');
+}
+
+function renderReliability(){
+  const r = state.data?.reliabilityRadar || {};
+  const el = document.getElementById('reliabilitySignals');
+  el.innerHTML = '';
+  (r.signals || []).forEach(s => {
+    el.innerHTML += `
+      <div class="signal">
+        <div class="row">
+          <div style="font-weight:700;">${esc(s.label || s.key)}</div>
+          <span class="status-chip ${cls(s.status)}">${esc(s.status)}</span>
+        </div>
+        <div style="font-size:20px; font-weight:800; margin-top:4px;">${esc(s.current)} ${esc(s.unit || '')}</div>
+        <div class="small">Target: ${esc(s.target || 'n/a')} · Trend: ${esc(s.trend || 'flat')}</div>
+        <div class="spark">${esc(miniSpark(s.history || []))}</div>
+      </div>
+    `;
+  });
+  if(!el.innerHTML) el.innerHTML = '<div class="small">No reliability signals.</div>';
+}
+
+function renderRevenue(){
+  const r = state.data?.revenuePipeline || {};
+  const totals = r.totals || {};
+  document.getElementById('revenueMain').innerHTML = `
+    <div style="font-weight:800; font-size:18px;">${fmtMoney(totals.weightedForecast || 0)}</div>
+    <div class="small">Weighted forecast · pipeline ${fmtMoney(totals.pipelineValue || 0)}</div>
+    <div class="small">Data quality: <b>${esc(r.dataQuality || 'unknown')}</b> · Confidence <b>${Math.round((r.forecastConfidence?.score || 0) * 100)}%</b></div>
+  `;
+
+  const leakage = document.getElementById('revenueLeakage');
+  leakage.innerHTML = '';
+  (r.leakage || []).forEach(l => {
+    leakage.innerHTML += `<li><b>${esc(l.stage)}</b>: ${fmtPercent(l.rate,1)} leakage · impact ${fmtMoney(l.estimatedImpact || 0)}</li>`;
+  });
+  if((r.forecastConfidence?.missingInputs || []).length){
+    leakage.innerHTML += `<li class="small">Missing inputs: ${(r.forecastConfidence.missingInputs || []).map(esc).join(', ')}</li>`;
+  }
+}
+
+function renderFocus(){
+  const f = state.data?.personalFocusMode || {};
+  const criticalOnly = state.focusOverride !== null ? state.focusOverride : !!f.criticalOnly;
+  document.getElementById('focusMain').innerHTML = `
+    <div><span class="status-chip ${cls(f.status)}">${esc(f.status || 'monitoring')}</span></div>
+    <div style="margin-top:6px;"><b>Critical-only:</b> ${criticalOnly ? 'ON' : 'OFF'}</div>
+    <div><b>Quiet hours:</b> ${f.quietHours?.start || '22:00'}–${f.quietHours?.end || '07:00'} (${f.quietHours?.activeNow ? 'active' : 'inactive'})</div>
+    <div><b>Suppressed estimate:</b> ${esc(f.suppressedEstimate ?? 0)} notifications</div>
+  `;
+
+  const indicators = document.getElementById('focusIndicators');
+  indicators.innerHTML = '';
+  (f.indicators || []).forEach(i => indicators.innerHTML += `<li>${esc(i)}</li>`);
+}
+
+function renderExplainability(){
+  const ex = state.data?.explainability || {};
+  const el = document.getElementById('explainList');
+  el.innerHTML = '';
+  (ex.anomalies || []).slice(0,5).forEach(a => {
+    const ev = (a.evidence || []).slice(0,2).map(e => esc(e.path)).join('<br>');
+    el.innerHTML += `
+      <div class="attention-item" style="margin-bottom:7px;">
+        <div class="row">
+          <div style="font-weight:700;">${esc(a.title || 'anomaly')}</div>
+          <span class="status-chip ${cls(a.severity)}">${esc(a.severity || 'warn')}</span>
+        </div>
+        <div class="small" style="margin-top:4px;"><b>Hypothesis:</b> ${esc(a.hypothesis || '')}</div>
+        <div class="small"><b>Confidence:</b> ${Math.round((a.confidence || 0)*100)}%</div>
+        <div class="small"><b>Suggested fix:</b> ${esc(a.suggestedFix || '')}</div>
+        ${ev ? `<div class="small"><b>Evidence:</b><br>${ev}</div>` : ''}
+      </div>
+    `;
+  });
+  if(!el.innerHTML) el.innerHTML = '<div class="small">No explainability rows.</div>';
+}
+
+function renderTrust(){
+  const t = state.data?.trustSecurity || {};
+  document.getElementById('trustMain').innerHTML =
+    `<span class="status-chip ${cls(t.overallStatus)}">${esc(t.overallStatus || 'unknown')}</span> Overall trust posture`;
+
+  const checks = document.getElementById('trustChecks');
+  checks.innerHTML = '';
+  (t.secretHealth?.checks || []).forEach(c => {
+    checks.innerHTML += `<div class="small">${c.exists ? '✅' : '⚠️'} ${esc(c.name)} <code>${esc(c.path)}</code></div>`;
+  });
+  checks.innerHTML += `<div class="small">Permission drift: ${esc(t.permissionDrift?.status || 'n/a')} (${esc(t.permissionDrift?.driftCount ?? 0)} drifts)</div>`;
+  checks.innerHTML += `<div class="small">Dependency status: ${esc(t.dependencyStatus?.status || 'n/a')}</div>`;
+
+  const blast = document.getElementById('blastPreview');
+  blast.innerHTML = '';
+  (t.blastRadiusPreview || []).slice(0,5).forEach(b => {
+    blast.innerHTML += `<div class="small">• <b>${esc(b.control)}</b> (${esc(b.risk)}) → ${esc(b.scope)}</div>`;
+  });
+  if(!blast.innerHTML) blast.innerHTML = '<div class="small">No blast previews.</div>';
+}
+
+function renderScenario(){
+  const s = state.data?.scenarioSimulator || {};
+  document.getElementById('scenarioMeta').innerHTML =
+    `Recommended: <b>${esc(s.recommendedScenarioId || 'n/a')}</b> · compare ${esc((s.compareDimensions || []).join(', '))}`;
+
+  const grid = document.getElementById('scenarioGrid');
+  grid.innerHTML = '';
+  (s.options || []).forEach(o => {
+    const rec = o.id === s.recommendedScenarioId;
+    const m = o.projectedMetrics || {};
+    grid.innerHTML += `
+      <article class="scenario ${rec ? 'recommended':''}">
+        <div class="row">
+          <div style="font-weight:800;">${esc(o.name || o.id)}</div>
+          ${rec ? '<span class="status-chip ok">recommended</span>' : ''}
+        </div>
+        <div class="small">${esc(o.description || '')}</div>
+        <ul class="list">
+          <li>Forecast: <b>${fmtMoney(m.weightedForecast || 0)}</b></li>
+          <li>Alert load: <b>${esc(m.alertLoad ?? 'n/a')}</b></li>
+          <li>SLA risk Δ: <b>${esc(m.slaRiskDeltaPct ?? 'n/a')}%</b></li>
+          <li>Confidence: <b>${Math.round((m.forecastConfidence || 0)*100)}%</b></li>
+        </ul>
+      </article>
+    `;
+  });
+  if(!grid.innerHTML) grid.innerHTML = '<div class="small">No scenarios available.</div>';
+}
+
+function mergedPreferences(){
+  const prefs = [...(state.data?.operatorMemory?.preferences || [])];
+  Object.entries(state.localPrefs || {}).forEach(([k,v]) => prefs.push({ key: k, value: v, source: 'local' }));
+  const seen = new Set();
+  return prefs.filter(p => {
+    const key = String(p.key || '').trim();
+    if(!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function renderMemory(){
+  const m = state.data?.operatorMemory || {};
+  document.getElementById('memoryMeta').textContent =
+    `Operator: ${m.profile?.operator || 'James'} · Strategy: ${m.recommendationBiasing?.strategy || 'safe-first'}`;
+
+  const list = document.getElementById('memoryPrefs');
+  list.innerHTML = '';
+  mergedPreferences().forEach(p => list.innerHTML += `<li><b>${esc(p.key)}</b>: ${esc(p.value)}</li>`);
+  if(!list.innerHTML) list.innerHTML = '<li class="small">No preferences stored.</li>';
+}
+
+function renderClassic(){
+  const d = state.data || {};
+  const pj = document.getElementById('projects');
+  pj.innerHTML = '';
+  (d.projects || []).forEach(p => {
+    pj.innerHTML += `
+      <article class="project">
+        <span class="status-chip ${cls(p.status)}">${esc(p.status || 'unknown')}</span>
+        <div style="font-weight:700; margin-top:7px;">${esc(p.name || 'project')}</div>
+        <div class="small">${esc(p.summary || '')}</div>
+        <div class="small" style="margin-top:5px;">Updated ${esc(relTime(p.lastUpdate))}</div>
+      </article>
+    `;
+  });
+
+  const updates = document.getElementById('updates');
+  updates.innerHTML = '';
+  (d.latestUpdates || []).forEach(u => updates.innerHTML += `<li>${esc(u.item)} <span class="small">(${esc(relTime(u.at))})</span></li>`);
+  if(!updates.innerHTML) updates.innerHTML = '<li class="small">No updates.</li>';
+
+  const decisions = document.getElementById('decisions');
+  decisions.innerHTML = '';
+  (d.decisionsNeeded || []).forEach(x => decisions.innerHTML += `<li>${esc(x)}</li>`);
+  if(!decisions.innerHTML) decisions.innerHTML = '<li class="small">No immediate decisions required.</li>';
+}
+
+function updateSlaTimers(){
+  document.querySelectorAll('[data-sla-target]').forEach(el => {
+    const target = new Date(el.getAttribute('data-sla-target'));
+    if(Number.isNaN(target.getTime())) return;
+    const remaining = Math.round((target.getTime() - Date.now()) / 60000);
+    el.textContent = remaining >= 0 ? `${remaining}m left` : `${Math.abs(remaining)}m overdue`;
+  });
+}
+
+function renderAll(){
+  applyFeatureVisibility();
+  renderTop();
+  if(featureEnabled('attentionQueue')) renderAttention();
+  if(featureEnabled('executiveDailyBrief')) renderBrief();
+  if(featureEnabled('decisionConsole')) renderDecisionConsole();
+  if(featureEnabled('reliabilityRadar')) renderReliability();
+  if(featureEnabled('revenuePipeline')) renderRevenue();
+  if(featureEnabled('personalFocusMode')) renderFocus();
+  if(featureEnabled('explainability')) renderExplainability();
+  if(featureEnabled('trustSecurity')) renderTrust();
+  if(featureEnabled('scenarioSimulator')) renderScenario();
+  if(featureEnabled('operatorMemory')) renderMemory();
+  if(featureEnabled('classicPanels')) renderClassic();
+  updateSlaTimers();
 }
 
 async function loadData(){
@@ -192,97 +860,79 @@ async function loadData(){
   return r.json();
 }
 
-function render(d){
-  const global = d?.headline?.globalStatus || 'unknown';
-  const alerts = d?.headline?.alerts ?? 0;
-  const rem = d?.headline?.openRemediations ?? 0;
-  const projects = d?.projects || [];
-
-  document.getElementById('kpiStatus').textContent = String(global).toUpperCase();
-  document.getElementById('kpiAlerts').textContent = alerts;
-  document.getElementById('kpiRem').textContent = rem;
-  document.getElementById('kpiProjects').textContent = projects.length;
-
-  const stamp = `Generated ${d.generatedAt || 'n/a'} · ${relTime(d.generatedAt)} · Global ${global} · Alerts ${alerts}`;
-  document.getElementById('stamp').textContent = stamp;
-
-  const pj = document.getElementById('projects');
-  pj.innerHTML = '';
-  projects.forEach(p => {
-    const c = cls(p.status);
-    pj.innerHTML += `
-      <article class="project">
-        <span class="status-chip ${c}">${esc(p.status || 'unknown')}</span>
-        <div class="name">${esc(p.name || 'Unnamed project')}</div>
-        <div>${esc(p.summary || 'No summary')}</div>
-        <div class="small" style="margin-top:8px;">Updated ${esc(relTime(p.lastUpdate))}</div>
-      </article>`;
-  });
-
-  const updates = document.getElementById('updates');
-  updates.innerHTML = '';
-  (d.latestUpdates || []).forEach(u => {
-    updates.innerHTML += `<li>${esc(u.item || 'Update')} <span class="small">(${esc(relTime(u.at))})</span></li>`;
-  });
-
-  const back = document.getElementById('backburner');
-  back.innerHTML = '';
-  (d.backburner || []).forEach(x => back.innerHTML += `<li><b>${esc(x.name)}</b> — ${esc(x.note)}</li>`);
-
-  const ag = document.getElementById('agents');
-  ag.innerHTML = '';
-  Object.entries(d.agents || {}).forEach(([name,v]) => {
-    ag.innerHTML += `<li><b>${esc(name)}</b>: ${esc(v.status || 'unknown')} · safeMode=${esc(String(v.safeMode))}</li>`;
-  });
-
-  const br = document.getElementById('briefs');
-  br.innerHTML = `
-    <li>Morning: ${esc(relTime(d?.briefs?.morning))}</li>
-    <li>Evening: ${esc(relTime(d?.briefs?.evening))}</li>
-  `;
-
-  const dec = document.getElementById('decisions');
-  dec.innerHTML = '';
-  (d.decisionsNeeded || []).forEach(x => dec.innerHTML += `<li>${esc(x)}</li>`);
-  if (!dec.innerHTML) dec.innerHTML = '<li class="small">No immediate decisions required.</li>';
-
-  const inc = document.getElementById('incidents');
-  inc.innerHTML = '';
-  (d.incidentFeed || []).slice().reverse().slice(0, 8).forEach(i => {
-    const t = i.ts || i.time || i.generatedAt || '';
-    const code = i.code || i.id || i.type || 'incident';
-    const msg = i.message || i.summary || i.alert || i.title || '';
-    inc.innerHTML += `<li><b>${esc(code)}</b> <span class="small">(${esc(relTime(t))})</span><br>${esc(msg).slice(0,130)}</li>`;
-  });
-  if (!inc.innerHTML) inc.innerHTML = '<li class="small">No recent incidents logged.</li>';
-}
-
 async function refresh(){
   try {
-    const d = await loadData();
-    render(d);
+    state.data = await loadData();
+    renderAll();
   } catch (e) {
-    document.getElementById('stamp').textContent = 'Snapshot unavailable — check deployment sync.';
     console.error(e);
+    document.getElementById('stamp').textContent = 'Snapshot unavailable — run sync script and redeploy.';
   }
 }
 
 function setAuto(on){
-  autoRefresh = on;
-  const pill = document.getElementById('autorefresh');
-  pill.textContent = `Auto-refresh: ${on ? 'ON' : 'OFF'}`;
-  if(timer) clearInterval(timer);
-  if(on) timer = setInterval(refresh, 30000);
+  state.autoRefresh = !!on;
+  document.getElementById('autoRefreshPill').textContent = `Auto-refresh: ${state.autoRefresh ? 'ON' : 'OFF'}`;
+  if(state.timer) clearInterval(state.timer);
+  if(state.autoRefresh) state.timer = setInterval(refresh, 30000);
 }
 
-window.addEventListener('keydown', (e)=>{
-  if(e.key.toLowerCase() === 'r') refresh();
-  if(e.key.toLowerCase() === 'a') setAuto(!autoRefresh);
-});
+function wireEvents(){
+  document.getElementById('refreshBtn').addEventListener('click', refresh);
+  document.getElementById('autoRefreshPill').addEventListener('click', () => setAuto(!state.autoRefresh));
 
-document.getElementById('refreshBtn').addEventListener('click', refresh);
-document.getElementById('autorefresh').addEventListener('click', ()=> setAuto(!autoRefresh));
+  document.getElementById('focusToggleBtn').addEventListener('click', ()=> {
+    state.focusOverride = !(state.focusOverride ?? !!state.data?.personalFocusMode?.criticalOnly);
+    state.localPrefs.criticalOnly = state.focusOverride;
+    saveLocal('cc.local.prefs', state.localPrefs);
+    renderFocus();
+    showToast(`Focus critical-only ${state.focusOverride ? 'ON' : 'OFF'}`);
+  });
 
+  document.getElementById('savePrefBtn').addEventListener('click', ()=> {
+    const key = (document.getElementById('prefKey').value || '').trim();
+    const value = (document.getElementById('prefValue').value || '').trim();
+    if(!key) return;
+    state.localPrefs[key] = value;
+    saveLocal('cc.local.prefs', state.localPrefs);
+    document.getElementById('prefKey').value = '';
+    document.getElementById('prefValue').value = '';
+    renderMemory();
+    showToast('Preference saved');
+  });
+
+  document.addEventListener('click', async (e)=> {
+    const t = e.target;
+    if(!(t instanceof HTMLElement)) return;
+
+    if(t.classList.contains('copy-action') || t.classList.contains('copy-rollback')){
+      const cmd = t.getAttribute('data-cmd') || '';
+      if(!cmd){ showToast('No command available'); return; }
+      const ok = await copyText(cmd);
+      showToast(ok ? 'Command copied' : 'Copy failed');
+      return;
+    }
+
+    if(t.classList.contains('queue-action') || t.classList.contains('queue-control')){
+      const cmd = t.getAttribute('data-cmd') || '';
+      const label = t.getAttribute('data-label') || 'action';
+      addLocalAudit(label, cmd.slice(0,140));
+      renderDecisionConsole();
+      showToast('Action queued in local audit');
+      return;
+    }
+  });
+
+  window.addEventListener('keydown', (e)=> {
+    const key = e.key.toLowerCase();
+    if(key === 'r') refresh();
+    if(key === 'a') setAuto(!state.autoRefresh);
+  });
+
+  setInterval(updateSlaTimers, 60000);
+}
+
+wireEvents();
 refresh();
 setAuto(true);
 </script>

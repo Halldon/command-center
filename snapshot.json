@@ -1,44 +1,63 @@
 {
-  "generatedAt": "2026-02-13T17:08:34.614895Z",
+  "schemaVersion": "2.0.0",
+  "generatedAt": "2026-02-13T18:59:45.425740Z",
+  "featureFlags": {
+    "attentionQueue": true,
+    "executiveDailyBrief": true,
+    "decisionConsole": true,
+    "reliabilityRadar": true,
+    "revenuePipeline": true,
+    "personalFocusMode": true,
+    "explainability": true,
+    "trustSecurity": true,
+    "scenarioSimulator": true,
+    "operatorMemory": true,
+    "classicPanels": true
+  },
   "headline": {
-    "globalStatus": "unknown",
+    "globalStatus": "critical",
     "alerts": 3,
-    "openRemediations": 0
+    "openRemediations": 3,
+    "attentionItems": 6
   },
   "projects": [
     {
       "name": "Runtime Reliability",
-      "status": "unknown",
-      "summary": "Gateway, locks, cron health and remediations",
+      "status": "critical",
+      "summary": "Gateway, lock-readiness, cron cadence, and incident pressure",
       "lastUpdate": "2026-02-13T16:00:41.471161Z"
     },
     {
       "name": "Outreach Engine",
-      "status": "alert",
+      "status": "warn",
       "summary": "Queue 61 \u00b7 healthRows 0 \u00b7 paused 0",
-      "lastUpdate": "2026-02-13T15:58:46.232340Z"
+      "lastUpdate": "2026-02-13T18:58:42.260268Z"
     },
     {
       "name": "Provider Budget/Capacity",
-      "status": "alert",
+      "status": "warn",
       "summary": "Providers healthy: 0/4",
       "lastUpdate": "2026-02-13T13:29:29.680879Z"
     },
     {
-      "name": "Agent Ops & Routing",
+      "name": "Decisioning & Automation",
       "status": "ok",
-      "summary": "Model-routing policy + ops-fix mini-agent active",
+      "summary": "Routing policy + safe remediation controls + audit trail",
       "lastUpdate": "2026-02-13T16:00:42.188309Z"
     }
   ],
   "backburner": [
     {
-      "name": "Ops rollout policy decisions",
-      "note": "Cron apply + recovery execution + thresholds"
+      "name": "Provider restore hardening",
+      "note": "Finalize non-interactive key-check workflow"
     },
     {
-      "name": "Voice polish pass v2",
-      "note": "Improve C2.5 natural prosody when time permits"
+      "name": "Scenario simulator calibration",
+      "note": "Tune deltas with closed-loop outcomes"
+    },
+    {
+      "name": "Focus mode heuristics",
+      "note": "Refine suppression thresholds from operator feedback"
     }
   ],
   "latestUpdates": [
@@ -51,20 +70,48 @@
       "at": "2026-02-13T16:00:41.597307Z"
     },
     {
-      "item": "Outreach telemetry health",
+      "item": "Telemetry health",
       "at": "2026-02-13T16:00:41.534317Z"
     },
     {
-      "item": "Gemini skill sync",
-      "at": "2026-02-13T15:35:03.765024Z"
+      "item": "Priority triage queue",
+      "at": "2026-02-13T16:00:41.890438Z"
     }
   ],
   "decisionsNeeded": [
-    "Review and clear active control-tower alerts",
-    "Restore missing outreach provider API keys in .env",
-    "Restore outreach health telemetry rows (>0)"
+    "Approve top Attention Queue action before next throughput increase.",
+    "Restore unhealthy provider credentials and confirm budget sync.",
+    "Backfill sender health rows before trusting conversion deltas."
   ],
   "incidentFeed": [
+    {
+      "ts": "2026-02-13T15:13:57.993630Z",
+      "code": "LOCK_READINESS_ZERO",
+      "severity": "warn",
+      "message": "No copy components are lock-ready yet",
+      "detail": {
+        "ready_components": 0,
+        "min_ready": 1
+      }
+    },
+    {
+      "ts": "2026-02-13T15:14:42.018087Z",
+      "code": "OPS_AUTOMATION_ERRORS_HIGH",
+      "severity": "critical",
+      "message": "Automation jobs have repeated failures",
+      "detail": {
+        "jobs": [
+          {
+            "jobId": "a664fbb7-197e-407b-8566-1fe99fe04d62",
+            "name": "Ops exception monitor (hourly)",
+            "type": "cron_run_error",
+            "lastErrorTs": 1770962354206,
+            "error": "Unsupported channel: telegram",
+            "consecutiveErrors": 4
+          }
+        ]
+      }
+    },
     {
       "ts": "2026-02-13T15:14:42.018087Z",
       "code": "OUTREACH_HEALTH_ROWS_EMPTY",
@@ -174,7 +221,7 @@
   "agents": {
     "opsFixMiniAgent": {
       "status": "active",
-      "lastRun": null,
+      "lastRun": "2026-02-13T16:00:42.027224Z",
       "safeMode": true
     }
   },
@@ -271,7 +318,7 @@
       ]
     },
     "snapshot": {
-      "generatedAt": "2026-02-13T15:58:46.231843Z",
+      "generatedAt": "2026-02-13T18:58:42.259536Z",
       "adaptiveQueueCount": 61,
       "routeMix": {
         "standard_short": 42,
@@ -372,6 +419,889 @@
           "current_cap": 20
         }
       ]
+    }
+  },
+  "attentionQueue": {
+    "generatedAt": "2026-02-13T18:59:45.425722Z",
+    "weights": {
+      "impact": 0.45,
+      "urgency": 0.4,
+      "confidence": 0.15
+    },
+    "summary": {
+      "total": 6,
+      "critical": 2,
+      "breached": 3,
+      "nextAction": {
+        "label": "Run OUTREACH_TELEMETRY_SIGNAL_MISSING remediation",
+        "description": "python3 scripts/telemetry_hardening.py --emit-incidents",
+        "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents",
+        "safeMode": "dry-run",
+        "requiresConfirm": true,
+        "rollbackCommand": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+      }
+    },
+    "items": [
+      {
+        "id": "alert-outreach_telemetry_signal_missing",
+        "kind": "alert",
+        "title": "OUTREACH_TELEMETRY_SIGNAL_MISSING",
+        "summary": "Required outreach telemetry signal checks are failing",
+        "source": "control_tower",
+        "severity": "critical",
+        "impact": 95,
+        "urgency": 92,
+        "confidence": 0.88,
+        "score": 104.8,
+        "createdAt": "2026-02-13T16:00:41.470829Z",
+        "sla": {
+          "minutes": 30,
+          "targetAt": "2026-02-13T16:30:41.470829Z",
+          "remainingMinutes": -150,
+          "status": "breached"
+        },
+        "recommendedAction": {
+          "label": "Run OUTREACH_TELEMETRY_SIGNAL_MISSING remediation",
+          "description": "python3 scripts/telemetry_hardening.py --emit-incidents",
+          "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents",
+          "safeMode": "dry-run",
+          "requiresConfirm": true,
+          "rollbackCommand": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+        },
+        "evidence": [
+          {
+            "label": "Control tower alert",
+            "path": "/Users/j/.openclaw/workspace/ops/output/control_tower/control_tower_status.json"
+          },
+          {
+            "label": "Incident timeline",
+            "path": "/Users/j/.openclaw/workspace/ops/output/incidents/incidents.jsonl"
+          }
+        ],
+        "tags": [
+          "reliability",
+          "ops"
+        ],
+        "rank": 1
+      },
+      {
+        "id": "alert-outreach_health_rows_empty",
+        "kind": "alert",
+        "title": "OUTREACH_HEALTH_ROWS_EMPTY",
+        "summary": "Outreach telemetry has no sender health rows",
+        "source": "control_tower",
+        "severity": "warn",
+        "impact": 76,
+        "urgency": 72,
+        "confidence": 0.88,
+        "score": 88.2,
+        "createdAt": "2026-02-13T16:00:41.470829Z",
+        "sla": {
+          "minutes": 120,
+          "targetAt": "2026-02-13T18:00:41.470829Z",
+          "remainingMinutes": -60,
+          "status": "breached"
+        },
+        "recommendedAction": {
+          "label": "Run OUTREACH_HEALTH_ROWS_EMPTY remediation",
+          "description": "python3 scripts/telemetry_hardening.py --emit-incidents",
+          "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents && python3 scripts/build_operational_snapshot.py",
+          "safeMode": "dry-run",
+          "requiresConfirm": true,
+          "rollbackCommand": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+        },
+        "evidence": [
+          {
+            "label": "Control tower alert",
+            "path": "/Users/j/.openclaw/workspace/ops/output/control_tower/control_tower_status.json"
+          },
+          {
+            "label": "Incident timeline",
+            "path": "/Users/j/.openclaw/workspace/ops/output/incidents/incidents.jsonl"
+          }
+        ],
+        "tags": [
+          "reliability",
+          "ops"
+        ],
+        "rank": 2
+      },
+      {
+        "id": "alert-lock_readiness_zero",
+        "kind": "alert",
+        "title": "LOCK_READINESS_ZERO",
+        "summary": "No copy components are lock-ready yet",
+        "source": "control_tower",
+        "severity": "warn",
+        "impact": 76,
+        "urgency": 72,
+        "confidence": 0.88,
+        "score": 88.2,
+        "createdAt": "2026-02-13T16:00:41.470829Z",
+        "sla": {
+          "minutes": 120,
+          "targetAt": "2026-02-13T18:00:41.470829Z",
+          "remainingMinutes": -60,
+          "status": "breached"
+        },
+        "recommendedAction": {
+          "label": "Run LOCK_READINESS_ZERO remediation",
+          "description": "python3 scripts/build_lock_readiness.py",
+          "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_lock_readiness.py",
+          "safeMode": "dry-run",
+          "requiresConfirm": true,
+          "rollbackCommand": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+        },
+        "evidence": [
+          {
+            "label": "Control tower alert",
+            "path": "/Users/j/.openclaw/workspace/ops/output/control_tower/control_tower_status.json"
+          },
+          {
+            "label": "Incident timeline",
+            "path": "/Users/j/.openclaw/workspace/ops/output/incidents/incidents.jsonl"
+          }
+        ],
+        "tags": [
+          "reliability",
+          "ops"
+        ],
+        "rank": 3
+      },
+      {
+        "id": "triage-smoke-1",
+        "kind": "task",
+        "title": "smoke-1",
+        "summary": "Urgent incident: outreach snapshot stale",
+        "source": "priority_queue",
+        "severity": "high",
+        "impact": 88,
+        "urgency": 84,
+        "confidence": 0.74,
+        "score": 84.2,
+        "createdAt": "2026-02-13T16:00:41.889902Z",
+        "sla": {
+          "minutes": 180,
+          "targetAt": "2026-02-13T19:00:41.889902Z",
+          "remainingMinutes": 0,
+          "status": "active"
+        },
+        "recommendedAction": {
+          "label": "Open triage task",
+          "description": "Review and resolve now-queue item.",
+          "command": "python3 /Users/j/.openclaw/workspace/ops/scripts/priority_triage_engine.py",
+          "safeMode": "review",
+          "requiresConfirm": false,
+          "rollbackCommand": "No rollback needed (read-only triage refresh)."
+        },
+        "evidence": [
+          {
+            "label": "Priority queue",
+            "path": "/Users/j/.openclaw/workspace/ops/output/triage/priority_queue.json"
+          }
+        ],
+        "tags": [
+          "triage",
+          "execution"
+        ],
+        "rank": 4
+      },
+      {
+        "id": "telemetry-sender_health_min_rows",
+        "kind": "telemetry",
+        "title": "SENDER_HEALTH_MIN_ROWS",
+        "summary": "Telemetry check status: missing",
+        "source": "outreach_telemetry",
+        "severity": "warn",
+        "impact": 74,
+        "urgency": 70,
+        "confidence": 0.69,
+        "score": 71.7,
+        "createdAt": "2026-02-13T16:00:41.534046Z",
+        "sla": {
+          "minutes": 240,
+          "targetAt": "2026-02-13T20:00:41.534046Z",
+          "remainingMinutes": 60,
+          "status": "active"
+        },
+        "recommendedAction": {
+          "label": "Run telemetry hardening",
+          "description": "Backfill missing telemetry checks and emit incidents.",
+          "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents",
+          "safeMode": "dry-run",
+          "requiresConfirm": true,
+          "rollbackCommand": "Restore last known good telemetry outputs from backup."
+        },
+        "evidence": [
+          {
+            "label": "Telemetry health report",
+            "path": "/Users/j/Documents/Builds/Outreach/output/telemetry_health.json"
+          }
+        ],
+        "tags": [
+          "telemetry",
+          "data-quality"
+        ],
+        "rank": 5
+      },
+      {
+        "id": "telemetry-op_snapshot_has_health_rows",
+        "kind": "telemetry",
+        "title": "OP_SNAPSHOT_HAS_HEALTH_ROWS",
+        "summary": "Telemetry check status: missing",
+        "source": "outreach_telemetry",
+        "severity": "warn",
+        "impact": 74,
+        "urgency": 70,
+        "confidence": 0.69,
+        "score": 71.7,
+        "createdAt": "2026-02-13T16:00:41.534046Z",
+        "sla": {
+          "minutes": 240,
+          "targetAt": "2026-02-13T20:00:41.534046Z",
+          "remainingMinutes": 60,
+          "status": "active"
+        },
+        "recommendedAction": {
+          "label": "Run telemetry hardening",
+          "description": "Backfill missing telemetry checks and emit incidents.",
+          "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents",
+          "safeMode": "dry-run",
+          "requiresConfirm": true,
+          "rollbackCommand": "Restore last known good telemetry outputs from backup."
+        },
+        "evidence": [
+          {
+            "label": "Telemetry health report",
+            "path": "/Users/j/Documents/Builds/Outreach/output/telemetry_health.json"
+          }
+        ],
+        "tags": [
+          "telemetry",
+          "data-quality"
+        ],
+        "rank": 6
+      }
+    ]
+  },
+  "executiveDailyBrief": {
+    "generatedAt": "2026-02-13T18:59:45.425817Z",
+    "readTimeSeconds": 60,
+    "summary": "Critical reliability issues remain the top constraint; execute the top attention action and validate deltas before scaling throughput.",
+    "highlights": [
+      "No material reduction in core incident pressure yet.",
+      "Highest-priority item: OUTREACH_TELEMETRY_SIGNAL_MISSING \u2014 Required outreach telemetry signal checks are failing",
+      "Morning brief priority: [smoke-1] Urgent incident: outreach snapshot stale"
+    ],
+    "risks": [
+      "OUTREACH_TELEMETRY_SIGNAL_MISSING: Required outreach telemetry signal checks are failing (SLA breached)",
+      "OUTREACH_HEALTH_ROWS_EMPTY: Outreach telemetry has no sender health rows (SLA breached)",
+      "LOCK_READINESS_ZERO: No copy components are lock-ready yet (SLA breached)"
+    ],
+    "decisions": [
+      "Approve top Attention Queue action before next throughput increase.",
+      "Restore unhealthy provider credentials and confirm budget sync.",
+      "Backfill sender health rows before trusting conversion deltas."
+    ],
+    "deltas": [
+      {
+        "metric": "Open alerts",
+        "before": 3,
+        "after": 3,
+        "delta": 0.0,
+        "direction": "flat",
+        "unit": ""
+      },
+      {
+        "metric": "Attention queue size",
+        "before": 6,
+        "after": 6,
+        "delta": 0.0,
+        "direction": "flat",
+        "unit": ""
+      },
+      {
+        "metric": "Adaptive queue count",
+        "before": 61,
+        "after": 61,
+        "delta": 0.0,
+        "direction": "flat",
+        "unit": ""
+      },
+      {
+        "metric": "Telemetry failing checks",
+        "before": 2,
+        "after": 2,
+        "delta": 0.0,
+        "direction": "flat",
+        "unit": ""
+      },
+      {
+        "metric": "Healthy providers",
+        "before": 0,
+        "after": 0,
+        "delta": 0.0,
+        "direction": "flat",
+        "unit": "/4"
+      }
+    ],
+    "source": {
+      "previousSnapshot": true,
+      "morningBrief": true
+    }
+  },
+  "decisionConsole": {
+    "generatedAt": "2026-02-13T18:59:45.425868Z",
+    "safeControlsEnabled": true,
+    "globalMode": "dry-run",
+    "controls": [
+      {
+        "id": "control-gateway_watchdog_stale",
+        "label": "Run GATEWAY_WATCHDOG_STALE remediation",
+        "description": "bash /Users/j/.openclaw/workspace/scripts/gateway_watchdog.sh",
+        "command": "bash /Users/j/.openclaw/workspace/scripts/gateway_watchdog.sh",
+        "safeMode": "dry-run",
+        "risk": "high",
+        "requiresConfirm": true,
+        "rollback": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+      },
+      {
+        "id": "control-outreach_snapshot_stale",
+        "label": "Run OUTREACH_SNAPSHOT_STALE remediation",
+        "description": "python3 scripts/build_operational_snapshot.py",
+        "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py",
+        "safeMode": "dry-run",
+        "risk": "medium",
+        "requiresConfirm": true,
+        "rollback": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+      },
+      {
+        "id": "control-outreach_health_rows_empty",
+        "label": "Run OUTREACH_HEALTH_ROWS_EMPTY remediation",
+        "description": "python3 scripts/telemetry_hardening.py --emit-incidents",
+        "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents && python3 scripts/build_operational_snapshot.py",
+        "safeMode": "dry-run",
+        "risk": "medium",
+        "requiresConfirm": true,
+        "rollback": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+      },
+      {
+        "id": "control-outreach_telemetry_signal_missing",
+        "label": "Run OUTREACH_TELEMETRY_SIGNAL_MISSING remediation",
+        "description": "python3 scripts/telemetry_hardening.py --emit-incidents",
+        "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents",
+        "safeMode": "dry-run",
+        "risk": "high",
+        "requiresConfirm": true,
+        "rollback": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+      },
+      {
+        "id": "control-lock_readiness_zero",
+        "label": "Run LOCK_READINESS_ZERO remediation",
+        "description": "python3 scripts/build_lock_readiness.py",
+        "command": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_lock_readiness.py",
+        "safeMode": "dry-run",
+        "risk": "medium",
+        "requiresConfirm": true,
+        "rollback": "git checkout -- output && python3 ops/scripts/build_command_center_snapshot.py"
+      },
+      {
+        "id": "control-sync-command-center",
+        "label": "Sync and publish Command Center snapshot",
+        "description": "Run synthesis + snapshot build + app sync.",
+        "command": "bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh",
+        "safeMode": "preview",
+        "risk": "low",
+        "requiresConfirm": false,
+        "rollback": "git checkout -- /Users/j/.openclaw/workspace/command-center-app/snapshot.json"
+      }
+    ],
+    "rollbackPlaybook": [
+      "Rebuild snapshots from deterministic scripts",
+      "Revert app snapshot.json from git",
+      "Restore previous cron config if control changes misbehave"
+    ],
+    "auditTrail": [
+      {
+        "ts": "2026-02-13T16:00:42.187973Z",
+        "actor": "model-routing-engine",
+        "action": "route:route-1",
+        "result": "cheap->gpt-5.3-codex-fast",
+        "rollbackAvailable": false,
+        "detail": "cheap_default"
+      },
+      {
+        "ts": "2026-02-13T16:00:42.187973Z",
+        "actor": "model-routing-engine",
+        "action": "route:route-2",
+        "result": "deep->gpt-5.3",
+        "rollbackAvailable": false,
+        "detail": "cheap_default,complexity_or_token_deep,retry_escalation,failure_loop_escalation"
+      },
+      {
+        "ts": "2026-02-13T16:00:42.187973Z",
+        "actor": "model-routing-engine",
+        "action": "route:route-3",
+        "result": "deep->gpt-5.3",
+        "rollbackAvailable": false,
+        "detail": "cheap_default,always_deep_flag,complexity_or_token_standard"
+      },
+      {
+        "ts": "2026-02-13T16:00:42.026772Z",
+        "actor": "ops-fix-mini-agent",
+        "action": "incident-pass",
+        "result": "processed=0 skipped=4",
+        "rollbackAvailable": false,
+        "detail": "safe-mode"
+      },
+      {
+        "ts": "2026-02-13T16:00:41.596783Z",
+        "actor": "auto-remediation",
+        "action": "LOCK_READINESS_ZERO",
+        "result": "skipped_dry_run",
+        "rollbackAvailable": true,
+        "detail": "dryRun=True"
+      },
+      {
+        "ts": "2026-02-13T16:00:41.596777Z",
+        "actor": "auto-remediation",
+        "action": "OUTREACH_TELEMETRY_SIGNAL_MISSING",
+        "result": "skipped_dry_run",
+        "rollbackAvailable": true,
+        "detail": "dryRun=True"
+      },
+      {
+        "ts": "2026-02-13T16:00:41.596770Z",
+        "actor": "auto-remediation",
+        "action": "OUTREACH_HEALTH_ROWS_EMPTY",
+        "result": "skipped_dry_run",
+        "rollbackAvailable": true,
+        "detail": "dryRun=True"
+      }
+    ]
+  },
+  "reliabilityRadar": {
+    "generatedAt": "2026-02-13T18:59:45.426012Z",
+    "overallStatus": "critical",
+    "summary": {
+      "providersHealthy": 0,
+      "providersTotal": 4,
+      "queueCount": 61,
+      "telemetryFailing": 2
+    },
+    "signals": [
+      {
+        "key": "lock_contention",
+        "label": "Lock contention",
+        "current": 100.0,
+        "unit": "%",
+        "target": "< 15%",
+        "status": "critical",
+        "trend": "flat",
+        "history": [
+          100.0,
+          100.0
+        ]
+      },
+      {
+        "key": "provider_degradation",
+        "label": "Provider degradation",
+        "current": 100.0,
+        "unit": "%",
+        "target": "< 20%",
+        "status": "critical",
+        "trend": "flat",
+        "history": [
+          100.0,
+          100.0
+        ]
+      },
+      {
+        "key": "cron_drift",
+        "label": "Cron drift P95",
+        "current": 10.8,
+        "unit": "m",
+        "target": "< 8m",
+        "status": "warn",
+        "trend": "flat",
+        "history": [
+          10.8,
+          10.8
+        ]
+      },
+      {
+        "key": "queue_slope",
+        "label": "Queue slope",
+        "current": 0.0,
+        "unit": "items/run",
+        "target": "\u2248 0",
+        "status": "ok",
+        "trend": "flat",
+        "history": [
+          0.0,
+          0.0
+        ]
+      }
+    ]
+  },
+  "revenuePipeline": {
+    "generatedAt": "2026-02-13T18:59:45.426028Z",
+    "dataQuality": "partial",
+    "totals": {
+      "pipelineValue": 75850,
+      "weightedForecast": 13653,
+      "queueCount": 61,
+      "hotLeads": 0
+    },
+    "leakage": [
+      {
+        "stage": "Discovery \u2192 Qualified",
+        "rate": 0.42,
+        "estimatedImpact": 15928,
+        "status": "warn"
+      },
+      {
+        "stage": "Qualified \u2192 Meeting",
+        "rate": 0.21,
+        "estimatedImpact": 7964,
+        "status": "ok"
+      }
+    ],
+    "forecastConfidence": {
+      "score": 0.51,
+      "label": "medium",
+      "missingInputs": [
+        "healthRows",
+        "hotLeadCount"
+      ]
+    },
+    "notes": "Derived from outreach queue + synthetic fallback when direct revenue telemetry is absent."
+  },
+  "personalFocusMode": {
+    "generatedAt": "2026-02-13T18:59:45.426049Z",
+    "status": "engaged",
+    "criticalOnly": false,
+    "noiseSuppressionLevel": "balanced",
+    "quietHours": {
+      "enabled": true,
+      "start": "22:00",
+      "end": "07:00",
+      "activeNow": false
+    },
+    "indicators": [
+      "2 critical items remain",
+      "Noise suppression: balanced"
+    ],
+    "suppressedEstimate": 4
+  },
+  "explainability": {
+    "generatedAt": "2026-02-13T18:59:45.426071Z",
+    "anomalies": [
+      {
+        "id": "alert-outreach_telemetry_signal_missing",
+        "title": "OUTREACH_TELEMETRY_SIGNAL_MISSING",
+        "severity": "critical",
+        "hypothesis": "Telemetry collector or upstream health feed is stale, causing control checks to fail.",
+        "confidence": 0.88,
+        "evidence": [
+          {
+            "label": "Control tower alert",
+            "path": "/Users/j/.openclaw/workspace/ops/output/control_tower/control_tower_status.json"
+          },
+          {
+            "label": "Incident timeline",
+            "path": "/Users/j/.openclaw/workspace/ops/output/incidents/incidents.jsonl"
+          }
+        ],
+        "suggestedFix": "python3 scripts/telemetry_hardening.py --emit-incidents",
+        "suggestedCommand": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents"
+      },
+      {
+        "id": "alert-outreach_health_rows_empty",
+        "title": "OUTREACH_HEALTH_ROWS_EMPTY",
+        "severity": "warn",
+        "hypothesis": "Sender health export is empty or upstream parsing failed before snapshot build.",
+        "confidence": 0.88,
+        "evidence": [
+          {
+            "label": "Control tower alert",
+            "path": "/Users/j/.openclaw/workspace/ops/output/control_tower/control_tower_status.json"
+          },
+          {
+            "label": "Incident timeline",
+            "path": "/Users/j/.openclaw/workspace/ops/output/incidents/incidents.jsonl"
+          }
+        ],
+        "suggestedFix": "python3 scripts/telemetry_hardening.py --emit-incidents",
+        "suggestedCommand": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents && python3 scripts/build_operational_snapshot.py"
+      },
+      {
+        "id": "alert-lock_readiness_zero",
+        "title": "LOCK_READINESS_ZERO",
+        "severity": "warn",
+        "hypothesis": "Lock-readiness build did not run or produced no ready components.",
+        "confidence": 0.88,
+        "evidence": [
+          {
+            "label": "Control tower alert",
+            "path": "/Users/j/.openclaw/workspace/ops/output/control_tower/control_tower_status.json"
+          },
+          {
+            "label": "Incident timeline",
+            "path": "/Users/j/.openclaw/workspace/ops/output/incidents/incidents.jsonl"
+          }
+        ],
+        "suggestedFix": "python3 scripts/build_lock_readiness.py",
+        "suggestedCommand": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_lock_readiness.py"
+      },
+      {
+        "id": "triage-smoke-1",
+        "title": "smoke-1",
+        "severity": "high",
+        "hypothesis": "Cross-signal drift detected; inspect source artifacts for freshness and completeness.",
+        "confidence": 0.74,
+        "evidence": [
+          {
+            "label": "Priority queue",
+            "path": "/Users/j/.openclaw/workspace/ops/output/triage/priority_queue.json"
+          }
+        ],
+        "suggestedFix": "Review and resolve now-queue item.",
+        "suggestedCommand": "python3 /Users/j/.openclaw/workspace/ops/scripts/priority_triage_engine.py"
+      },
+      {
+        "id": "telemetry-sender_health_min_rows",
+        "title": "SENDER_HEALTH_MIN_ROWS",
+        "severity": "warn",
+        "hypothesis": "Cross-signal drift detected; inspect source artifacts for freshness and completeness.",
+        "confidence": 0.69,
+        "evidence": [
+          {
+            "label": "Telemetry health report",
+            "path": "/Users/j/Documents/Builds/Outreach/output/telemetry_health.json"
+          }
+        ],
+        "suggestedFix": "Backfill missing telemetry checks and emit incidents.",
+        "suggestedCommand": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents"
+      },
+      {
+        "id": "telemetry-op_snapshot_has_health_rows",
+        "title": "OP_SNAPSHOT_HAS_HEALTH_ROWS",
+        "severity": "warn",
+        "hypothesis": "Cross-signal drift detected; inspect source artifacts for freshness and completeness.",
+        "confidence": 0.69,
+        "evidence": [
+          {
+            "label": "Telemetry health report",
+            "path": "/Users/j/Documents/Builds/Outreach/output/telemetry_health.json"
+          }
+        ],
+        "suggestedFix": "Backfill missing telemetry checks and emit incidents.",
+        "suggestedCommand": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/telemetry_hardening.py --emit-incidents"
+      }
+    ]
+  },
+  "trustSecurity": {
+    "generatedAt": "2026-02-13T18:59:45.426083Z",
+    "overallStatus": "ok",
+    "secretHealth": {
+      "status": "stub",
+      "checks": [
+        {
+          "name": "workspace_env_file",
+          "path": "/Users/j/.openclaw/workspace/.env",
+          "exists": false
+        },
+        {
+          "name": "outreach_env_file",
+          "path": "/Users/j/Documents/Builds/Outreach/.env",
+          "exists": true
+        }
+      ]
+    },
+    "permissionDrift": {
+      "status": "ok",
+      "driftCount": 0
+    },
+    "dependencyStatus": {
+      "status": "stub",
+      "outdated": 0,
+      "vulnerabilities": 0
+    },
+    "blastRadiusPreview": [
+      {
+        "controlId": "control-gateway_watchdog_stale",
+        "control": "Run GATEWAY_WATCHDOG_STALE remediation",
+        "risk": "high",
+        "scope": "command-center artifacts",
+        "preview": "Potential impact limited by dry-run defaults and rollback playbook."
+      },
+      {
+        "controlId": "control-outreach_snapshot_stale",
+        "control": "Run OUTREACH_SNAPSHOT_STALE remediation",
+        "risk": "medium",
+        "scope": "outreach + ops artifacts",
+        "preview": "Potential impact limited by dry-run defaults and rollback playbook."
+      },
+      {
+        "controlId": "control-outreach_health_rows_empty",
+        "control": "Run OUTREACH_HEALTH_ROWS_EMPTY remediation",
+        "risk": "medium",
+        "scope": "outreach + ops artifacts",
+        "preview": "Potential impact limited by dry-run defaults and rollback playbook."
+      },
+      {
+        "controlId": "control-outreach_telemetry_signal_missing",
+        "control": "Run OUTREACH_TELEMETRY_SIGNAL_MISSING remediation",
+        "risk": "high",
+        "scope": "outreach + ops artifacts",
+        "preview": "Potential impact limited by dry-run defaults and rollback playbook."
+      },
+      {
+        "controlId": "control-lock_readiness_zero",
+        "control": "Run LOCK_READINESS_ZERO remediation",
+        "risk": "medium",
+        "scope": "command-center artifacts",
+        "preview": "Potential impact limited by dry-run defaults and rollback playbook."
+      },
+      {
+        "controlId": "control-sync-command-center",
+        "control": "Sync and publish Command Center snapshot",
+        "risk": "low",
+        "scope": "command-center artifacts",
+        "preview": "Potential impact limited by dry-run defaults and rollback playbook."
+      }
+    ]
+  },
+  "scenarioSimulator": {
+    "generatedAt": "2026-02-13T18:59:45.426110Z",
+    "recommendedScenarioId": "balanced",
+    "options": [
+      {
+        "id": "balanced",
+        "name": "Balanced",
+        "description": "Moderate queue throughput while fixing top two reliability issues.",
+        "projected": {
+          "alertLoadDeltaPct": -18,
+          "pipelineDeltaPct": 6,
+          "slaBreachRiskDeltaPct": -15,
+          "forecastConfidenceDelta": 0.05
+        },
+        "confidence": 0.73,
+        "projectedMetrics": {
+          "weightedForecast": 14472,
+          "alertLoad": 2,
+          "slaRiskDeltaPct": -15.0,
+          "forecastConfidence": 0.56
+        },
+        "compositeScore": 14.2
+      },
+      {
+        "id": "reliability_first",
+        "name": "Reliability First",
+        "description": "Reduce send caps and clear telemetry debt before growth pushes.",
+        "projected": {
+          "alertLoadDeltaPct": -35,
+          "pipelineDeltaPct": -12,
+          "slaBreachRiskDeltaPct": -28,
+          "forecastConfidenceDelta": 0.08
+        },
+        "confidence": 0.77,
+        "projectedMetrics": {
+          "weightedForecast": 12015,
+          "alertLoad": 2,
+          "slaRiskDeltaPct": -28.0,
+          "forecastConfidence": 0.59
+        },
+        "compositeScore": 5.8
+      },
+      {
+        "id": "growth_push",
+        "name": "Growth Push",
+        "description": "Increase queue pressure to maximize top-of-funnel volume.",
+        "projected": {
+          "alertLoadDeltaPct": 24,
+          "pipelineDeltaPct": 18,
+          "slaBreachRiskDeltaPct": 20,
+          "forecastConfidenceDelta": -0.04
+        },
+        "confidence": 0.58,
+        "projectedMetrics": {
+          "weightedForecast": 16111,
+          "alertLoad": 4,
+          "slaRiskDeltaPct": 20.0,
+          "forecastConfidence": 0.47
+        },
+        "compositeScore": 4.0
+      }
+    ],
+    "compareDimensions": [
+      "weightedForecast",
+      "alertLoad",
+      "slaRiskDeltaPct",
+      "forecastConfidence"
+    ]
+  },
+  "operatorMemory": {
+    "generatedAt": "2026-02-13T18:59:45.426127Z",
+    "profile": {
+      "operator": "James",
+      "timezone": "America/New_York"
+    },
+    "preferences": [
+      {
+        "key": "decision_style",
+        "value": "safe-first"
+      },
+      {
+        "key": "alert_digest_interval_minutes",
+        "value": 30
+      },
+      {
+        "key": "show_critical_only_during_quiet_hours",
+        "value": true
+      }
+    ],
+    "recommendationBiasing": {
+      "weights": {
+        "reliability": 1.2,
+        "revenue": 1.0,
+        "speed": 0.9,
+        "trust": 1.1
+      },
+      "strategy": "safe-first weighted ranking"
+    },
+    "learnedSignals": [
+      {
+        "topic": "reliability",
+        "weight": 1.3,
+        "reason": "Observed in repeated high-priority recommendations"
+      },
+      {
+        "topic": "ops",
+        "weight": 1.3,
+        "reason": "Observed in repeated high-priority recommendations"
+      },
+      {
+        "topic": "telemetry",
+        "weight": 1.2,
+        "reason": "Observed in repeated high-priority recommendations"
+      },
+      {
+        "topic": "data-quality",
+        "weight": 1.2,
+        "reason": "Observed in repeated high-priority recommendations"
+      }
+    ],
+    "feedbackLoop": {
+      "recentFeedback": [
+        {
+          "ts": "2026-02-13T18:59:45.364116Z",
+          "type": "synthetic_seed",
+          "note": "No explicit operator feedback file detected; seeded defaults applied."
+        }
+      ],
+      "nextReview": "2026-02-14T18:59:45.426131Z"
     }
   }
 }
