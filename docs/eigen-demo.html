@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Verifiable Operator Copilot — Demo</title>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; margin: 24px; max-width: 900px; line-height: 1.5; }
+    code, pre { background: #111; color: #e6f1ff; padding: 2px 6px; border-radius: 6px; }
+    pre { padding: 12px; overflow: auto; }
+    .ok { color: #0a7f2e; font-weight: 700; }
+    .card { border: 1px solid #ddd; border-radius: 10px; padding: 14px; margin: 12px 0; }
+  </style>
+</head>
+<body>
+  <h1>Verifiable Operator Copilot — Demo</h1>
+  <p>Deterministic operator agent with signed run attestations for reproducible, multi-party trust.</p>
+
+  <div class="card">
+    <h2>What this demo proves</h2>
+    <ul>
+      <li>Deterministic run over Command Center snapshot</li>
+      <li>SHA-256 hashes for <code>code + input + output</code></li>
+      <li>Signed run manifest with wallet identity</li>
+      <li>Independent signature verification</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>Run it yourself</h2>
+    <pre>git clone https://github.com/Halldon/command-center.git
+cd command-center/eigen-verifiable-agent
+./run_all.sh</pre>
+  </div>
+
+  <div class="card">
+    <h2>Expected verify result</h2>
+    <pre>{
+  "ok": true,
+  "checks": {
+    "messageMatches": true,
+    "recoveredMatchesRecorded": true,
+    "recoveredMatchesStoredRecovered": true
+  }
+}</pre>
+    <p class="ok">✅ End-to-end verification passes</p>
+  </div>
+
+  <div class="card">
+    <h2>Artifacts</h2>
+    <ul>
+      <li><a href="https://github.com/Halldon/command-center/tree/main/eigen-verifiable-agent">Source folder</a></li>
+      <li><a href="https://raw.githubusercontent.com/Halldon/command-center/main/eigen-verifiable-agent/artifacts/run_manifest.json">run_manifest.json</a></li>
+      <li><a href="https://raw.githubusercontent.com/Halldon/command-center/main/eigen-verifiable-agent/artifacts/run_manifest.sig.json">run_manifest.sig.json</a></li>
+      <li><a href="https://raw.githubusercontent.com/Halldon/command-center/main/eigen-verifiable-agent/artifacts/agent_output.json">agent_output.json</a></li>
+    </ul>
+  </div>
+</body>
+</html>
