@@ -1,0 +1,12 @@
+{
+  "version": "1.0.0",
+  "name": "verifiable-agent-upgrade-policy",
+  "rules": [
+    "Only run src/run_agent.js as signed in manifest",
+    "Any code change requires regenerating manifest + signature",
+    "Policy changes must be committed and reflected in manifest",
+    "No destructive commands; output is read-only recommendations"
+  ],
+  "approvedBy": "James",
+  "updatedAt": "2026-02-13T00:00:00Z"
+}

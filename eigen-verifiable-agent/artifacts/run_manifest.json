@@ -1,0 +1,21 @@
+{
+  "manifestVersion": "1.0.0",
+  "generatedAt": "2026-02-13T20:36:28.889Z",
+  "code": {
+    "entrypoint": "/Users/j/.openclaw/workspace/eigen-verifiable-agent/src/run_agent.js",
+    "sha256": "5b88af5e3cca63f9fee9bf36c840fc8d3da310f55afb91c965b07b2eb18d7c00",
+    "gitCommit": "58d115e1ea8afc0314bdc7dfec4d1fc24588a1fa"
+  },
+  "input": {
+    "path": "/Users/j/.openclaw/workspace/command-center-app/snapshot.json",
+    "sha256": "6e12e401f8484305b8b40def918ae9384ffc5e22fd56d0b36bc4710d434767f0"
+  },
+  "output": {
+    "path": "/Users/j/.openclaw/workspace/eigen-verifiable-agent/artifacts/agent_output.json",
+    "sha256": "8166c9c3a7857d50ba6b261a99b8629115614ff603c18bb9856f6acd267aa134"
+  },
+  "upgradePolicy": {
+    "policyFile": "/Users/j/.openclaw/workspace/eigen-verifiable-agent/policies/upgrade_policy.json",
+    "mode": "explicit-policy-file-required"
+  }
+}

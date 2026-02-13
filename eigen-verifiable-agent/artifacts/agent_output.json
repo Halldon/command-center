@@ -1,0 +1,33 @@
+{
+  "runAt": "2026-02-13T20:36:28.789Z",
+  "policyVersion": "1.0.0",
+  "objective": "Rank operator attention and recommend immediate actions",
+  "top3": [
+    {
+      "id": "alert-outreach_telemetry_signal_missing",
+      "title": "OUTREACH_TELEMETRY_SIGNAL_MISSING",
+      "severity": "critical",
+      "computedScore": 92.55,
+      "recommendedAction": "Run OUTREACH_TELEMETRY_SIGNAL_MISSING remediation"
+    },
+    {
+      "id": "triage-smoke-1",
+      "title": "smoke-1",
+      "severity": "high",
+      "computedScore": 83.8,
+      "recommendedAction": "Open triage task"
+    },
+    {
+      "id": "alert-outreach_health_rows_empty",
+      "title": "OUTREACH_HEALTH_ROWS_EMPTY",
+      "severity": "warn",
+      "computedScore": 77,
+      "recommendedAction": "Run OUTREACH_HEALTH_ROWS_EMPTY remediation"
+    }
+  ],
+  "meta": {
+    "sourceSnapshot": "/Users/j/.openclaw/workspace/command-center-app/snapshot.json",
+    "totalAttentionItems": 6,
+    "schemaVersion": "2.0.0"
+  }
+}

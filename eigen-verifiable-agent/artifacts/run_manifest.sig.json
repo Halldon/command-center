@@ -1,0 +1,8 @@
+{
+  "signedAt": "2026-02-13T20:36:29.101Z",
+  "signerAddress": "0x4AB73f1F3ad5Ad3b0fDb70F99989d74AA0c484c3",
+  "recoveredAddress": "0x4AB73f1F3ad5Ad3b0fDb70F99989d74AA0c484c3",
+  "message": "Eigen-style verifiable agent run\nmanifest_sha256:6536411be91d2da8cc3a9c917d4b45d272bf4799c2808e0a27be32b103c75f88",
+  "signature": "0x307ad68bd2ec48957210b46f971b10b6ce7d170caa90d51ea5d1608ae58e0f154cf213e513da2858b487bdd9850fdecf8e251d372327417519b4311137c29daf1b",
+  "walletFile": "agent-wallet-2026-02-13T17-35-31-934Z.json"
+}
