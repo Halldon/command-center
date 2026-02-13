@@ -146,6 +146,16 @@
         <h3>Executive Briefs</h3>
         <ul id="briefs"></ul>
       </section>
+
+      <section class="card backburner">
+        <h3>Decisions Needed</h3>
+        <ul id="decisions"></ul>
+      </section>
+
+      <section class="card updates">
+        <h3>Incident Feed</h3>
+        <ul id="incidents"></ul>
+      </section>
     </div>
 
     <div class="footer">Tip: press <b>R</b> to refresh · Data source: <code>snapshot.json</code></div>
@@ -230,6 +240,21 @@ function render(d){
     <li>Morning: ${esc(relTime(d?.briefs?.morning))}</li>
     <li>Evening: ${esc(relTime(d?.briefs?.evening))}</li>
   `;
+
+  const dec = document.getElementById('decisions');
+  dec.innerHTML = '';
+  (d.decisionsNeeded || []).forEach(x => dec.innerHTML += `<li>${esc(x)}</li>`);
+  if (!dec.innerHTML) dec.innerHTML = '<li class="small">No immediate decisions required.</li>';
+
+  const inc = document.getElementById('incidents');
+  inc.innerHTML = '';
+  (d.incidentFeed || []).slice().reverse().slice(0, 8).forEach(i => {
+    const t = i.ts || i.time || i.generatedAt || '';
+    const code = i.code || i.id || i.type || 'incident';
+    const msg = i.message || i.summary || i.alert || i.title || '';
+    inc.innerHTML += `<li><b>${esc(code)}</b> <span class="small">(${esc(relTime(t))})</span><br>${esc(msg).slice(0,130)}</li>`;
+  });
+  if (!inc.innerHTML) inc.innerHTML = '<li class="small">No recent incidents logged.</li>';
 }
 
 async function refresh(){
