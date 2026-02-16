@@ -327,11 +327,11 @@
     </div>
 
     <div class="kpis">
-      <div class="kpi"><div class="label">Global Status</div><div class="val" id="kpiStatus">—</div></div>
-      <div class="kpi"><div class="label">Attention Queue</div><div class="val" id="kpiAttention">—</div></div>
-      <div class="kpi"><div class="label">SLA Breaches</div><div class="val" id="kpiBreaches">—</div></div>
-      <div class="kpi"><div class="label">Forecast Confidence</div><div class="val" id="kpiForecast">—</div></div>
-      <div class="kpi"><div class="label">Trust/Security</div><div class="val" id="kpiTrust">—</div></div>
+      <div class="kpi"><div class="label">Delivery Risk Now</div><div class="val" id="kpiStatus">—</div></div>
+      <div class="kpi"><div class="label">Decisions Due</div><div class="val" id="kpiAttention">—</div></div>
+      <div class="kpi"><div class="label">Commitments Overdue</div><div class="val" id="kpiBreaches">—</div></div>
+      <div class="kpi"><div class="label">Confidence in Plan</div><div class="val" id="kpiForecast">—</div></div>
+      <div class="kpi"><div class="label">Trust Guardrails</div><div class="val" id="kpiTrust">—</div></div>
     </div>
 
     <div class="grid">
@@ -352,20 +352,20 @@
       </section>
 
       <section class="card span-8" id="attentionCard">
-        <h3>1) Attention Queue</h3>
+        <h3>1) Triage Now (Action Queue)</h3>
         <div class="small" id="attentionSummary">Loading…</div>
         <div class="attention-list" id="attentionList"></div>
       </section>
 
       <section class="card span-4" id="briefCard">
-        <h3>2) Executive Daily Brief (60s)</h3>
+        <h3>2) Operator Brief (60s)</h3>
         <div id="briefSummary" class="small">Loading…</div>
         <ul class="list" id="briefHighlights"></ul>
         <div class="delta-grid" id="briefDeltas"></div>
       </section>
 
       <section class="card span-6" id="decisionCard">
-        <h3>3) Decision Console</h3>
+        <h3>3) What Needs My Decision Today</h3>
         <div class="small" id="decisionMeta"></div>
         <div id="decisionControls"></div>
         <h3 style="margin-top:10px;">Audit Trail</h3>
@@ -373,29 +373,29 @@
       </section>
 
       <section class="card span-6" id="reliabilityCard">
-        <h3>4) Reliability Radar</h3>
+        <h3>4) Delivery Threat Radar</h3>
         <div class="signal-grid" id="reliabilitySignals"></div>
       </section>
 
       <section class="card span-4" id="revenueCard">
-        <h3>5) Revenue / Pipeline Truth</h3>
+        <h3>5) Cash & Pipeline Snapshot</h3>
         <div id="revenueMain"></div>
         <ul class="list" id="revenueLeakage"></ul>
       </section>
 
       <section class="card span-4" id="focusCard">
-        <h3>6) Personal Focus Mode</h3>
+        <h3>6) Focus Capacity</h3>
         <div id="focusMain" class="small"></div>
         <ul class="list" id="focusIndicators"></ul>
       </section>
 
       <section class="card span-4" id="explainCard">
-        <h3>7) Explainability Panel</h3>
+        <h3>7) Why This Is Ranked Here</h3>
         <div id="explainList"></div>
       </section>
 
       <section class="card span-6" id="trustCard">
-        <h3>8) Trust / Security Center</h3>
+        <h3>8) Safety & Permission Boundaries</h3>
         <div id="trustMain" class="small"></div>
         <div class="split" style="margin-top:8px;">
           <div><h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Checks</h4><div id="trustChecks"></div></div>
@@ -419,13 +419,13 @@
       </section>
 
       <section class="card span-6" id="scenarioCard">
-        <h3>10) Scenario Simulator</h3>
+        <h3>10) If We Do Nothing, What Breaks?</h3>
         <div class="small" id="scenarioMeta"></div>
         <div class="scenario-grid" id="scenarioGrid"></div>
       </section>
 
       <section class="card span-6" id="memoryCard">
-        <h3>11) Operator Memory / Learning Loop</h3>
+        <h3>11) Decision Journal & Learning Loop</h3>
         <div class="small" id="memoryMeta"></div>
         <ul class="list" id="memoryPrefs"></ul>
         <div class="mem-form">
@@ -436,7 +436,7 @@
       </section>
 
       <section class="card span-6" id="roadmapCard">
-        <h3>12) Command Sensor Next Stack</h3>
+        <h3>12) Parking Lot — Not for Today</h3>
         <div class="small" id="roadmapMeta"></div>
         <div class="roadmap-grid" id="roadmapTop"></div>
         <ul class="list" id="roadmapFirstAction"></ul>
@@ -667,10 +667,10 @@ function renderAttention(){
   const summary = q.summary || {};
   const model = q.model?.id || 'priority_v2';
   document.getElementById('attentionSummary').innerHTML =
-    `Ranked by first-order + second-order + freshness confidence (${esc(model)}) · <b>${summary.total || 0}</b> items · <b>${summary.breached || 0}</b> SLA breached`;
+    `Process in this order to protect delivery (${esc(model)}) · <b>${summary.total || 0}</b> items · <b>${summary.breached || 0}</b> overdue`;
 
   if(!items.length){
-    listEl.innerHTML = '<div class="small">No priority items.</div>';
+    listEl.innerHTML = '<div class="small">No urgent queue items. Pull the next highest-impact task.</div>';
     return;
   }
 
