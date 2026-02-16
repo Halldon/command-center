@@ -277,6 +277,7 @@
       </div>
       <div class="ctrls">
         <span class="pill" id="safeModePill">Console mode: DRY-RUN</span>
+        <span class="pill" id="streamPill">Live stream: CONNECTING</span>
         <span class="pill" id="autoRefreshPill">Auto-refresh: ON</span>
         <button id="focusToggleBtn">Toggle Focus</button>
         <button id="refreshBtn">Refresh</button>
@@ -414,6 +415,7 @@ const state = {
   autoRefresh: true,
   timer: null,
   focusOverride: null,
+  stream: { enabled: false, connected: false, lastEventAt: null, source: null },
   localAudit: loadLocal('cc.local.audit', []),
   localPrefs: loadLocal('cc.local.prefs', {}),
 };
@@ -936,6 +938,20 @@ function renderAll(){
   updateSlaTimers();
 }
 
+function updateStreamPill(){
+  const el = document.getElementById('streamPill');
+  if(!el) return;
+  if(!state.stream.enabled){
+    el.textContent = 'Live stream: OFF';
+    return;
+  }
+  if(state.stream.connected){
+    el.textContent = `Live stream: ON${state.stream.lastEventAt ? ` · ${relTime(state.stream.lastEventAt)}` : ''}`;
+    return;
+  }
+  el.textContent = 'Live stream: RECONNECTING';
+}
+
 async function loadData(){
   const r = await fetch('./snapshot.json?ts=' + Date.now());
   if(!r.ok) throw new Error('snapshot fetch failed');
@@ -950,6 +966,48 @@ async function refresh(){
     console.error(e);
     document.getElementById('stamp').textContent = 'Snapshot unavailable — run sync script and redeploy.';
   }
+}
+
+function startLiveStream(){
+  if(typeof EventSource === 'undefined'){
+    state.stream.enabled = false;
+    updateStreamPill();
+    return;
+  }
+
+  if(state.stream.source){
+    try { state.stream.source.close(); } catch {}
+  }
+
+  state.stream.enabled = true;
+  const es = new EventSource('/api/stream');
+  state.stream.source = es;
+  updateStreamPill();
+
+  es.addEventListener('snapshot', (ev) => {
+    try {
+      const payload = JSON.parse(ev.data || '{}');
+      if(payload && payload.snapshot){
+        state.data = payload.snapshot;
+        state.stream.connected = true;
+        state.stream.lastEventAt = new Date().toISOString();
+        renderAll();
+        updateStreamPill();
+      }
+    } catch (err){
+      console.error('stream parse failed', err);
+    }
+  });
+
+  es.onopen = () => {
+    state.stream.connected = true;
+    updateStreamPill();
+  };
+
+  es.onerror = () => {
+    state.stream.connected = false;
+    updateStreamPill();
+  };
 }
 
 function setAuto(on){
@@ -1016,7 +1074,9 @@ function wireEvents(){
 
 wireEvents();
 refresh();
+startLiveStream();
 setAuto(true);
+setInterval(updateStreamPill, 10000);
 </script>
 </body>
 </html>
