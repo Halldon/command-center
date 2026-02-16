@@ -12,6 +12,7 @@
     "trustSecurity": true,
     "scenarioSimulator": true,
     "operatorMemory": true,
+    "commandSensorRoadmap": true,
     "classicPanels": true
   },
   "headline": {
@@ -1303,5 +1304,36 @@
       ],
       "nextReview": "2026-02-14T18:59:45.426131Z"
     }
+  },
+  "commandSensorRoadmap": {
+    "northStar": "Confident Action Closure Rate (CACR)",
+    "horizon": "30/60/90",
+    "topFeatures": [
+      {
+        "name": "Signal Freshness & Integrity Gate",
+        "owner": "Data Pipeline",
+        "whyNow": "Prevents stale/noisy inputs from contaminating the attention queue."
+      },
+      {
+        "name": "Alert Budget + Quiet-Hours Router",
+        "owner": "Notifications/Ops",
+        "whyNow": "Reduces operator fatigue while preserving critical interrupts."
+      },
+      {
+        "name": "Config/Dependency Drift Sentinel",
+        "owner": "Platform Reliability",
+        "whyNow": "Auto-detects and heals recurring env/runtime regressions."
+      },
+      {
+        "name": "Risk-Tiered Action Policy Engine",
+        "owner": "Governance/Runner",
+        "whyNow": "Enables faster execution with explicit HITL thresholds and rollback safety."
+      }
+    ],
+    "firstAction": [
+      "Run a 20-minute env hardening pass across runtime, secrets, and quota dependencies.",
+      "Pin interpreter + policy versions and verify watchdog/singleton behavior.",
+      "Rerun preflight jobs and confirm alert budget + freshness checks pass."
+    ]
   }
 }
