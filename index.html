@@ -266,6 +266,48 @@
       .split { grid-template-columns: 1fr; }
       .mem-form { grid-template-columns: 1fr; }
     }
+
+    @media (max-width: 900px) {
+      .wrap { padding: 10px 10px 20px; }
+      .topbar {
+        top: 0;
+        border-radius: 10px;
+        padding: 10px;
+        align-items: flex-start;
+      }
+      .title { font-size: 17px; line-height: 1.25; }
+      .sub { font-size: 11px; }
+      .ctrls { width: 100%; justify-content: flex-start; gap: 6px; }
+      button, .pill, select, input {
+        min-height: 36px;
+        font-size: 12px;
+        padding: 8px 9px;
+      }
+      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+      .kpi { padding: 9px 10px; }
+      .kpi .val { font-size: 20px; }
+      .card { padding: 10px; border-radius: 10px; }
+      .card h3 { font-size: 13px; margin-bottom: 7px; }
+      .attention-item { padding: 9px; }
+      .action-row button { flex: 1 1 100%; }
+      .delta-grid, .signal-grid, .scenario-grid, .roadmap-grid, .projects { grid-template-columns: 1fr; }
+      .footer { text-align: left; font-size: 10px; }
+    }
+
+    @media (max-width: 640px) {
+      .wrap { padding: 8px 8px 16px; }
+      .topbar { position: static; }
+      .kpis { grid-template-columns: 1fr; }
+      .row { align-items: flex-start; }
+      .score { font-size: 10px; }
+      .small { font-size: 11px; }
+      .audit { max-height: 180px; }
+      .toast {
+        right: 8px;
+        left: 8px;
+        bottom: 8px;
+      }
+    }
   </style>
 </head>
 <body>
