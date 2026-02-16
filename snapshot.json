@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "generatedAt": "2026-02-16T18:58:23.389367Z",
+  "generatedAt": "2026-02-16T20:10:17.980033Z",
   "featureFlags": {
     "attentionQueue": true,
     "executiveDailyBrief": true,
@@ -31,13 +31,13 @@
       "name": "Outreach Engine",
       "status": "ok",
       "summary": "Queue 61 \u00b7 healthRows 6 \u00b7 paused 0",
-      "lastUpdate": "2026-02-16T16:28:46.470672Z"
+      "lastUpdate": "2026-02-16T18:58:43.009170Z"
     },
     {
       "name": "Provider Budget/Capacity",
       "status": "ok",
       "summary": "Providers healthy: 4/4",
-      "lastUpdate": "2026-02-16T16:23:25.300642Z"
+      "lastUpdate": "2026-02-16T19:29:32.537807Z"
     },
     {
       "name": "Decisioning & Automation",
@@ -180,7 +180,7 @@
       ]
     },
     "snapshot": {
-      "generatedAt": "2026-02-16T16:28:46.470481Z",
+      "generatedAt": "2026-02-16T18:58:43.008584Z",
       "adaptiveQueueCount": 61,
       "routeMix": {
         "standard_short": 42,
@@ -284,7 +284,7 @@
     }
   },
   "attentionQueue": {
-    "generatedAt": "2026-02-16T18:58:23.389346Z",
+    "generatedAt": "2026-02-16T20:10:17.980015Z",
     "model": {
       "id": "priority_v3",
       "weights": {
@@ -324,7 +324,7 @@
     "items": []
   },
   "executiveDailyBrief": {
-    "generatedAt": "2026-02-16T18:58:23.389444Z",
+    "generatedAt": "2026-02-16T20:10:17.980094Z",
     "readTimeSeconds": 60,
     "summary": "Critical reliability issues remain the top constraint; execute the top attention action and validate deltas before scaling throughput.",
     "highlights": [
@@ -381,7 +381,7 @@
     }
   },
   "decisionConsole": {
-    "generatedAt": "2026-02-16T18:58:23.389481Z",
+    "generatedAt": "2026-02-16T20:10:17.980126Z",
     "safeControlsEnabled": true,
     "globalMode": "dry-run",
     "controls": [
@@ -461,7 +461,7 @@
     ]
   },
   "reliabilityRadar": {
-    "generatedAt": "2026-02-16T18:58:23.391933Z",
+    "generatedAt": "2026-02-16T20:10:17.982225Z",
     "overallStatus": "warn",
     "summary": {
       "providersHealthy": 4,
@@ -561,7 +561,7 @@
     ]
   },
   "revenuePipeline": {
-    "generatedAt": "2026-02-16T18:58:23.391953Z",
+    "generatedAt": "2026-02-16T20:10:17.982243Z",
     "dataQuality": "partial",
     "totals": {
       "pipelineValue": 75850,
@@ -593,7 +593,7 @@
     "notes": "Derived from outreach queue + synthetic fallback when direct revenue telemetry is absent."
   },
   "portfolioCommandView": {
-    "generatedAt": "2026-02-16T18:58:23.393908Z",
+    "generatedAt": "2026-02-16T20:10:17.984236Z",
     "summary": "Portfolio lens balances local urgency against cross-project cascade risk.",
     "domains": [
       {
@@ -601,7 +601,7 @@
         "status": "ok",
         "riskScore": 46.0,
         "confidence": 0.68,
-        "note": "Runner heartbeat 0m ago \u00b7 open positions 0."
+        "note": "Runner heartbeat 0m ago \u00b7 open positions 6."
       },
       {
         "domain": "Outreach",
@@ -647,7 +647,7 @@
     ]
   },
   "personalFocusMode": {
-    "generatedAt": "2026-02-16T18:58:23.393936Z",
+    "generatedAt": "2026-02-16T20:10:17.984265Z",
     "status": "monitoring",
     "criticalOnly": false,
     "noiseSuppressionLevel": "balanced",
@@ -663,11 +663,11 @@
     "suppressedEstimate": 4
   },
   "explainability": {
-    "generatedAt": "2026-02-16T18:58:23.393942Z",
+    "generatedAt": "2026-02-16T20:10:17.984271Z",
     "anomalies": []
   },
   "trustSecurity": {
-    "generatedAt": "2026-02-16T18:58:23.393957Z",
+    "generatedAt": "2026-02-16T20:10:17.984279Z",
     "overallStatus": "ok",
     "secretHealth": {
       "status": "stub",
@@ -704,7 +704,7 @@
     ]
   },
   "scenarioSimulator": {
-    "generatedAt": "2026-02-16T18:58:23.393986Z",
+    "generatedAt": "2026-02-16T20:10:17.984305Z",
     "recommendedScenarioId": "balanced",
     "options": [
       {
@@ -773,7 +773,7 @@
     ]
   },
   "operatorMemory": {
-    "generatedAt": "2026-02-16T18:58:23.393994Z",
+    "generatedAt": "2026-02-16T20:10:17.984312Z",
     "profile": {
       "operator": "James",
       "timezone": "America/New_York"
@@ -805,12 +805,54 @@
     "feedbackLoop": {
       "recentFeedback": [
         {
-          "ts": "2026-02-16T18:56:24.210889Z",
+          "ts": "2026-02-16T19:56:22.623128Z",
           "type": "synthetic_seed",
           "note": "No explicit operator feedback file detected; seeded defaults applied."
         }
       ],
-      "nextReview": "2026-02-17T18:58:23.393997Z"
+      "nextReview": "2026-02-17T20:10:17.984315Z"
+    }
+  },
+  "godView": {
+    "generatedAt": "2026-02-16T20:10:17.984325Z",
+    "topStrip": {
+      "criticalAlerts": 0,
+      "hardDeadlinesToday": 0,
+      "focusCapacity": "NORMAL",
+      "trustScore": 81.0
+    },
+    "projectPulse": [
+      {
+        "name": "Runtime Reliability",
+        "status": "unknown",
+        "summary": "Gateway, lock-readiness, cron cadence, and incident pressure",
+        "updatedAt": "2026-02-13T16:00:41.471161Z"
+      },
+      {
+        "name": "Outreach Engine",
+        "status": "ok",
+        "summary": "Queue 61 \u00b7 healthRows 6 \u00b7 paused 0",
+        "updatedAt": "2026-02-16T18:58:43.009170Z"
+      },
+      {
+        "name": "Provider Budget/Capacity",
+        "status": "ok",
+        "summary": "Providers healthy: 4/4",
+        "updatedAt": "2026-02-16T19:29:32.537807Z"
+      },
+      {
+        "name": "Decisioning & Automation",
+        "status": "ok",
+        "summary": "Routing policy + safe remediation controls + audit trail",
+        "updatedAt": "2026-02-13T16:00:42.188309Z"
+      }
+    ],
+    "decisionQueue": [],
+    "executionQueue": [],
+    "summary": {
+      "whatCanHurtToday": "No critical blockers",
+      "whatCanPayToday": "Execute highest-confidence queue items and resolve top bottleneck",
+      "mustDecideNow": []
     }
   }
 }

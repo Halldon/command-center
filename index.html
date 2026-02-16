@@ -293,6 +293,22 @@
     </div>
 
     <div class="grid">
+      <section class="card span-12" id="godViewCard">
+        <h3>0) God View (60s)</h3>
+        <div id="godViewSummary" class="small">Loading…</div>
+        <div class="kpis" style="margin-top:8px;" id="godViewTop"></div>
+        <div class="split" style="margin-top:8px;">
+          <div>
+            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Decision Queue (max 5)</h4>
+            <div id="godViewDecisions"></div>
+          </div>
+          <div>
+            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Execution Queue (max 7)</h4>
+            <div id="godViewExecution"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="card span-8" id="attentionCard">
         <h3>1) Attention Queue</h3>
         <div class="small" id="attentionSummary">Loading…</div>
@@ -513,6 +529,7 @@ function featureEnabled(flag){
 
 function applyFeatureVisibility(){
   const map = {
+    godView: 'godViewCard',
     attentionQueue: 'attentionCard',
     executiveDailyBrief: 'briefCard',
     decisionConsole: 'decisionCard',
@@ -552,6 +569,37 @@ function renderTop(){
 
   const stamp = `Generated ${d.generatedAt || 'n/a'} · ${relTime(d.generatedAt)} · Schema ${d.schemaVersion || 'legacy'}`;
   document.getElementById('stamp').textContent = stamp;
+}
+
+function renderGodView(){
+  const g = state.data?.godView || {};
+  const top = g.topStrip || {};
+  const summary = g.summary || {};
+
+  document.getElementById('godViewSummary').innerHTML =
+    `<b>Hurt today:</b> ${esc(summary.whatCanHurtToday || 'n/a')} · <b>Pay today:</b> ${esc(summary.whatCanPayToday || 'n/a')}`;
+
+  const topEl = document.getElementById('godViewTop');
+  topEl.innerHTML = `
+    <div class="kpi"><div class="label">Critical Alerts</div><div class="val">${esc(top.criticalAlerts ?? 0)}</div></div>
+    <div class="kpi"><div class="label">Hard Decisions</div><div class="val">${esc(top.hardDeadlinesToday ?? 0)}</div></div>
+    <div class="kpi"><div class="label">Focus Capacity</div><div class="val">${esc(top.focusCapacity || 'NORMAL')}</div></div>
+    <div class="kpi"><div class="label">Trust Score</div><div class="val">${esc(top.trustScore ?? 0)}%</div></div>
+  `;
+
+  const dec = document.getElementById('godViewDecisions');
+  dec.innerHTML = '';
+  (g.decisionQueue || []).forEach(i => {
+    dec.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(i.severity)}">${esc(i.severity || 'unknown')}</span> <b>${esc(i.title || '')}</b> · score ${esc(i.score ?? 0)}</div>`;
+  });
+  if(!dec.innerHTML) dec.innerHTML = '<div class="small">No immediate decisions.</div>';
+
+  const exe = document.getElementById('godViewExecution');
+  exe.innerHTML = '';
+  (g.executionQueue || []).forEach(i => {
+    exe.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(i.severity)}">${esc(i.severity || 'unknown')}</span> <b>${esc(i.title || '')}</b> · score ${esc(i.score ?? 0)}</div>`;
+  });
+  if(!exe.innerHTML) exe.innerHTML = '<div class="small">No queued execution items.</div>';
 }
 
 function attentionBias(item){
@@ -922,6 +970,7 @@ function updateSlaTimers(){
 function renderAll(){
   applyFeatureVisibility();
   renderTop();
+  if(featureEnabled('godView')) renderGodView();
   if(featureEnabled('attentionQueue')) renderAttention();
   if(featureEnabled('executiveDailyBrief')) renderBrief();
   if(featureEnabled('decisionConsole')) renderDecisionConsole();
