@@ -344,14 +344,29 @@
         </div>
       </section>
 
+      <section class="card span-6" id="portfolioCard">
+        <h3>9) Portfolio Command View</h3>
+        <div class="small" id="portfolioSummary"></div>
+        <div class="split" style="margin-top:8px;">
+          <div>
+            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Domain Risk Grid</h4>
+            <div id="portfolioDomains"></div>
+          </div>
+          <div>
+            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Resource Contention</h4>
+            <div id="portfolioContention"></div>
+          </div>
+        </div>
+      </section>
+
       <section class="card span-6" id="scenarioCard">
-        <h3>9) Scenario Simulator</h3>
+        <h3>10) Scenario Simulator</h3>
         <div class="small" id="scenarioMeta"></div>
         <div class="scenario-grid" id="scenarioGrid"></div>
       </section>
 
       <section class="card span-6" id="memoryCard">
-        <h3>10) Operator Memory / Learning Loop</h3>
+        <h3>11) Operator Memory / Learning Loop</h3>
         <div class="small" id="memoryMeta"></div>
         <ul class="list" id="memoryPrefs"></ul>
         <div class="mem-form">
@@ -362,7 +377,7 @@
       </section>
 
       <section class="card span-6" id="roadmapCard">
-        <h3>11) Command Sensor Next Stack</h3>
+        <h3>12) Command Sensor Next Stack</h3>
         <div class="small" id="roadmapMeta"></div>
         <div class="roadmap-grid" id="roadmapTop"></div>
         <ul class="list" id="roadmapFirstAction"></ul>
@@ -504,6 +519,7 @@ function applyFeatureVisibility(){
     personalFocusMode: 'focusCard',
     explainability: 'explainCard',
     trustSecurity: 'trustCard',
+    portfolioCommandView: 'portfolioCard',
     scenarioSimulator: 'scenarioCard',
     operatorMemory: 'memoryCard',
     commandSensorRoadmap: 'roadmapCard',
@@ -553,11 +569,13 @@ function renderAttention(){
   const listEl = document.getElementById('attentionList');
   listEl.innerHTML = '';
 
-  const items = [...(q.items || [])].sort((a,b)=> ((b.score||0) * attentionBias(b)) - ((a.score||0) * attentionBias(a)));
+  const scoreOf = (i) => i.priority?.score ?? i.score ?? 0;
+  const items = [...(q.items || [])].sort((a,b)=> (scoreOf(b) * attentionBias(b)) - (scoreOf(a) * attentionBias(a)));
 
   const summary = q.summary || {};
+  const model = q.model?.id || 'priority_v2';
   document.getElementById('attentionSummary').innerHTML =
-    `Ranked by impact/urgency/confidence · <b>${summary.total || 0}</b> items · <b>${summary.breached || 0}</b> SLA breached`;
+    `Ranked by first-order + second-order + freshness confidence (${esc(model)}) · <b>${summary.total || 0}</b> items · <b>${summary.breached || 0}</b> SLA breached`;
 
   if(!items.length){
     listEl.innerHTML = '<div class="small">No priority items.</div>';
@@ -568,20 +586,23 @@ function renderAttention(){
     const c = cls(item.severity || item.status);
     const remaining = item.sla?.remainingMinutes;
     const slaText = typeof remaining === 'number' ? `${remaining >= 0 ? `${remaining}m left` : `${Math.abs(remaining)}m overdue`}` : 'SLA n/a';
-    const score = ((item.score || 0) * attentionBias(item)).toFixed(1);
+    const score = ((item.priority?.score ?? item.score ?? 0) * attentionBias(item)).toFixed(1);
+    const p = item.priority || {};
 
     listEl.innerHTML += `
       <article class="attention-item">
         <div class="row">
           <div class="left">
             <span class="status-chip ${c}">${esc(item.severity || 'unknown')}</span>
-            <span class="score">#${esc(item.rank || '?')} · score ${esc(score)}</span>
+            <span class="score">#${esc(item.rank || '?')} · score ${esc(score)} · ${esc(p.band || 'P?')}</span>
+            <span class="status-chip ${cls(item.dataTrust === 'stale' ? 'warn' : (item.dataTrust === 'aging' ? 'warning' : 'ok'))}">${esc(item.dataTrust || 'unknown')} data</span>
             <span class="small">${esc(item.source || 'source')}</span>
           </div>
           <div class="small" data-sla-target="${esc(item.sla?.targetAt || '')}">${esc(slaText)}</div>
         </div>
         <div style="font-weight:700; margin-top:6px;">${esc(item.title || 'Untitled')}</div>
         <div class="small" style="margin-top:2px;">${esc(item.summary || '')}</div>
+        <div class="small">${esc(p.confidenceBand || '')} · ${esc(p.freshnessBand || '')} · S1 ${(Number(p.firstOrder||0)*100).toFixed(0)} · S2 ${(Number(p.secondOrder||0)*100).toFixed(0)}</div>
         <div class="action-row">
           <button class="copy-action" data-cmd="${esc(item.recommendedAction?.command || '')}" data-id="${esc(item.id || '')}">Copy recommended action</button>
           <button class="queue-action" data-cmd="${esc(item.recommendedAction?.command || '')}" data-label="${esc(item.title || '')}">Queue dry-run</button>
@@ -795,6 +816,25 @@ function renderScenario(){
   if(!grid.innerHTML) grid.innerHTML = '<div class="small">No scenarios available.</div>';
 }
 
+function renderPortfolio(){
+  const p = state.data?.portfolioCommandView || {};
+  document.getElementById('portfolioSummary').textContent = p.summary || 'Portfolio-level risk view unavailable.';
+
+  const d = document.getElementById('portfolioDomains');
+  d.innerHTML = '';
+  (p.domains || []).forEach(row => {
+    d.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(row.status)}">${esc(row.status)}</span> <b>${esc(row.domain)}</b> · risk ${esc(row.riskScore)} · conf ${Math.round((row.confidence||0)*100)}%<br>${esc(row.note || '')}</div>`;
+  });
+  if(!d.innerHTML) d.innerHTML = '<div class="small">No domain rows.</div>';
+
+  const c = document.getElementById('portfolioContention');
+  c.innerHTML = '';
+  (p.contention || []).forEach(row => {
+    c.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(row.status)}">${esc(row.status)}</span> <b>${esc(row.resource)}</b> · pressure ${esc(row.pressure)}<br>${esc(row.note || '')}</div>`;
+  });
+  if(!c.innerHTML) c.innerHTML = '<div class="small">No contention rows.</div>';
+}
+
 function mergedPreferences(){
   const prefs = [...(state.data?.operatorMemory?.preferences || [])];
   Object.entries(state.localPrefs || {}).forEach(([k,v]) => prefs.push({ key: k, value: v, source: 'local' }));
@@ -888,6 +928,7 @@ function renderAll(){
   if(featureEnabled('personalFocusMode')) renderFocus();
   if(featureEnabled('explainability')) renderExplainability();
   if(featureEnabled('trustSecurity')) renderTrust();
+  if(featureEnabled('portfolioCommandView')) renderPortfolio();
   if(featureEnabled('scenarioSimulator')) renderScenario();
   if(featureEnabled('operatorMemory')) renderMemory();
   if(featureEnabled('commandSensorRoadmap')) renderRoadmap();
