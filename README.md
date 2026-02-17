@@ -63,6 +63,10 @@ Optional auto-sync is controlled by `operator.config.json > liveSync` and env va
 - `COMMAND_CENTER_OPS_ROOT`
 - `COMMAND_CENTER_SOURCE_SNAPSHOT`
 - `COMMAND_CENTER_TARGET_SNAPSHOT`
+- `COMMAND_CENTER_MAX_SNAPSHOT_AGE_MINUTES` (freshness gate, default `30`)
+- `COMMAND_CENTER_MAX_OUTREACH_SNAPSHOT_AGE_MINUTES` (default `90`)
+- `COMMAND_CENTER_MAX_OUTREACH_TELEMETRY_AGE_MINUTES` (default `90`)
+- `COMMAND_CENTER_MIN_OUTREACH_HEALTH_ROWS` (default `1`)
 
 History retrieval:
 
@@ -84,6 +88,14 @@ bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh
 1. `COMMAND_CENTER_LIVE_SYNC_CMD` (custom command)
 2. local OPS build via `COMMAND_CENTER_OPS_ROOT`
 3. pull from `COMMAND_CENTER_SNAPSHOT_SOURCE_URL`
+
+It also enforces a freshness gate (fail-closed) after sync/fetch:
+- snapshot timestamp must be recent
+- outreach snapshot timestamp must be recent
+- outreach telemetry timestamp must be recent
+- outreach `healthRows` must be >= configured minimum
+
+If the gate fails, the sync step exits non-zero so stale data cannot silently deploy.
 
 ## GitHub Actions Auto Sync (recommended)
 
