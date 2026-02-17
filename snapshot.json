@@ -897,5 +897,115 @@
     "primaryActionId": null,
     "maxVisibleActions": 3,
     "progressiveDisclosureDefault": "compact"
+  },
+  "projectContracts": {
+    "generatedAt": "2026-02-17T19:43:45.118262Z",
+    "expectedProjectCount": 2,
+    "projectCount": 2,
+    "staleCount": 2,
+    "missingContractCount": 2,
+    "invalidContractCount": 0,
+    "projects": [
+      {
+        "projectId": "outreach-pipeline",
+        "name": "Outreach Pipeline",
+        "type": "outreach",
+        "owner": "James (Halldon)",
+        "priority": "P1",
+        "generatedAt": "2026-02-16T16:28:46.629017Z",
+        "ageSeconds": 98098,
+        "maxStalenessSeconds": 900,
+        "isStale": true,
+        "staleReason": "stale:98098s>900s",
+        "status": "stale",
+        "summary": "Queue 61 | health rows 6",
+        "cards": {},
+        "modules": [
+          {
+            "id": "missing-contract",
+            "title": "Project Contract Missing",
+            "description": "This project has no command-center contract artifact yet.",
+            "kind": "list",
+            "stats": [],
+            "items": [
+              "Create command-center/project_contract.json in the project repo.",
+              "Emit generatedAt every run and set maxStalenessSeconds.",
+              "Define cards and modules for Reviews, Solve, and Prevent."
+            ],
+            "tags": [
+              "outreach-pipeline",
+              "contract-required"
+            ],
+            "footer": [
+              "Project: Outreach Pipeline"
+            ],
+            "actions": [
+              {
+                "kind": "link",
+                "label": "Open Contract Guide",
+                "actionKey": "",
+                "command": "",
+                "href": "./docs/project-contract.md"
+              }
+            ]
+          }
+        ],
+        "replaceDefaultModules": false,
+        "contractFound": false,
+        "contractValid": false,
+        "contractSource": "",
+        "contractError": ""
+      },
+      {
+        "projectId": "polymarket-bot-paper-first",
+        "name": "Polymarket Bot (paper-first)",
+        "type": "polymarket",
+        "owner": "James",
+        "priority": "P1",
+        "generatedAt": "2026-02-17T18:33:36.005010Z",
+        "ageSeconds": 4209,
+        "maxStalenessSeconds": 300,
+        "isStale": true,
+        "staleReason": "stale:4209s>300s",
+        "status": "stale",
+        "summary": "No summary provided.",
+        "cards": {},
+        "modules": [
+          {
+            "id": "missing-contract",
+            "title": "Project Contract Missing",
+            "description": "This project has no command-center contract artifact yet.",
+            "kind": "list",
+            "stats": [],
+            "items": [
+              "Create command-center/project_contract.json in the project repo.",
+              "Emit generatedAt every run and set maxStalenessSeconds.",
+              "Define cards and modules for Reviews, Solve, and Prevent."
+            ],
+            "tags": [
+              "polymarket-bot-paper-first",
+              "contract-required"
+            ],
+            "footer": [
+              "Project: Polymarket Bot (paper-first)"
+            ],
+            "actions": [
+              {
+                "kind": "link",
+                "label": "Open Contract Guide",
+                "actionKey": "",
+                "command": "",
+                "href": "./docs/project-contract.md"
+              }
+            ]
+          }
+        ],
+        "replaceDefaultModules": false,
+        "contractFound": false,
+        "contractValid": false,
+        "contractSource": "",
+        "contractError": ""
+      }
+    ]
   }
 }

@@ -1,3 +1,7 @@
 .vercel
 .env.local
 .env.*.local
+runtime/
+control-plane/node_modules/
+control-plane/.env
+control-plane/.env.local

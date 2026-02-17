@@ -1223,7 +1223,7 @@
       </section>
     </main>
 
-    <div class="footer">Snapshot source: <code>snapshot.json</code> | Keyboard: <code>R</code> refresh, <code>A</code> auto-refresh</div>
+    <div id="dataSourceFooter" class="footer">Data source: <code>/api/state</code> | Stream: <code>/api/stream</code> | Keyboard: <code>R</code> refresh, <code>A</code> auto-refresh</div>
   </div>
 
   <div id="toast" class="toast"></div>
@@ -1242,9 +1242,27 @@
       timezone: "America/New_York",
       calendarSource: "local-only",
       tasksSource: "local-only",
+      realtime: {
+        apiBaseUrl: "",
+        statePath: "/api/state",
+        streamPath: "/api/stream",
+        ingestPath: "/api/ingest",
+        fallbackSnapshotPath: "./snapshot.json",
+        transport: "sse",
+        freshnessSlo: {
+          staleAfterMissedHeartbeats: 2,
+          defaultHeartbeatIntervalSeconds: 600,
+          urgentHeartbeatIntervalSeconds: 60
+        },
+        incidentRouting: {
+          provider: "telegram-via-openclaw",
+          enabled: true,
+          target: "openclaw-notifier-agent"
+        }
+      },
       liveSync: {
         enabled: true,
-        cmd: "bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh",
+        cmd: "bash ./scripts_sync_snapshot.sh",
         intervalMs: 5000,
         streamWaitMs: 25000,
         streamPollMs: 1000
@@ -1257,6 +1275,27 @@
           owner: "James (Halldon)",
           priority: "P1",
           automationMode: "auto-fix-allowed",
+          commandCenter: {
+            contractPath: "/Users/j/Documents/Builds/Outreach/command-center/project_contract.json",
+            maxStalenessSeconds: 900
+          },
+          adapter: {
+            heartbeatIntervalSeconds: 600,
+            maxEventAgeSeconds: 1800,
+            requiredMetrics: ["queueDepth", "healthRows", "failingChecks"],
+            severityMap: {
+              ok: "ok",
+              warn: "warn",
+              critical: "critical",
+              stale: "critical"
+            },
+            runbookLinks: {
+              reviews: "./docs/operator-quickstart.md",
+              solve: "./docs/verification.md",
+              prevent: "./docs/project-contract.md",
+              rollback: "./docs/rollback.md"
+            }
+          },
           branchFlow: ["dev", "main"],
           metricsSource: "file+db",
           refreshCadence: "event-driven + cron",
@@ -1290,6 +1329,27 @@
           owner: "James",
           priority: "P1",
           automationMode: "auto-fix-allowed",
+          commandCenter: {
+            contractPath: "/Users/j/.openclaw/workspace/polymarket-bot/command-center/project_contract.json",
+            maxStalenessSeconds: 300
+          },
+          adapter: {
+            heartbeatIntervalSeconds: 60,
+            maxEventAgeSeconds: 300,
+            requiredMetrics: ["loopLatencyMs", "openPositions", "riskScore"],
+            severityMap: {
+              ok: "ok",
+              warn: "warn",
+              critical: "critical",
+              stale: "critical"
+            },
+            runbookLinks: {
+              reviews: "./docs/priority-model-v3.md",
+              solve: "./docs/verification.md",
+              prevent: "./docs/project-contract.md",
+              rollback: "./docs/rollback.md"
+            }
+          },
           branchFlow: ["main"],
           metricsSource: "db+file",
           refreshCadence: "loop poll ~2s + hourly scoreboard",
@@ -1345,6 +1405,18 @@
         timezone: raw.timezone || DEFAULT_OPERATOR_CONFIG.timezone,
         calendarSource: raw.calendarSource || DEFAULT_OPERATOR_CONFIG.calendarSource,
         tasksSource: raw.tasksSource || DEFAULT_OPERATOR_CONFIG.tasksSource,
+        realtime: {
+          ...DEFAULT_OPERATOR_CONFIG.realtime,
+          ...(raw.realtime || {}),
+          freshnessSlo: {
+            ...DEFAULT_OPERATOR_CONFIG.realtime.freshnessSlo,
+            ...((raw.realtime && raw.realtime.freshnessSlo) || {})
+          },
+          incidentRouting: {
+            ...DEFAULT_OPERATOR_CONFIG.realtime.incidentRouting,
+            ...((raw.realtime && raw.realtime.incidentRouting) || {})
+          }
+        },
         liveSync: {
           ...DEFAULT_OPERATOR_CONFIG.liveSync,
           ...(raw.liveSync || {})
@@ -1370,6 +1442,30 @@
       } catch {
         return state.operatorConfig || DEFAULT_OPERATOR_CONFIG;
       }
+    }
+
+    function trimTrailingSlash(value) {
+      return String(value || "").replace(/\/+$/, "");
+    }
+
+    function ensureLeadingSlash(value, fallback = "/") {
+      const text = String(value || "").trim();
+      if (!text) return fallback;
+      return text.startsWith("/") ? text : `/${text}`;
+    }
+
+    function realtimeEndpoints(config = state.operatorConfig) {
+      const rt = (config && config.realtime) || DEFAULT_OPERATOR_CONFIG.realtime;
+      const base = trimTrailingSlash(rt.apiBaseUrl || "");
+      const statePath = ensureLeadingSlash(rt.statePath, "/api/state");
+      const streamPath = ensureLeadingSlash(rt.streamPath, "/api/stream");
+      const fallbackSnapshotPath = String(rt.fallbackSnapshotPath || "./snapshot.json");
+      return {
+        base,
+        stateUrl: base ? `${base}${statePath}` : statePath,
+        streamUrl: base ? `${base}${streamPath}` : streamPath,
+        fallbackSnapshotPath
+      };
     }
 
     function isoAtHour(hour, minute) {
@@ -1853,6 +1949,66 @@
       return keys;
     }
 
+    function projectContractRows() {
+      return Array.isArray(state.data?.projectContracts?.projects) ? state.data.projectContracts.projects : [];
+    }
+
+    function projectContractMap() {
+      const map = new Map();
+      projectContractRows().forEach((row) => {
+        if (!row || typeof row !== "object") return;
+        const keys = [
+          row.projectId,
+          row.id,
+          row.slug,
+          row.name
+        ];
+        keys.forEach((value) => {
+          const key = slugify(value);
+          if (key && !map.has(key)) map.set(key, row);
+        });
+      });
+      return map;
+    }
+
+    function findProjectContract(projectLike, contracts = projectContractMap()) {
+      if (!projectLike) return null;
+      const keys = projectKeySet(projectLike);
+      keys.add(slugify(projectLike.id));
+      keys.add(slugify(projectLike.projectId));
+      keys.add(slugify(projectLike.name));
+      for (const key of keys) {
+        if (contracts.has(key)) return contracts.get(key);
+      }
+      return null;
+    }
+
+    function formatAgeSeconds(ageSeconds) {
+      const n = Number(ageSeconds);
+      if (!Number.isFinite(n) || n < 0) return "n/a";
+      if (n < 60) return `${Math.floor(n)}s`;
+      if (n < 3600) return `${Math.floor(n / 60)}m`;
+      if (n < 86400) return `${Math.floor(n / 3600)}h`;
+      return `${Math.floor(n / 86400)}d`;
+    }
+
+    function projectFreshnessLabel(project) {
+      const contract = project?.contract;
+      if (!contract) return "";
+      const ageText = formatAgeSeconds(contract.ageSeconds);
+      return contract.isStale ? `STALE ${ageText}` : `Fresh ${ageText}`;
+    }
+
+    function projectFreshnessClass(project) {
+      const contract = project?.contract;
+      if (!contract) return "status-unknown";
+      if (contract.isStale) return "status-alert";
+      const age = Number(contract.ageSeconds);
+      const max = Number(contract.maxStalenessSeconds);
+      if (Number.isFinite(age) && Number.isFinite(max) && max > 0 && age > max * 0.7) return "status-warn";
+      return "status-ok";
+    }
+
     function projectAction(project, key, fallbackLabel, fallbackCmd) {
       const actions = project?.config?.actions || {};
       const action = actions[key] || {};
@@ -2156,7 +2312,9 @@
       return state.renderedProjects.find((project) => project.id === projectId) || null;
     }
 
-    function deriveProjectStatus(type, fallbackStatus) {
+    function deriveProjectStatus(type, fallbackStatus, contract = null) {
+      if (contract?.isStale) return "stale";
+      if (contract?.status) return contract.status;
       if (type === "outreach") return state.data?.outreach?.telemetry?.overallStatus || fallbackStatus || "monitoring";
       if (type === "polymarket") {
         const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading");
@@ -2166,14 +2324,16 @@
       return fallbackStatus || "unknown";
     }
 
-    function deriveProjectLastUpdate(type, fallback) {
+    function deriveProjectLastUpdate(type, fallback, contract = null) {
+      if (contract?.generatedAt) return contract.generatedAt;
       if (type === "outreach") return state.data?.outreach?.snapshot?.generatedAt || state.data?.generatedAt || fallback;
       if (type === "polymarket") return state.data?.portfolioCommandView?.generatedAt || state.data?.generatedAt || fallback;
       if (type === "ops") return state.data?.generatedAt || fallback;
       return fallback || state.data?.generatedAt;
     }
 
-    function deriveProjectSummary(type, configuredSummary, fallbackSummary) {
+    function deriveProjectSummary(type, configuredSummary, fallbackSummary, contract = null) {
+      if (contract?.summary) return contract.summary;
       if (configuredSummary) return configuredSummary;
       if (fallbackSummary) return fallbackSummary;
       if (type === "outreach") {
@@ -2192,6 +2352,7 @@
     function buildProjects() {
       const snapshotProjects = [...(state.data?.projects || [])];
       const usedSnapshotIds = new Set();
+      const contracts = projectContractMap();
 
       const configured = configuredProjects().map((configProject) => {
         const configId = slugify(configProject.name);
@@ -2208,16 +2369,22 @@
         });
         const snapshotProject = matchIndex >= 0 ? snapshotProjects[matchIndex] : null;
         if (matchIndex >= 0) usedSnapshotIds.add(matchIndex);
+        const contract = findProjectContract({
+          ...configProject,
+          id: configId,
+          projectId: configId
+        }, contracts);
 
         return {
           id: configId,
           name: configProject.name,
           type: configType,
-          status: deriveProjectStatus(configType, snapshotProject?.status),
-          summary: deriveProjectSummary(configType, configProject.summary, snapshotProject?.summary),
-          lastUpdate: deriveProjectLastUpdate(configType, snapshotProject?.lastUpdate),
+          status: deriveProjectStatus(configType, snapshotProject?.status, contract),
+          summary: deriveProjectSummary(configType, configProject.summary, snapshotProject?.summary, contract),
+          lastUpdate: deriveProjectLastUpdate(configType, snapshotProject?.lastUpdate, contract),
           mode: normalizeMode(state.projectModes[configId] || state.globalMode),
-          config: configProject
+          config: configProject,
+          contract
         };
       });
 
@@ -2225,12 +2392,18 @@
         .filter((_, idx) => !usedSnapshotIds.has(idx))
         .map((project) => {
           const id = slugify(project.id || project.projectId || project.name) || uid("project");
+          const contract = findProjectContract({
+            ...project,
+            id,
+            projectId: id
+          }, contracts);
           return {
             ...project,
             id,
             type: project.type || projectTypeFromName(project.name),
             mode: normalizeMode(state.projectModes[id] || state.globalMode),
-            config: null
+            config: null,
+            contract
           };
         });
 
@@ -2356,9 +2529,43 @@
       }];
     }
 
+    function contractCardOverride(project, mode, modeText) {
+      const modeCards = project?.contract?.cards?.[mode];
+      if (!modeCards || typeof modeCards !== "object") return null;
+      const problem = (modeCards.problem && typeof modeCards.problem === "object") ? modeCards.problem : {};
+      const solution = (modeCards.solution && typeof modeCards.solution === "object") ? modeCards.solution : {};
+      const problemTitle = String(problem.title || "").trim();
+      const solutionTitle = String(solution.title || "").trim();
+      if (!problemTitle && !solutionTitle) return null;
+
+      return {
+        problem: {
+          title: problemTitle || "Problem context",
+          body: String(problem.body || "No problem detail provided by contract.").trim(),
+          tags: Array.isArray(problem.tags) && problem.tags.length ? problem.tags : [`mode ${mode}`],
+          impact: String(problem.impact || "Operator attention and delivery risk").trim(),
+          evidenceHref: String(problem.evidenceHref || `#project-${project.id}`).trim()
+        },
+        solution: {
+          title: solutionTitle || "Solution path",
+          body: String(solution.body || "No solution detail provided by contract.").trim(),
+          tags: Array.isArray(solution.tags) && solution.tags.length ? solution.tags : ["contract-defined"],
+          eta: String(solution.eta || (mode === "solve" ? "5 minutes to execute" : "5 minutes to queue")).trim(),
+          command: String(solution.command || "").trim(),
+          verifyHref: String(solution.verifyHref || "./docs/project-contract.md").trim(),
+          verifyLabel: String(solution.verifyLabel || "Check solution").trim()
+        },
+        meta: modeText
+      };
+    }
+
     function projectCards(project, mode) {
       const activeMode = normalizeMode(mode);
       const modeText = modePresentation(activeMode);
+      const contractOverride = contractCardOverride(project, activeMode, modeText);
+      if (contractOverride) {
+        return contractOverride;
+      }
 
       if (project.type === "outreach") {
         const senders = state.data?.outreach?.senderStoplights?.senders || [];
@@ -2545,6 +2752,74 @@
       return `<button class="tiny-btn queue-command" data-action-key="${esc(actionKey)}" data-label="${esc(label)}" data-command="${esc(command)}"${projectAttrs}>${esc(label)}</button>`;
     }
 
+    function renderContractModuleAction(project, rawAction, mode) {
+      const kind = String(rawAction?.kind || "queue").toLowerCase();
+      const href = String(rawAction?.href || "").trim();
+      const actionKey = String(rawAction?.actionKey || "verify").trim();
+      const fallbackLabel = String(rawAction?.label || fallbackActionLabel(project, actionKey, mode) || "Action").trim();
+      const action = projectAction(project, actionKey, fallbackLabel, fallbackActionCommand(project, actionKey));
+      const command = String(rawAction?.command || action.cmd || "").trim();
+      const hydratedAction = {
+        key: actionKey,
+        label: fallbackLabel,
+        cmd: command,
+        classification: action.classification || "internal_safe"
+      };
+
+      if (kind === "link" && href) {
+        return `<a class="tiny-btn" href="${esc(href)}" target="_blank" rel="noopener">${esc(fallbackLabel)}</a>`;
+      }
+      if (kind === "copy") {
+        return renderActionButton(project, hydratedAction, "copy", fallbackLabel);
+      }
+      if (kind === "go-live" || actionKey === "go_live") {
+        return renderActionButton(project, hydratedAction, "go-live", fallbackLabel);
+      }
+      return renderActionButton(project, hydratedAction, "queue", fallbackLabel);
+    }
+
+    function renderContractModules(project, mode) {
+      const modules = Array.isArray(project?.contract?.modules) ? project.contract.modules : [];
+      const activeMode = normalizeMode(mode);
+      const filtered = modules.filter((module) => {
+        if (!module || typeof module !== "object") return false;
+        const modes = Array.isArray(module.modes) ? module.modes : [];
+        return !modes.length || modes.includes(activeMode);
+      });
+      if (!filtered.length) return "";
+
+      return filtered.map((module) => {
+        const stats = Array.isArray(module.stats) ? module.stats : [];
+        const items = Array.isArray(module.items) ? module.items : [];
+        const tags = Array.isArray(module.tags) ? module.tags : [];
+        const footer = Array.isArray(module.footer) ? module.footer : [];
+        const actions = Array.isArray(module.actions) ? module.actions : [];
+        const statsHtml = stats.length ? `
+          <div class="module-kv">
+            ${stats.map((stat) => `<div><b>${esc(stat.label || "Metric")}</b><span>${esc(stat.value ?? "n/a")}</span></div>`).join("")}
+          </div>
+        ` : "";
+        const itemsHtml = items.length ? `<ul class="mini-list">${items.map((item) => `<li>${esc(item)}</li>`).join("")}</ul>` : "";
+        const tagsHtml = tags.length ? `<div class="tag-row">${tags.map((tag) => `<span class="tag">${esc(tag)}</span>`).join("")}</div>` : "";
+        const footerHtml = footer.length ? `<ul class="mini-list">${footer.map((row) => `<li>${esc(row)}</li>`).join("")}</ul>` : "";
+        const actionsHtml = actions.length
+          ? `<div class="pro-actions">${actions.map((action) => renderContractModuleAction(project, action, activeMode)).join("")}</div>`
+          : "";
+
+        return `
+          <article class="module-card contract-module">
+            <h4>${esc(module.title || "Project Module")}</h4>
+            ${module.description ? `<p>${esc(module.description)}</p>` : ""}
+            ${statsHtml}
+            ${itemsHtml}
+            ${tagsHtml}
+            ${actionsHtml}
+            ${footerHtml}
+          </article>
+        `;
+      }).join("");
+    }
+
     function renderReviewQueueModule(project) {
       const reviewItems = deriveProjectReviewItems(project);
       const promotion = projectPromotionStep(project);
@@ -2594,6 +2869,8 @@
 
     function renderOutreachModules(project, mode) {
       const activeMode = normalizeMode(mode);
+      const contractModulesHtml = renderContractModules(project, activeMode);
+      const replaceDefaultModules = Boolean(contractModulesHtml && project?.contract?.replaceDefaultModules);
       const snapshot = state.data?.outreach?.snapshot || {};
       const telemetry = state.data?.outreach?.telemetry || {};
       const stoplights = state.data?.outreach?.senderStoplights?.senders || [];
@@ -2657,8 +2934,13 @@
           ];
       const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
 
+      if (replaceDefaultModules) {
+        return `${reviewModule}${contractModulesHtml}`;
+      }
+
       return `
         ${reviewModule}
+        ${contractModulesHtml}
         <article class="module-card" id="module-outreach-${esc(project.id)}">
           <h4>Outreach Health</h4>
           <p>Queue pressure, telemetry freshness, and sender condition.</p>
@@ -2699,6 +2981,8 @@
 
     function renderPolymarketModules(project, mode) {
       const activeMode = normalizeMode(mode);
+      const contractModulesHtml = renderContractModules(project, activeMode);
+      const replaceDefaultModules = Boolean(contractModulesHtml && project?.contract?.replaceDefaultModules);
       const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading") || {};
       const scenario = state.data?.scenarioSimulator || {};
       const reliability = state.data?.reliabilityRadar?.signals || [];
@@ -2749,8 +3033,13 @@
           ];
       const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
 
+      if (replaceDefaultModules) {
+        return `${reviewModule}${contractModulesHtml}`;
+      }
+
       return `
         ${reviewModule}
+        ${contractModulesHtml}
         <article class="module-card">
           <h4>Trading Domain Pulse</h4>
           <p>${esc(domain.note || "Trading telemetry not present in this snapshot.")}</p>
@@ -2789,6 +3078,8 @@
 
     function renderOpsModules(project, mode) {
       const activeMode = normalizeMode(mode);
+      const contractModulesHtml = renderContractModules(project, activeMode);
+      const replaceDefaultModules = Boolean(contractModulesHtml && project?.contract?.replaceDefaultModules);
       const controls = state.data?.decisionConsole?.controls || [];
       const trustChecks = state.data?.trustSecurity?.secretHealth?.checks || [];
       const blast = state.data?.trustSecurity?.blastRadiusPreview || [];
@@ -2854,8 +3145,13 @@
           : "Queue recurring trust checks and rollback templates before incidents.";
       const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
 
+      if (replaceDefaultModules) {
+        return `${reviewModule}${contractModulesHtml}`;
+      }
+
       return `
         ${reviewModule}
+        ${contractModulesHtml}
         <article class="module-card">
           <h4>Decision Controls</h4>
           <p>Queue, validate, then promote to live mode.</p>
@@ -2893,6 +3189,8 @@
 
     function renderGenericModules(project, mode) {
       const activeMode = normalizeMode(mode);
+      const contractModulesHtml = renderContractModules(project, activeMode);
+      const replaceDefaultModules = Boolean(contractModulesHtml && project?.contract?.replaceDefaultModules);
       const updates = projectUpdates(project.name);
       const signals = state.data?.reliabilityRadar?.signals || [];
       const backburner = state.data?.backburner || [];
@@ -2961,8 +3259,13 @@
             ];
       const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
 
+      if (replaceDefaultModules) {
+        return `${reviewModule}${contractModulesHtml}`;
+      }
+
       return `
         ${reviewModule}
+        ${contractModulesHtml}
         <article class="module-card">
           <h4>Project Pulse</h4>
           <p>Recent updates connected to this mission.</p>
@@ -3029,6 +3332,14 @@
       const projectMeta2 = project.config
         ? `${project.config.metricsSource || "metrics n/a"} | ${project.config.refreshCadence || "cadence n/a"}`
         : "";
+      const freshnessLabel = projectFreshnessLabel(project);
+      const contractNote = project.contract
+        ? (
+          project.contract.contractFound
+            ? (project.contract.contractSource ? `Contract: ${project.contract.contractSource}` : "Contract: configured")
+            : "Contract: fallback (missing project contract file)"
+        )
+        : "";
       const primaryAttrs = [
         `class="go-live-btn ${esc(primaryAction.triggerClass)}"`,
         `data-project-id="${esc(project.id)}"`,
@@ -3058,7 +3369,9 @@
             </div>
             <div>
               <span class="status-chip ${statusClass(project.status)}">${esc(project.status || "unknown")}</span>
+              ${freshnessLabel ? `<span class="status-chip ${projectFreshnessClass(project)}" style="margin-left:6px;">${esc(freshnessLabel)}</span>` : ""}
               <div class="tiny-note" style="margin-top:6px;">Updated ${esc(relTime(project.lastUpdate))}</div>
+              ${contractNote ? `<div class="tiny-note">${esc(contractNote)}</div>` : ""}
             </div>
           </div>
           <div class="mode-switch project-mode">
@@ -3209,6 +3522,7 @@
       const tz = state.operatorConfig?.timezone || "America/New_York";
       const calendarSource = state.operatorConfig?.calendarSource || "local-only";
       const tasksSource = state.operatorConfig?.tasksSource || "local-only";
+      const endpoints = realtimeEndpoints(state.operatorConfig);
       stamp.textContent = generatedAt
         ? `Generated ${generatedAt} (${relTime(generatedAt)}) | Schema ${schema} | TZ ${tz} | Calendar ${calendarSource} | Tasks ${tasksSource}`
         : "Snapshot unavailable";
@@ -3219,6 +3533,10 @@
       document.getElementById("execPill").textContent = `Exec: ${state.execToken ? "ARMED" : "LOCKED"}`;
       document.getElementById("autoRefreshBtn").textContent = `Polling ${state.autoRefresh ? "ON" : "OFF"}`;
       updateStreamPill();
+      const footer = document.getElementById("dataSourceFooter");
+      if (footer) {
+        footer.innerHTML = `Data source: <code>${esc(endpoints.stateUrl)}</code> | Stream: <code>${esc(endpoints.streamUrl)}</code> | Keyboard: <code>R</code> refresh, <code>A</code> auto-refresh`;
+      }
 
       document.querySelectorAll("[data-global-mode]").forEach((btn) => {
         btn.classList.toggle("active", btn.getAttribute("data-global-mode") === state.globalMode);
@@ -3228,12 +3546,16 @@
     function renderMissionMetrics() {
       const proactive = deriveProactiveItems(state.globalMode);
       const activeProjects = buildProjects().length;
+      const staleContracts = Number(state.data?.projectContracts?.staleCount || 0);
+      const contractProjects = Number(state.data?.projectContracts?.projectCount || 0);
       const queueItems = state.data?.attentionQueue?.summary?.total || 0;
       const openTodos = state.todos.filter((todo) => !todo.done).length;
       const nextAppointment = upcomingAppointments().find((item) => new Date(item.when).getTime() >= Date.now()) || upcomingAppointments()[0];
 
       document.getElementById("mActiveProjects").textContent = String(activeProjects);
-      document.getElementById("mActiveProjectsSub").textContent = `${state.data?.headline?.globalStatus || "monitoring"} global health`;
+      document.getElementById("mActiveProjectsSub").textContent = staleContracts
+        ? `${staleContracts} stale contracts | ${state.data?.headline?.globalStatus || "monitoring"} global health`
+        : `${state.data?.headline?.globalStatus || "monitoring"} global health`;
 
       document.getElementById("mOpenTasks").textContent = String(openTodos + queueItems);
       document.getElementById("mOpenTasksSub").textContent = `${openTodos} personal tasks | ${queueItems} attention items`;
@@ -3242,7 +3564,7 @@
       document.getElementById("mNextAppointmentSub").textContent = nextAppointment ? nextAppointment.title : "No upcoming events";
 
       document.getElementById("mAutonomous").textContent = String(proactive.length);
-      document.getElementById("mAutonomousSub").textContent = state.operatorConfig?.securityRules?.autoFixScope || "OpenClaw proactive opportunities";
+      document.getElementById("mAutonomousSub").textContent = `${state.operatorConfig?.securityRules?.autoFixScope || "OpenClaw proactive opportunities"} | contracts ${contractProjects}`;
     }
 
     function setupRevealObserver() {
@@ -3289,9 +3611,14 @@
       const sync = state.stream.lastSyncMeta || {};
       const syncError = String(sync.lastError || "");
       const staleSec = Number(sync.snapshotStalenessSec);
+      const staleContracts = Number(sync.projectContractStaleCount);
       if (state.stream.connected) {
         if (syncError) {
           pill.textContent = `Stream: ON | Sync error`;
+          return;
+        }
+        if (Number.isFinite(staleContracts) && staleContracts > 0) {
+          pill.textContent = `Stream: ON | ${staleContracts} project stale`;
           return;
         }
         if (Number.isFinite(staleSec) && staleSec > 300) {
@@ -3304,27 +3631,45 @@
       pill.textContent = "Stream: RECONNECTING";
     }
 
-    async function loadSnapshot() {
-      const response = await fetch(`./snapshot.json?ts=${Date.now()}`);
-      if (!response.ok) throw new Error("snapshot fetch failed");
+    async function loadCentralState(config) {
+      const endpoints = realtimeEndpoints(config);
+      const response = await fetch(`${endpoints.stateUrl}?ts=${Date.now()}`);
+      if (!response.ok) throw new Error(`state fetch failed (${response.status})`);
+      const payload = await response.json();
+      if (payload && typeof payload === "object" && payload._meta) {
+        state.stream.lastSnapshotVersion = String(payload._meta.version || payload.generatedAt || "");
+      }
+      return payload;
+    }
+
+    async function loadFallbackSnapshot(config) {
+      const endpoints = realtimeEndpoints(config);
+      const response = await fetch(`${endpoints.fallbackSnapshotPath}?ts=${Date.now()}`);
+      if (!response.ok) throw new Error("fallback snapshot fetch failed");
       return response.json();
     }
 
     async function refresh() {
-      const [snapshotResult, configResult] = await Promise.allSettled([loadSnapshot(), loadOperatorConfig()]);
-      if (configResult.status === "fulfilled") {
-        state.operatorConfig = configResult.value;
-      }
-      if (snapshotResult.status === "fulfilled") {
-        state.data = snapshotResult.value;
-        const initialVersion = String(state.data?.generatedAt || "");
+      const config = await loadOperatorConfig();
+      state.operatorConfig = config;
+
+      try {
+        const payload = await loadCentralState(config);
+        state.data = payload;
+        const initialVersion = String(payload?._meta?.version || payload?.generatedAt || "");
         if (initialVersion && !state.stream.lastSnapshotVersion) {
           state.stream.lastSnapshotVersion = initialVersion;
         }
-      } else {
-        console.error(snapshotResult.reason);
-        showToast("Snapshot unavailable");
-        if (!state.data) state.data = {};
+      } catch (primaryError) {
+        console.error(primaryError);
+        try {
+          state.data = await loadFallbackSnapshot(config);
+          showToast("Using snapshot fallback (state API unavailable)");
+        } catch (fallbackError) {
+          console.error(fallbackError);
+          showToast("State unavailable");
+          if (!state.data) state.data = {};
+        }
       }
       renderAll();
       await fetchExecutionHistory();
@@ -3350,7 +3695,8 @@
       }
 
       state.stream.enabled = true;
-      const source = new EventSource("/api/stream");
+      const endpoints = realtimeEndpoints(state.operatorConfig);
+      const source = new EventSource(endpoints.streamUrl);
       state.stream.source = source;
       updateStreamPill();
 

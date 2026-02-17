@@ -1,11 +1,4 @@
-const fs = require('fs');
-const path = require('path');
-
-function readSnapshot() {
-  const snapshotPath = path.join(process.cwd(), 'snapshot.json');
-  const raw = fs.readFileSync(snapshotPath, 'utf8');
-  return JSON.parse(raw);
-}
+const { readPublishedState } = require('./_central_state');
 
 function tools() {
   return [
@@ -38,6 +31,17 @@ function tools() {
       input_schema: { type: 'object', properties: {} }
     },
     {
+      name: 'get_project_contracts',
+      description: 'Return per-project contract freshness, status, cards, and dynamic modules.',
+      input_schema: {
+        type: 'object',
+        properties: {
+          stale_only: { type: 'boolean' },
+          limit: { type: 'number' }
+        }
+      }
+    },
+    {
       name: 'search_alerts',
       description: 'Search explainability/reliability items by keyword.',
       input_schema: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] }
@@ -66,6 +70,20 @@ function callTool(name, args = {}, s) {
     }
     case 'get_focus_mode':
       return s.personalFocusMode || { mode: 'normal' };
+    case 'get_project_contracts': {
+      const root = s.projectContracts || {};
+      const rows = Array.isArray(root.projects) ? root.projects : [];
+      const staleOnly = Boolean(args.stale_only);
+      const limit = Math.max(1, Math.min(Number(args.limit || 50), 200));
+      const filtered = staleOnly ? rows.filter((row) => row && row.isStale) : rows;
+      return {
+        generatedAt: root.generatedAt || null,
+        staleCount: root.staleCount ?? null,
+        projectCount: root.projectCount ?? rows.length,
+        expectedProjectCount: root.expectedProjectCount ?? null,
+        projects: filtered.slice(0, limit)
+      };
+    }
     case 'search_alerts': {
       const q = String(args.query || '').toLowerCase();
       const ex = s.explainability?.items || [];
@@ -92,7 +110,8 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(204).end();
 
   try {
-    const snapshot = readSnapshot();
+    const published = readPublishedState();
+    const snapshot = published.state || {};
 
     if (req.method === 'GET') {
       return res.status(200).json({

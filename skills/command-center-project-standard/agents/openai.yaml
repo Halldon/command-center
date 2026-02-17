@@ -1,0 +1,3 @@
+display_name: Command Center Standard
+short_description: Standardize a project for Command Center realtime ingest/state architecture.
+default_prompt: Bootstrap this project with Command Center adapter contract, OpenClaw HEARTBEAT/CONSTITUTION/SOUL files, and CloudEvents ingest compatibility.

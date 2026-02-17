@@ -1,0 +1,28 @@
+app = "command-center-control-plane"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[deploy]
+  release_command = "node scripts/migrate.js"
+
+[env]
+  PORT = "4190"
+  COMMAND_CENTER_STREAM_WAIT_MS = "25000"
+  COMMAND_CENTER_STREAM_POLL_MS = "1000"
+  COMMAND_CENTER_HEARTBEAT_EVAL_INTERVAL_MS = "30000"
+  COMMAND_CENTER_STALE_AFTER_MISSED_HEARTBEATS = "2"
+
+[http_service]
+  internal_port = 4190
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

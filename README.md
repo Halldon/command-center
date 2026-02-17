@@ -1,166 +1,154 @@
-# Command Center App (Operator Edition)
+# Command Center
 
-Static Vercel app powered by deterministic snapshot artifacts generated in:
+Realtime command center with:
+- central ingest/state/stream architecture
+- strict freshness SLOs (stale after missed heartbeats)
+- fail-closed ingest + publish gates
+- project-specific dynamic cards/modules
 
-- `/Users/j/.openclaw/workspace/ops/scripts`
-- `/Users/j/.openclaw/workspace/ops/output/command_center`
+## Primary architecture
 
-## Operator Config
+1. **OpenClaw project agents** emit CloudEvents to ingest API.
+2. **Control plane (Fly + Postgres)** validates adapters, enforces idempotency, writes durable state.
+3. **UI** reads from centralized `/api/state` and `/api/stream` (SSE).
+4. **GitHub Actions snapshot sync** is backup reporting/publishing, not primary realtime transport.
 
-Project commands, ownership, priority, data source metadata, and live-action security policy are defined in:
+Reference:
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/control-plane-architecture.md`
 
+## Repo layout
+
+- UI app + transitional local APIs:
+  - `/Users/jameshalldon/Documents/Builds/Command Center/index.html`
+  - `/Users/jameshalldon/Documents/Builds/Command Center/api/state.js`
+  - `/Users/jameshalldon/Documents/Builds/Command Center/api/stream.js`
+  - `/Users/jameshalldon/Documents/Builds/Command Center/api/ingest.js`
+- Fly/Postgres control plane service:
+  - `/Users/jameshalldon/Documents/Builds/Command Center/control-plane`
+- OpenClaw standards/templates:
+  - `/Users/jameshalldon/Documents/Builds/Command Center/templates/openclaw`
+  - `/Users/jameshalldon/Documents/Builds/Command Center/scripts/bootstrap_openclaw_project.py`
+  - `/Users/jameshalldon/Documents/Builds/Command Center/skills/command-center-project-standard/SKILL.md`
+
+## Operator config
+
+All project + realtime contracts live in:
 - `/Users/jameshalldon/Documents/Builds/Command Center/operator.config.json`
 
-Update this file to add new projects or change health/verify/go-live/rollback command mappings.
-If you want Reviews-mode branch promotion, add `branchFlow` per project (example: `["dev","main"]`).
+Important sections:
+- `realtime`: API base/paths, freshness SLO, incident routing
+- `projects[].adapter`: heartbeat cadence, required metrics, severity map, runbooks
+- `projects[].actions`: execution allowlist for `/api/execute`
 
-## Authenticated Execution Endpoint
+## Control plane (Fly + Postgres)
 
-Live command execution is available at:
-
-- `/api/execute`
-
-Requirements:
-
-1. Set `COMMAND_CENTER_EXEC_TOKEN` in runtime environment (local shell or Vercel env vars).
-2. Send token as `X-Command-Center-Token` header.
-3. Use `projectId` + `actionKey` only. Commands are resolved from `operator.config.json` allowlist.
-
-Example (dry-run preview):
+### Local bootstrap
 
 ```bash
-curl -s http://localhost:4173/api/execute \
-  -H "content-type: application/json" \
-  -H "x-command-center-token: $COMMAND_CENTER_EXEC_TOKEN" \
-  -d '{"projectId":"outreach-pipeline","actionKey":"go_live","actor":"James","confirmed":true,"dryRun":true}' | jq
+cd /Users/jameshalldon/Documents/Builds/Command\ Center/control-plane
+npm install
+npm run migrate
+npm run sync:adapters
+npm run dev
 ```
 
-Notes:
-
-- External irreversible actions require `confirmed: true`.
-- Long-running paper-mode loop commands are started in background mode.
-- Execution audit is appended to `runtime/exec_audit.jsonl` when writable.
-- `promote_review` is a built-in action key. It validates and merges one branch step from `branchFlow` (for example `dev -> main`) and requires `confirmed: true`.
-
-## Live Updates (no manual refresh)
-
-The UI now uses a stream-first model:
-
-- `/api/stream` long-polls and pushes snapshot changes continuously.
-- Polling is fallback only (toggle in UI).
-- Stream includes sync/staleness metadata so stuck pipelines are visible.
-
-Optional auto-sync is controlled by `operator.config.json > liveSync` and env vars:
-
-- `COMMAND_CENTER_AUTO_SYNC` (`true`/`false`)
-- `COMMAND_CENTER_LIVE_SYNC_CMD` (override sync command)
-- `COMMAND_CENTER_SYNC_INTERVAL_MS`
-- `COMMAND_CENTER_STREAM_WAIT_MS`
-- `COMMAND_CENTER_STREAM_POLL_MS`
-- `COMMAND_CENTER_SYNC_TIMEOUT_MS`
-- `COMMAND_CENTER_SYNC_FAILURE_BACKOFF_MS`
-- `COMMAND_CENTER_FORCE_SYNC_WITHOUT_WATCH_PATHS` (`true` to run sync command even when watch paths are unresolved)
-- `COMMAND_CENTER_OPS_ROOT`
-- `COMMAND_CENTER_SOURCE_SNAPSHOT`
-- `COMMAND_CENTER_TARGET_SNAPSHOT`
-- `COMMAND_CENTER_MAX_SNAPSHOT_AGE_MINUTES` (freshness gate, default `30`)
-- `COMMAND_CENTER_MAX_OUTREACH_SNAPSHOT_AGE_MINUTES` (default `90`)
-- `COMMAND_CENTER_MAX_OUTREACH_TELEMETRY_AGE_MINUTES` (default `90`)
-- `COMMAND_CENTER_MIN_OUTREACH_HEALTH_ROWS` (default `1`)
-
-History retrieval:
+### Fly deploy
 
 ```bash
-curl -s http://localhost:4173/api/execute \
-  -H "content-type: application/json" \
-  -H "x-command-center-token: $COMMAND_CENTER_EXEC_TOKEN" \
-  -d '{"action":"history","limit":25}' | jq
+cd /Users/jameshalldon/Documents/Builds/Command\ Center/control-plane
+fly launch --no-deploy
+fly secrets set DATABASE_URL=postgres://...
+fly deploy
 ```
 
-## Build + Sync Snapshot
+### CI automation
 
-```bash
-bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh
+Added workflows:
+- `/Users/jameshalldon/Documents/Builds/Command Center/.github/workflows/control-plane-deploy.yml`
+- `/Users/jameshalldon/Documents/Builds/Command Center/.github/workflows/control-plane-sync-adapters.yml`
+
+Required GitHub secrets:
+- `FLY_API_TOKEN`
+- `CONTROL_PLANE_MPG_CLUSTER_ID`
+
+### Endpoints
+
+- `POST /api/ingest`: CloudEvents ingest (idempotency + adapter enforcement)
+- `GET /api/state`: centralized materialized state
+- `GET /api/stream`: SSE updates
+- `GET /health`
+
+## UI runtime
+
+The UI is stream-first and reads realtime state from configured endpoints in `operator.config.json > realtime`.
+
+Set this after control-plane deploy:
+
+```json
+{
+  "realtime": {
+    "apiBaseUrl": "https://<your-control-plane>.fly.dev",
+    "statePath": "/api/state",
+    "streamPath": "/api/stream",
+    "ingestPath": "/api/ingest"
+  }
+}
 ```
 
-`scripts_sync_snapshot.sh` supports 3 modes (in this order):
-
-1. `COMMAND_CENTER_LIVE_SYNC_CMD` (custom command)
-2. local OPS build via `COMMAND_CENTER_OPS_ROOT`
-3. pull from `COMMAND_CENTER_SNAPSHOT_SOURCE_URL`
-
-It also enforces a freshness gate (fail-closed) after sync/fetch:
-- snapshot timestamp must be recent
-- outreach snapshot timestamp must be recent
-- outreach telemetry timestamp must be recent
-- outreach `healthRows` must be >= configured minimum
-
-If the gate fails, the sync step exits non-zero so stale data cannot silently deploy.
-
-## GitHub Actions Auto Sync (recommended)
-
-Workflow file: `.github/workflows/snapshot-sync.yml`
-
-It runs every 15 minutes + manual dispatch, updates `snapshot.json`, and commits only when changed.
-
-### Required setup (GitHub repo settings)
-
-- **Secrets**
-  - `COMMAND_CENTER_SNAPSHOT_SOURCE_URL` (recommended): URL that returns the latest snapshot JSON.
-    - If auth is required, you can encode header in the same secret:
-      - `https://api.example.com/snapshot||Authorization: Bearer <token>`
-    - Or include token in query string directly if your API supports it.
-  - Optional: `COMMAND_CENTER_LIVE_SYNC_CMD` (advanced/custom runner command).
-- **Variables**
-  - Optional: `COMMAND_CENTER_OPS_ROOT` (default `/Users/j/.openclaw/workspace/ops`).
-
-### Trigger manually
+Local UI smoke:
 
 ```bash
-gh workflow run "Snapshot Sync" --repo Halldon/command-center
-```
-
-### Check recent runs
-
-```bash
-gh run list --repo Halldon/command-center --workflow "Snapshot Sync" --limit 10
-```
-
-## Local Smoke
-
-```bash
-cd /Users/j/.openclaw/workspace/command-center-app
+cd /Users/jameshalldon/Documents/Builds/Command\ Center
 python3 -m http.server 4173
-# open http://localhost:4173
 ```
 
-## Deploy
+## OpenClaw standardization
+
+Generate required files for any project:
 
 ```bash
-cd /Users/j/.openclaw/workspace/command-center-app
-vercel --prod
+python3 /Users/jameshalldon/Documents/Builds/Command\ Center/scripts/bootstrap_openclaw_project.py \
+  --repo-path "/path/to/project" \
+  --project-name "My Project" \
+  --project-type "outreach" \
+  --owner "James" \
+  --priority "P1"
 ```
 
-## WebMCP-lite Endpoint (new)
+Generated:
+- `openclaw/HEARTBEAT.md`
+- `openclaw/CONSTITUTION.md`
+- `openclaw/SOUL.md`
+- `command-center/project_adapter.json`
+- `command-center/project_contract.json`
 
-A lightweight read-only structured tools endpoint is now available for agent/browser integrations:
-
-- Discovery: `/.well-known/webmcp.json`
-- API: `/api/webmcp`
-
-Example:
+Install Codex skill for repeatable use:
 
 ```bash
-curl -s https://command-center-app.vercel.app/api/webmcp | jq
-curl -s https://command-center-app.vercel.app/api/webmcp \
-  -H 'content-type: application/json' \
-  -d '{"action":"call_tool","name":"get_attention_queue","arguments":{"limit":5}}' | jq
+bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts/install_codex_command_center_skill.sh
 ```
 
-> Current mode is read-only and unauthenticated. Add auth before broad/public usage.
+## Backup snapshot pipeline (secondary)
 
-Docs:
-- `docs/implementation-summary.md`
-- `docs/operator-quickstart.md`
-- `docs/rollback.md`
-- `docs/verification.md`
+Snapshot sync script remains available:
+
+```bash
+bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts_sync_snapshot.sh
+```
+
+This is backup/reporting only. Realtime authority is central ingest/state APIs.
+
+## Existing execution endpoint
+
+`/api/execute` remains action allowlisted and token-gated for project commands.
+
+Set token:
+- `COMMAND_CENTER_EXEC_TOKEN`
+
+## Key docs
+
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/control-plane-architecture.md`
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/codex-claude-openclaw-orchestration.md`
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/project-contract.md`
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/openclaw-agent-standards.md`
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/openclaw-command-center-bootstrap-prompt.md`

@@ -1,0 +1,76 @@
+name: Control Plane Sync Adapters
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'operator.config.json'
+      - 'control-plane/scripts/sync-adapters-from-operator-config.js'
+      - 'control-plane/src/config.js'
+      - '.github/workflows/control-plane-sync-adapters.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: control-plane-sync-adapters
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: control-plane
+    env:
+      FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      CONTROL_PLANE_MPG_CLUSTER_ID: ${{ secrets.CONTROL_PLANE_MPG_CLUSTER_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Fly secrets are configured
+        run: |
+          if [ -z "${FLY_API_TOKEN}" ]; then
+            echo "Missing required secret: FLY_API_TOKEN"
+            exit 1
+          fi
+          if [ -z "${CONTROL_PLANE_MPG_CLUSTER_ID}" ]; then
+            echo "Missing required secret: CONTROL_PLANE_MPG_CLUSTER_ID"
+            exit 1
+          fi
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+          cache-dependency-path: control-plane/package-lock.json
+
+      - name: Setup Flyctl
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build proxied DATABASE_URL
+        run: |
+          flyctl mpg proxy "${CONTROL_PLANE_MPG_CLUSTER_ID}" -p 15432 >/tmp/fly-mpg-proxy.log 2>&1 &
+          sleep 3
+          CREDS_JSON="$(flyctl mpg status "${CONTROL_PLANE_MPG_CLUSTER_ID}" --json | jq -c '.credentials')"
+          DB_USER="$(echo "${CREDS_JSON}" | jq -r '.user')"
+          DB_PASS="$(echo "${CREDS_JSON}" | jq -r '.password')"
+          DB_NAME="$(echo "${CREDS_JSON}" | jq -r '.dbname')"
+          if [ -z "${DB_USER}" ] || [ "${DB_USER}" = "null" ]; then
+            echo "Failed to read MPG credentials"
+            exit 1
+          fi
+          echo "DATABASE_URL=postgresql://${DB_USER}:${DB_PASS}@127.0.0.1:15432/${DB_NAME}" >> "$GITHUB_ENV"
+
+      - name: Apply schema (idempotent)
+        run: npm run migrate
+
+      - name: Sync adapters from operator config
+        run: npm run sync:adapters

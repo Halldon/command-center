@@ -1,37 +1,51 @@
 # Rollback Instructions
 
-## Fast rollback (UI + snapshot)
+## 1) Soft rollback (no code revert)
+
+If control plane is unhealthy, temporarily run UI in snapshot fallback mode:
+
+1. In `operator.config.json`, set:
+   - `realtime.apiBaseUrl` to `""` (or a healthy endpoint)
+2. Ensure `realtime.fallbackSnapshotPath` points to a valid local snapshot.
+3. Run:
 
 ```bash
-cd /Users/j/.openclaw/workspace/command-center-app
-git checkout -- index.html snapshot.json README.md scripts_sync_snapshot.sh docs/
+bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts_sync_snapshot.sh
 ```
 
-Then redeploy:
+This keeps operators unblocked while preserving realtime architecture for recovery.
+
+## 2) Control-plane rollback
+
+If a new control-plane deploy is bad:
+
+1. Roll back Fly app to previous release.
+2. Re-run adapter sync:
 
 ```bash
-vercel --prod
+cd /Users/jameshalldon/Documents/Builds/Command\ Center/control-plane
+npm run sync:adapters
 ```
 
-## Snapshot pipeline rollback
-
-If new schema generation causes issues:
+3. Verify:
 
 ```bash
-# restore prior script versions from your VCS history if available
-# then rebuild + sync
-python3 /Users/j/.openclaw/workspace/ops/scripts/build_command_center_snapshot.py
-cp /Users/j/.openclaw/workspace/ops/output/command_center/snapshot.json /Users/j/.openclaw/workspace/command-center-app/snapshot.json
+curl -s http://localhost:4190/health
+curl -s http://localhost:4190/api/state | head -n 40
 ```
 
-## Safe-operating fallback
+## 3) Snapshot pipeline fallback (backup only)
 
-If uncertain, keep console actions in dry-run mode only:
-- Use Decision Console queue/copy actions without executing.
-- Validate snapshot freshness and critical alerts before applying any recovery commands.
+If ingest remains unavailable:
 
-## Verification after rollback
+```bash
+bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts_sync_snapshot.sh
+```
 
-- Open app and confirm no JS errors.
-- Confirm `snapshot.json` renders KPI row + project cards.
-- Confirm deploy URL serves expected (older) view.
+Use this as temporary backup transport only.
+
+## 4) Safety posture during rollback
+
+- Keep irreversible actions gated by explicit confirmation.
+- Prefer diagnostics/verify/rollback actions while incident is open.
+- Keep incident feed visible until stale/critical items clear.

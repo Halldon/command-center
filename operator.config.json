@@ -2,9 +2,27 @@
   "timezone": "America/New_York",
   "calendarSource": "local-only",
   "tasksSource": "local-only (OpenClaw cron + local project scripts/runtime artifacts)",
+  "realtime": {
+    "apiBaseUrl": "https://command-center-control-plane.fly.dev",
+    "statePath": "/api/state",
+    "streamPath": "/api/stream",
+    "ingestPath": "/api/ingest",
+    "fallbackSnapshotPath": "./snapshot.json",
+    "transport": "sse",
+    "freshnessSlo": {
+      "staleAfterMissedHeartbeats": 2,
+      "defaultHeartbeatIntervalSeconds": 600,
+      "urgentHeartbeatIntervalSeconds": 60
+    },
+    "incidentRouting": {
+      "provider": "telegram-via-openclaw",
+      "enabled": true,
+      "target": "openclaw-notifier-agent"
+    }
+  },
   "liveSync": {
     "enabled": true,
-    "cmd": "bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh",
+    "cmd": "bash ./scripts_sync_snapshot.sh",
     "intervalMs": 5000,
     "streamWaitMs": 25000,
     "streamPollMs": 1000,
@@ -22,6 +40,31 @@
       "owner": "James (Halldon)",
       "priority": "P1",
       "automationMode": "auto-fix-allowed",
+      "commandCenter": {
+        "contractPath": "/Users/j/Documents/Builds/Outreach/command-center/project_contract.json",
+        "maxStalenessSeconds": 900
+      },
+      "adapter": {
+        "heartbeatIntervalSeconds": 600,
+        "maxEventAgeSeconds": 1800,
+        "requiredMetrics": [
+          "queueDepth",
+          "healthRows",
+          "failingChecks"
+        ],
+        "severityMap": {
+          "ok": "ok",
+          "warn": "warn",
+          "critical": "critical",
+          "stale": "critical"
+        },
+        "runbookLinks": {
+          "reviews": "./docs/operator-quickstart.md",
+          "solve": "./docs/verification.md",
+          "prevent": "./docs/project-contract.md",
+          "rollback": "./docs/rollback.md"
+        }
+      },
       "branchFlow": [
         "dev",
         "main"
@@ -58,6 +101,31 @@
       "owner": "James",
       "priority": "P1",
       "automationMode": "auto-fix-allowed",
+      "commandCenter": {
+        "contractPath": "/Users/j/.openclaw/workspace/polymarket-bot/command-center/project_contract.json",
+        "maxStalenessSeconds": 300
+      },
+      "adapter": {
+        "heartbeatIntervalSeconds": 60,
+        "maxEventAgeSeconds": 300,
+        "requiredMetrics": [
+          "loopLatencyMs",
+          "openPositions",
+          "riskScore"
+        ],
+        "severityMap": {
+          "ok": "ok",
+          "warn": "warn",
+          "critical": "critical",
+          "stale": "critical"
+        },
+        "runbookLinks": {
+          "reviews": "./docs/priority-model-v3.md",
+          "solve": "./docs/verification.md",
+          "prevent": "./docs/project-contract.md",
+          "rollback": "./docs/rollback.md"
+        }
+      },
       "branchFlow": [
         "main"
       ],

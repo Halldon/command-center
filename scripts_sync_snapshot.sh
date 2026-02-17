@@ -7,6 +7,12 @@ MAX_SNAPSHOT_AGE_MINUTES="${COMMAND_CENTER_MAX_SNAPSHOT_AGE_MINUTES:-30}"
 MAX_OUTREACH_SNAPSHOT_AGE_MINUTES="${COMMAND_CENTER_MAX_OUTREACH_SNAPSHOT_AGE_MINUTES:-90}"
 MAX_OUTREACH_TELEMETRY_AGE_MINUTES="${COMMAND_CENTER_MAX_OUTREACH_TELEMETRY_AGE_MINUTES:-90}"
 MIN_OUTREACH_HEALTH_ROWS="${COMMAND_CENTER_MIN_OUTREACH_HEALTH_ROWS:-1}"
+MAX_PROJECT_CONTRACT_AGE_MINUTES="${COMMAND_CENTER_MAX_PROJECT_CONTRACT_AGE_MINUTES:-120}"
+PROJECT_CONTRACTS_REQUIRED="${COMMAND_CENTER_PROJECT_CONTRACTS_REQUIRED:-true}"
+PROJECT_MODULES_REQUIRED="${COMMAND_CENTER_REQUIRE_PROJECT_MODULES:-true}"
+PROJECT_CONTRACT_FILES_REQUIRED="${COMMAND_CENTER_REQUIRE_PROJECT_CONTRACT_FILES:-false}"
+PROJECT_CONTRACT_OVERLAY_SCRIPT="${COMMAND_CENTER_PROJECT_CONTRACT_OVERLAY_SCRIPT:-$APP_ROOT/scripts/build_project_contract_overlay.py}"
+OPERATOR_CONFIG_PATH="${COMMAND_CENTER_OPERATOR_CONFIG_PATH:-$APP_ROOT/operator.config.json}"
 
 SYNC_CMD="${COMMAND_CENTER_LIVE_SYNC_CMD:-}"
 SNAPSHOT_SOURCE_RAW="${COMMAND_CENTER_SNAPSHOT_SOURCE_URL:-}"
@@ -23,12 +29,42 @@ OPS_ROOT_CANDIDATES+=(
 
 log() { printf '[sync] %s\n' "$*"; }
 
+copy_snapshot_file() {
+  local source_path="$1"
+  local target_path="$2"
+  if [[ -e "$source_path" && -e "$target_path" && "$source_path" -ef "$target_path" ]]; then
+    log "Source and target snapshot are the same file; skipping copy"
+    return 0
+  fi
+  cp "$source_path" "$target_path"
+}
+
+apply_project_contract_overlay() {
+  if [[ ! -f "$TARGET_SNAPSHOT" ]]; then
+    return
+  fi
+  if [[ -f "$PROJECT_CONTRACT_OVERLAY_SCRIPT" ]]; then
+    log "Applying project contract overlay"
+    python3 "$PROJECT_CONTRACT_OVERLAY_SCRIPT" \
+      --snapshot "$TARGET_SNAPSHOT" \
+      --operator-config "$OPERATOR_CONFIG_PATH" \
+      --output "$TARGET_SNAPSHOT"
+  else
+    log "Project contract overlay script not found: ${PROJECT_CONTRACT_OVERLAY_SCRIPT}"
+  fi
+}
+
 validate_snapshot_freshness() {
   python3 - "$TARGET_SNAPSHOT" \
     "$MAX_SNAPSHOT_AGE_MINUTES" \
     "$MAX_OUTREACH_SNAPSHOT_AGE_MINUTES" \
     "$MAX_OUTREACH_TELEMETRY_AGE_MINUTES" \
-    "$MIN_OUTREACH_HEALTH_ROWS" <<'PY'
+    "$MIN_OUTREACH_HEALTH_ROWS" \
+    "$MAX_PROJECT_CONTRACT_AGE_MINUTES" \
+    "$PROJECT_CONTRACTS_REQUIRED" \
+    "$PROJECT_MODULES_REQUIRED" \
+    "$PROJECT_CONTRACT_FILES_REQUIRED" \
+    "$OPERATOR_CONFIG_PATH" <<'PY'
 import json
 import sys
 from datetime import datetime, timezone
@@ -39,11 +75,22 @@ max_snapshot_age = float(sys.argv[2])
 max_outreach_snapshot_age = float(sys.argv[3])
 max_outreach_telemetry_age = float(sys.argv[4])
 min_health_rows = float(sys.argv[5])
+max_project_contract_age = float(sys.argv[6])
+project_contracts_required = str(sys.argv[7]).strip().lower() not in {"0", "false", "off", "no"}
+project_modules_required = str(sys.argv[8]).strip().lower() not in {"0", "false", "off", "no"}
+project_contract_files_required = str(sys.argv[9]).strip().lower() not in {"0", "false", "off", "no"}
+operator_config_path = Path(sys.argv[10])
 
 if not path.exists():
     raise SystemExit(f"[sync] freshness check failed: snapshot missing: {path}")
 
 data = json.loads(path.read_text(encoding="utf-8"))
+operator_config = {}
+if operator_config_path.exists():
+    try:
+        operator_config = json.loads(operator_config_path.read_text(encoding="utf-8"))
+    except Exception:
+        operator_config = {}
 now = datetime.now(timezone.utc)
 errors = []
 
@@ -116,6 +163,49 @@ if failing_checks is not None:
     if failing_checks_value is None:
         errors.append("outreach.telemetry.summary.failing invalid")
 
+project_contracts = data.get("projectContracts") or {}
+project_entries = project_contracts.get("projects") if isinstance(project_contracts.get("projects"), list) else []
+expected_count = len(operator_config.get("projects") or []) if isinstance(operator_config, dict) else 0
+if project_contracts_required and not project_entries:
+    errors.append("projectContracts.projects missing/empty")
+if project_contracts_required and expected_count and len(project_entries) < expected_count:
+    errors.append(
+        f"projectContracts.projects count too low: {len(project_entries)} (expected >= {expected_count})"
+    )
+
+def project_age_minutes(project):
+    age_seconds = project.get("ageSeconds")
+    if age_seconds is not None:
+        try:
+            return max(0.0, float(age_seconds) / 60.0)
+        except Exception:
+            pass
+    return age_minutes(project.get("generatedAt"))
+
+for idx, project in enumerate(project_entries):
+    if not isinstance(project, dict):
+        continue
+    project_id = str(project.get("projectId") or f"project[{idx}]")
+    if project_contracts_required:
+        age_m = project_age_minutes(project)
+        if age_m is None:
+            errors.append(f"{project_id} missing/invalid generatedAt")
+        elif age_m > max_project_contract_age:
+            errors.append(
+                f"{project_id} stale project contract: {age_m:.1f}m (max {max_project_contract_age:.1f}m)"
+            )
+
+        if project.get("isStale") is True:
+            reason = str(project.get("staleReason") or "unknown")
+            errors.append(f"{project_id} marked stale ({reason})")
+
+    modules = project.get("modules")
+    if project_modules_required and (not isinstance(modules, list) or not modules):
+        errors.append(f"{project_id} missing dynamic modules")
+
+    if project_contract_files_required and not bool(project.get("contractFound")):
+        errors.append(f"{project_id} missing project contract file")
+
 if errors:
     print("[sync] freshness gate failed:", file=sys.stderr)
     for issue in errors:
@@ -127,7 +217,8 @@ print(
     f"snapshot_age={snapshot_age:.1f}m "
     f"outreach_snapshot_age={outreach_snapshot_age:.1f}m "
     f"outreach_telemetry_age={outreach_telemetry_age:.1f}m "
-    f"health_rows={health_rows_value:g}"
+    f"health_rows={health_rows_value:g} "
+    f"project_contracts={len(project_entries)}"
 )
 PY
 }
@@ -146,14 +237,20 @@ if [[ -n "$SNAPSHOT_SOURCE_RAW" ]]; then
 fi
 
 if [[ -n "$SYNC_CMD" ]]; then
-  log "Running COMMAND_CENTER_LIVE_SYNC_CMD"
-  bash -lc "$SYNC_CMD"
-  if [[ -f "$TARGET_SNAPSHOT" ]]; then
-    validate_snapshot_freshness
-    log "Snapshot synced via custom command: ${TARGET_SNAPSHOT}"
-    exit 0
+  self_path="${APP_ROOT}/scripts_sync_snapshot.sh"
+  if [[ "$SYNC_CMD" == *"$self_path"* ]] || [[ "$SYNC_CMD" =~ (^|[[:space:]])scripts_sync_snapshot\.sh($|[[:space:]]) ]]; then
+    log "Skipping COMMAND_CENTER_LIVE_SYNC_CMD to avoid recursive scripts_sync_snapshot.sh invocation"
+  else
+    log "Running COMMAND_CENTER_LIVE_SYNC_CMD"
+    bash -lc "$SYNC_CMD"
+    if [[ -f "$TARGET_SNAPSHOT" ]]; then
+      apply_project_contract_overlay
+      validate_snapshot_freshness
+      log "Snapshot synced via custom command: ${TARGET_SNAPSHOT}"
+      exit 0
+    fi
+    log "Custom command ran but target snapshot not found: ${TARGET_SNAPSHOT}"
   fi
-  log "Custom command ran but target snapshot not found: ${TARGET_SNAPSHOT}"
 fi
 
 for OPS_ROOT in "${OPS_ROOT_CANDIDATES[@]}"; do
@@ -166,7 +263,8 @@ for OPS_ROOT in "${OPS_ROOT_CANDIDATES[@]}"; do
     python3 "$synth"
     python3 "$build"
     if [[ -f "$out_snapshot" ]]; then
-      cp "$out_snapshot" "$TARGET_SNAPSHOT"
+      copy_snapshot_file "$out_snapshot" "$TARGET_SNAPSHOT"
+      apply_project_contract_overlay
       validate_snapshot_freshness
       log "Snapshot synced (synth + build + copy)."
       exit 0
@@ -177,7 +275,8 @@ done
 
 if [[ -n "$SOURCE_SNAPSHOT_FILE" && -f "$SOURCE_SNAPSHOT_FILE" ]]; then
   log "Copying snapshot from COMMAND_CENTER_SOURCE_SNAPSHOT"
-  cp "$SOURCE_SNAPSHOT_FILE" "$TARGET_SNAPSHOT"
+  copy_snapshot_file "$SOURCE_SNAPSHOT_FILE" "$TARGET_SNAPSHOT"
+  apply_project_contract_overlay
   validate_snapshot_freshness
   log "Snapshot synced (copy only)."
   exit 0
@@ -200,6 +299,7 @@ If your endpoint requires auth, set the secret in either form:
 EOF
     exit 1
   fi
+  apply_project_contract_overlay
   validate_snapshot_freshness
   log "Snapshot downloaded to ${TARGET_SNAPSHOT}"
   exit 0

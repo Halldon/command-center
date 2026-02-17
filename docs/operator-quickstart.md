@@ -1,39 +1,47 @@
 # Operator Quickstart
 
-## 1) Refresh data pipeline
+## 1) Start control plane (realtime source)
 
 ```bash
-bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh
+cd /Users/jameshalldon/Documents/Builds/Command\ Center/control-plane
+npm install
+npm run migrate
+npm run sync:adapters
+npm run dev
 ```
 
-## 2) Run app locally
+Required env:
+- `DATABASE_URL`
+
+## 2) Run UI locally
 
 ```bash
-cd /Users/j/.openclaw/workspace/command-center-app
+cd /Users/jameshalldon/Documents/Builds/Command\ Center
 python3 -m http.server 4173
 ```
 
 Open: `http://localhost:4173`
 
-## 3) Daily operating loop (recommended)
+## 3) Verify live state + stream
 
-1. **Attention Queue**: Execute top 1–2 ranked items first.
-2. **Daily Brief**: Scan highlights + deltas in under 60 seconds.
-3. **Decision Console**: Queue dry-run controls, verify audit trail.
-4. **Reliability Radar**: Watch lock contention + cron drift trend.
-5. **Revenue Layer**: Check confidence and leakage before scaling sends.
-6. **Focus Mode**: Toggle critical-only during quiet hours/high alert load.
-7. **Scenario Simulator**: Compare policy options before major changes.
+```bash
+curl -s http://localhost:4190/api/state | head -n 40
+curl -N http://localhost:4190/api/stream
+```
 
-## 4) One-click actions
+You should see a `snapshot` or `heartbeat` SSE event and a valid `realtime` block in `/api/state`.
 
-- **Copy recommended action**: Copies command from Attention Queue row.
-- **Queue dry-run**: Adds an operator-local audit entry for execution tracking.
-- **Copy rollback**: Copies rollback command/runbook step.
+## 4) Backup snapshot pipeline (secondary)
 
-## 5) Preference capture
+Use only as backup/reporting:
 
-Use **Operator Memory** section:
-- add `key/value`
-- click **Save Preference**
-- preferences persist in browser localStorage and bias prioritization.
+```bash
+bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts_sync_snapshot.sh
+```
+
+## 5) Daily operator loop
+
+1. Reviews mode: inspect OpenClaw-proposed changes and evidence.
+2. Solve mode: execute highest impact mapped action with verification.
+3. Prevent mode: queue/install guardrails and cadence checks.
+4. Incident feed: clear stale/critical items first.
