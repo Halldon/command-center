@@ -1103,7 +1103,7 @@
         <span id="securityPill" class="pill">Triggers: LOCAL</span>
         <span id="execPill" class="pill">Exec: LOCKED</span>
         <button id="setExecTokenBtn" class="ghost-btn">Set Exec Token</button>
-        <button id="autoRefreshBtn" class="ghost-btn">Auto-refresh ON</button>
+        <button id="autoRefreshBtn" class="ghost-btn">Polling OFF</button>
         <button id="refreshBtn" class="solid-btn">Refresh</button>
       </div>
     </header>
@@ -1242,6 +1242,13 @@
       timezone: "America/New_York",
       calendarSource: "local-only",
       tasksSource: "local-only",
+      liveSync: {
+        enabled: true,
+        cmd: "bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh",
+        intervalMs: 5000,
+        streamWaitMs: 25000,
+        streamPollMs: 1000
+      },
       projects: [
         {
           name: "Outreach Pipeline",
@@ -1338,6 +1345,10 @@
         timezone: raw.timezone || DEFAULT_OPERATOR_CONFIG.timezone,
         calendarSource: raw.calendarSource || DEFAULT_OPERATOR_CONFIG.calendarSource,
         tasksSource: raw.tasksSource || DEFAULT_OPERATOR_CONFIG.tasksSource,
+        liveSync: {
+          ...DEFAULT_OPERATOR_CONFIG.liveSync,
+          ...(raw.liveSync || {})
+        },
         projects: projects.map((project) => ({
           ...project,
           type: project.type || projectTypeFromName(project.name),
@@ -1386,9 +1397,9 @@
     const state = {
       data: null,
       operatorConfig: DEFAULT_OPERATOR_CONFIG,
-      autoRefresh: true,
+      autoRefresh: false,
       timer: null,
-      stream: { enabled: false, connected: false, lastEventAt: null, source: null, lastSnapshotVersion: null },
+      stream: { enabled: false, connected: false, lastEventAt: null, source: null, lastSnapshotVersion: null, lastSyncMeta: null },
       globalMode: "reviews",
       projectModes: loadLocal(STORAGE_KEYS.projectModes, {}),
       localAudit: loadLocal(STORAGE_KEYS.audit, []),
@@ -3206,7 +3217,7 @@
       document.getElementById("safeModePill").textContent = `Console: ${safeMode}`;
       document.getElementById("securityPill").textContent = `Triggers: ${state.operatorConfig?.securityRules?.liveActionTriggers || "local-only"}`;
       document.getElementById("execPill").textContent = `Exec: ${state.execToken ? "ARMED" : "LOCKED"}`;
-      document.getElementById("autoRefreshBtn").textContent = `Auto-refresh ${state.autoRefresh ? "ON" : "OFF"}`;
+      document.getElementById("autoRefreshBtn").textContent = `Polling ${state.autoRefresh ? "ON" : "OFF"}`;
       updateStreamPill();
 
       document.querySelectorAll("[data-global-mode]").forEach((btn) => {
@@ -3275,7 +3286,18 @@
         pill.textContent = "Stream: OFF";
         return;
       }
+      const sync = state.stream.lastSyncMeta || {};
+      const syncError = String(sync.lastError || "");
+      const staleSec = Number(sync.snapshotStalenessSec);
       if (state.stream.connected) {
+        if (syncError) {
+          pill.textContent = `Stream: ON | Sync error`;
+          return;
+        }
+        if (Number.isFinite(staleSec) && staleSec > 300) {
+          pill.textContent = `Stream: ON | Stale ${Math.floor(staleSec / 60)}m`;
+          return;
+        }
         pill.textContent = `Stream: ON${state.stream.lastEventAt ? ` | ${relTime(state.stream.lastEventAt)}` : ""}`;
         return;
       }
@@ -3319,6 +3341,7 @@
       if (typeof EventSource === "undefined") {
         state.stream.enabled = false;
         updateStreamPill();
+        if (!state.autoRefresh) setAutoRefresh(true);
         return;
       }
 
@@ -3337,7 +3360,10 @@
           if (payload.snapshot) {
             state.stream.connected = true;
             state.stream.lastEventAt = new Date().toISOString();
-            const streamVersion = String(payload.mtimeMs || payload.snapshot.generatedAt || "");
+            if (payload.sync && typeof payload.sync === "object") {
+              state.stream.lastSyncMeta = payload.sync;
+            }
+            const streamVersion = String(payload.version || payload.mtimeMs || payload.snapshot.generatedAt || "");
             const isDuplicate = Boolean(streamVersion) && streamVersion === state.stream.lastSnapshotVersion;
             if (isDuplicate) {
               updateStreamPill();
@@ -3348,14 +3374,30 @@
             }
             state.data = payload.snapshot;
             renderAll();
+            fetchExecutionHistory().catch(() => {});
           }
         } catch (error) {
           console.error("stream parse failed", error);
         }
       });
 
+      source.addEventListener("heartbeat", (event) => {
+        try {
+          const payload = JSON.parse(event.data || "{}");
+          state.stream.connected = true;
+          state.stream.lastEventAt = new Date().toISOString();
+          if (payload.sync && typeof payload.sync === "object") {
+            state.stream.lastSyncMeta = payload.sync;
+          }
+          updateStreamPill();
+        } catch (error) {
+          console.error("stream heartbeat parse failed", error);
+        }
+      });
+
       source.onopen = () => {
         state.stream.connected = true;
+        if (state.autoRefresh) setAutoRefresh(false);
         updateStreamPill();
       };
 
@@ -3706,7 +3748,7 @@
     wireKeyboard();
     refresh();
     startLiveStream();
-    setAutoRefresh(true);
+    setAutoRefresh(false);
     setInterval(updateStreamPill, 10000);
   </script>
 </body>

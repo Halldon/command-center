@@ -2,6 +2,18 @@
   "timezone": "America/New_York",
   "calendarSource": "local-only",
   "tasksSource": "local-only (OpenClaw cron + local project scripts/runtime artifacts)",
+  "liveSync": {
+    "enabled": true,
+    "cmd": "bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh",
+    "intervalMs": 5000,
+    "streamWaitMs": 25000,
+    "streamPollMs": 1000,
+    "watchPaths": [
+      "/Users/j/.openclaw/workspace/ops/output/command_center/snapshot.json",
+      "/Users/j/.openclaw/workspace/command-center-app/snapshot.json",
+      "/Users/j/Documents/Builds/Outreach/output/operational_snapshot.json"
+    ]
+  },
   "projects": [
     {
       "name": "Outreach Pipeline",

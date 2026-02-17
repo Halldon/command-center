@@ -42,6 +42,28 @@ Notes:
 - Execution audit is appended to `runtime/exec_audit.jsonl` when writable.
 - `promote_review` is a built-in action key. It validates and merges one branch step from `branchFlow` (for example `dev -> main`) and requires `confirmed: true`.
 
+## Live Updates (no manual refresh)
+
+The UI now uses a stream-first model:
+
+- `/api/stream` long-polls and pushes snapshot changes continuously.
+- Polling is fallback only (toggle in UI).
+- Stream includes sync/staleness metadata so stuck pipelines are visible.
+
+Optional auto-sync is controlled by `operator.config.json > liveSync` and env vars:
+
+- `COMMAND_CENTER_AUTO_SYNC` (`true`/`false`)
+- `COMMAND_CENTER_LIVE_SYNC_CMD` (override sync command)
+- `COMMAND_CENTER_SYNC_INTERVAL_MS`
+- `COMMAND_CENTER_STREAM_WAIT_MS`
+- `COMMAND_CENTER_STREAM_POLL_MS`
+- `COMMAND_CENTER_SYNC_TIMEOUT_MS`
+- `COMMAND_CENTER_SYNC_FAILURE_BACKOFF_MS`
+- `COMMAND_CENTER_FORCE_SYNC_WITHOUT_WATCH_PATHS` (`true` to run sync command even when watch paths are unresolved)
+- `COMMAND_CENTER_OPS_ROOT`
+- `COMMAND_CENTER_SOURCE_SNAPSHOT`
+- `COMMAND_CENTER_TARGET_SNAPSHOT`
+
 History retrieval:
 
 ```bash
