@@ -95,6 +95,15 @@ def run_command(command: str, timeout_seconds: int) -> CmdResult:
         return CmdResult(ok=False, exit_code=124, duration_ms=ms, stderr_tail="health_check timeout")
 
 
+def extract_leading_cd_path(command: str) -> str:
+    pattern = r'^\s*cd\s+("([^"]+)"|\'([^\']+)\'|([^&;]+?))\s*&&'
+    match = re.match(pattern, str(command or ""))
+    if not match:
+        return ""
+    raw = match.group(2) or match.group(3) or match.group(4) or ""
+    return str(raw).strip()
+
+
 def default_metric_value(name: str) -> float:
     metric = str(name or "").strip()
     key = metric.lower()
@@ -183,10 +192,26 @@ def main() -> int:
         actions = project.get("actions") if isinstance(project.get("actions"), dict) else {}
         health = actions.get("health_check") if isinstance(actions.get("health_check"), dict) else {}
         health_cmd = str(health.get("cmd") or "").strip()
+        repo_path = str(project.get("repoPath") or "").strip()
+        repo_exists = bool(repo_path and Path(repo_path).expanduser().exists())
 
         cmd_result = CmdResult(ok=True, exit_code=0, duration_ms=0, stderr_tail="")
+        health_mode = "executed"
         if health_cmd:
-            cmd_result = run_command(health_cmd, timeout_seconds=max(5, int(args.timeout_seconds)))
+            cd_path = extract_leading_cd_path(health_cmd)
+            if cd_path and not Path(cd_path).expanduser().exists():
+                health_mode = "skipped_missing_cd_path"
+                cmd_result = CmdResult(
+                    ok=True,
+                    exit_code=0,
+                    duration_ms=0,
+                    stderr_tail=f"skipped: cd path missing ({cd_path})",
+                )
+            else:
+                cmd_result = run_command(health_cmd, timeout_seconds=max(5, int(args.timeout_seconds)))
+        else:
+            health_mode = "skipped_no_health_command"
+            cmd_result = CmdResult(ok=True, exit_code=0, duration_ms=0, stderr_tail="skipped: no health_check command configured")
 
         metrics = dict(baseline_metrics.get(project_id, {}))
         for key in required_metrics:
@@ -199,6 +224,8 @@ def main() -> int:
         metrics["healthCheckOk"] = 1 if cmd_result.ok else 0
         metrics["healthCheckExitCode"] = cmd_result.exit_code
         metrics["healthCheckDurationMs"] = cmd_result.duration_ms
+        metrics["healthCheckSkipped"] = 1 if health_mode.startswith("skipped") else 0
+        metrics["repoPathExists"] = 1 if repo_exists else 0
 
         status = "ok" if cmd_result.ok else "warn"
         severity = "ok" if cmd_result.ok else "warn"
@@ -224,9 +251,12 @@ def main() -> int:
                     "healthCheck": {
                         "ok": cmd_result.ok,
                         "exitCode": cmd_result.exit_code,
+                        "mode": health_mode,
                         "durationMs": cmd_result.duration_ms,
                         "stderrTail": cmd_result.stderr_tail,
                     },
+                    "repoPath": repo_path,
+                    "repoPathExists": repo_exists,
                 },
             }
         )
@@ -253,4 +283,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-
