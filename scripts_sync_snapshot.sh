@@ -5,7 +5,7 @@ APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_SNAPSHOT="${COMMAND_CENTER_TARGET_SNAPSHOT:-$APP_ROOT/snapshot.json}"
 
 SYNC_CMD="${COMMAND_CENTER_LIVE_SYNC_CMD:-}"
-SNAPSHOT_URL="${COMMAND_CENTER_SNAPSHOT_SOURCE_URL:-}"
+SNAPSHOT_SOURCE_RAW="${COMMAND_CENTER_SNAPSHOT_SOURCE_URL:-}"
 SOURCE_SNAPSHOT_FILE="${COMMAND_CENTER_SOURCE_SNAPSHOT:-}"
 
 OPS_ROOT_CANDIDATES=()
@@ -18,6 +18,19 @@ OPS_ROOT_CANDIDATES+=(
 )
 
 log() { printf '[sync] %s\n' "$*"; }
+
+SNAPSHOT_URL=""
+SNAPSHOT_AUTH_HEADER="${COMMAND_CENTER_SNAPSHOT_AUTH_HEADER:-}"
+if [[ -n "$SNAPSHOT_SOURCE_RAW" ]]; then
+  if [[ "$SNAPSHOT_SOURCE_RAW" == *"||"* ]]; then
+    SNAPSHOT_URL="${SNAPSHOT_SOURCE_RAW%%||*}"
+    if [[ -z "$SNAPSHOT_AUTH_HEADER" ]]; then
+      SNAPSHOT_AUTH_HEADER="${SNAPSHOT_SOURCE_RAW#*||}"
+    fi
+  else
+    SNAPSHOT_URL="$SNAPSHOT_SOURCE_RAW"
+  fi
+fi
 
 if [[ -n "$SYNC_CMD" ]]; then
   log "Running COMMAND_CENTER_LIVE_SYNC_CMD"
@@ -56,7 +69,21 @@ fi
 
 if [[ -n "$SNAPSHOT_URL" ]]; then
   log "Fetching snapshot from COMMAND_CENTER_SNAPSHOT_SOURCE_URL"
-  curl -fsSL "$SNAPSHOT_URL" -o "$TARGET_SNAPSHOT"
+  CURL_ARGS=(-fsSL "$SNAPSHOT_URL" -o "$TARGET_SNAPSHOT")
+  if [[ -n "$SNAPSHOT_AUTH_HEADER" ]]; then
+    CURL_ARGS=(-H "$SNAPSHOT_AUTH_HEADER" "${CURL_ARGS[@]}")
+  fi
+  if ! curl "${CURL_ARGS[@]}"; then
+    cat >&2 <<EOF
+[sync] ERROR: Snapshot fetch failed from COMMAND_CENTER_SNAPSHOT_SOURCE_URL.
+
+If your endpoint requires auth, set the secret in either form:
+- Plain URL with token in query string
+- URL||Header (single secret), e.g.
+  https://api.example.com/snapshot||Authorization: Bearer <token>
+EOF
+    exit 1
+  fi
   log "Snapshot downloaded to ${TARGET_SNAPSHOT}"
   exit 0
 fi

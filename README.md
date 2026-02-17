@@ -95,6 +95,9 @@ It runs every 15 minutes + manual dispatch, updates `snapshot.json`, and commits
 
 - **Secrets**
   - `COMMAND_CENTER_SNAPSHOT_SOURCE_URL` (recommended): URL that returns the latest snapshot JSON.
+    - If auth is required, you can encode header in the same secret:
+      - `https://api.example.com/snapshot||Authorization: Bearer <token>`
+    - Or include token in query string directly if your API supports it.
   - Optional: `COMMAND_CENTER_LIVE_SYNC_CMD` (advanced/custom runner command).
 - **Variables**
   - Optional: `COMMAND_CENTER_OPS_ROOT` (default `/Users/j/.openclaw/workspace/ops`).
