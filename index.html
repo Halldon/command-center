@@ -1272,6 +1272,7 @@
           name: "Outreach Pipeline",
           type: "outreach",
           repoPath: "/Users/j/Documents/Builds/Outreach",
+          repoUrl: "https://github.com/Halldon-Inc/outreach",
           owner: "James (Halldon)",
           priority: "P1",
           automationMode: "auto-fix-allowed",
@@ -1326,6 +1327,7 @@
           name: "Polymarket Bot (paper-first)",
           type: "polymarket",
           repoPath: "/Users/j/.openclaw/workspace/polymarket-bot",
+          repoUrl: "https://github.com/Halldon-Inc/polymarket-bot",
           owner: "James",
           priority: "P1",
           automationMode: "auto-fix-allowed",
@@ -1518,6 +1520,25 @@
         "\"": "&quot;",
         "'": "&#39;"
       }[c]));
+    }
+
+    function safeExternalUrl(value) {
+      const text = String(value || "").trim();
+      if (!text) return "";
+      return /^https?:\/\/[^\s]+$/i.test(text) ? text : "";
+    }
+
+    function repoMetadataLines(project) {
+      const repoPath = String(project?.config?.repoPath || "").trim();
+      const repoUrl = safeExternalUrl(project?.config?.repoUrl);
+      const repoUrlLabel = repoUrl ? repoUrl.replace(/^https?:\/\//i, "") : "n/a";
+      const repoUrlHtml = repoUrl
+        ? `<a href="${esc(repoUrl)}" target="_blank" rel="noopener">${esc(repoUrlLabel)}</a>`
+        : "n/a";
+      return `
+        <li>Repo: ${esc(repoPath || "n/a")}</li>
+        <li>Repo URL: ${repoUrlHtml}</li>
+      `;
     }
 
     function relTime(iso) {
@@ -2973,7 +2994,7 @@
             <li>Hot leads: ${esc(snapshot.hotLeadCount ?? 0)}</li>
             <li>Paused senders: ${esc(snapshot.pausedSenders ?? 0)}</li>
             <li>Top route: ${esc(snapshot.topRoute?.variant_id || "n/a")}</li>
-            <li>Repo: ${esc(project.config?.repoPath || "n/a")}</li>
+            ${repoMetadataLines(project)}
           </ul>
         </article>
       `;
@@ -3070,7 +3091,7 @@
           <ul class="mini-list">
             <li>Recommended scenario: ${esc(scenario.recommendedScenarioId || "n/a")}</li>
             <li>Compare dimensions: ${esc((scenario.compareDimensions || []).join(", ") || "n/a")}</li>
-            <li>Repo: ${esc(project.config?.repoPath || "n/a")}</li>
+            ${repoMetadataLines(project)}
           </ul>
         </article>
       `;
