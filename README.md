@@ -79,11 +79,37 @@ curl -s http://localhost:4173/api/execute \
 bash /Users/j/.openclaw/workspace/command-center-app/scripts_sync_snapshot.sh
 ```
 
-That runs:
+`scripts_sync_snapshot.sh` supports 3 modes (in this order):
 
-1. `synthesize_command_center_signals.py` (backfill/mock synthesis)
-2. `build_command_center_snapshot.py` (snapshot schema v2)
-3. copy to `command-center-app/snapshot.json`
+1. `COMMAND_CENTER_LIVE_SYNC_CMD` (custom command)
+2. local OPS build via `COMMAND_CENTER_OPS_ROOT`
+3. pull from `COMMAND_CENTER_SNAPSHOT_SOURCE_URL`
+
+## GitHub Actions Auto Sync (recommended)
+
+Workflow file: `.github/workflows/snapshot-sync.yml`
+
+It runs every 15 minutes + manual dispatch, updates `snapshot.json`, and commits only when changed.
+
+### Required setup (GitHub repo settings)
+
+- **Secrets**
+  - `COMMAND_CENTER_SNAPSHOT_SOURCE_URL` (recommended): URL that returns the latest snapshot JSON.
+  - Optional: `COMMAND_CENTER_LIVE_SYNC_CMD` (advanced/custom runner command).
+- **Variables**
+  - Optional: `COMMAND_CENTER_OPS_ROOT` (default `/Users/j/.openclaw/workspace/ops`).
+
+### Trigger manually
+
+```bash
+gh workflow run "Snapshot Sync" --repo Halldon/command-center
+```
+
+### Check recent runs
+
+```bash
+gh run list --repo Halldon/command-center --workflow "Snapshot Sync" --limit 10
+```
 
 ## Local Smoke
 

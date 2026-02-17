@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
-TARGET_SNAPSHOT="${COMMAND_CENTER_TARGET_SNAPSHOT:-$ROOT_DIR/snapshot.json}"
+APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TARGET_SNAPSHOT="${COMMAND_CENTER_TARGET_SNAPSHOT:-$APP_ROOT/snapshot.json}"
+
+SYNC_CMD="${COMMAND_CENTER_LIVE_SYNC_CMD:-}"
+SNAPSHOT_URL="${COMMAND_CENTER_SNAPSHOT_SOURCE_URL:-}"
+SOURCE_SNAPSHOT_FILE="${COMMAND_CENTER_SOURCE_SNAPSHOT:-}"
 
 OPS_ROOT_CANDIDATES=()
 if [[ -n "${COMMAND_CENTER_OPS_ROOT:-}" ]]; then
@@ -13,39 +17,59 @@ OPS_ROOT_CANDIDATES+=(
   "/Users/jameshalldon/.openclaw/workspace/ops"
 )
 
-run_ops_pipeline=0
-source_snapshot=""
+log() { printf '[sync] %s\n' "$*"; }
 
-for ops_root in "${OPS_ROOT_CANDIDATES[@]}"; do
-  synth="$ops_root/scripts/synthesize_command_center_signals.py"
-  build="$ops_root/scripts/build_command_center_snapshot.py"
-  out_snapshot="$ops_root/output/command_center/snapshot.json"
+if [[ -n "$SYNC_CMD" ]]; then
+  log "Running COMMAND_CENTER_LIVE_SYNC_CMD"
+  bash -lc "$SYNC_CMD"
+  if [[ -f "$TARGET_SNAPSHOT" ]]; then
+    log "Snapshot synced via custom command: ${TARGET_SNAPSHOT}"
+    exit 0
+  fi
+  log "Custom command ran but target snapshot not found: ${TARGET_SNAPSHOT}"
+fi
+
+for OPS_ROOT in "${OPS_ROOT_CANDIDATES[@]}"; do
+  synth="${OPS_ROOT}/scripts/synthesize_command_center_signals.py"
+  build="${OPS_ROOT}/scripts/build_command_center_snapshot.py"
+  out_snapshot="${OPS_ROOT}/output/command_center/snapshot.json"
+
   if [[ -f "$synth" && -f "$build" ]]; then
+    log "Using OPS_ROOT build path: ${OPS_ROOT}"
     python3 "$synth"
     python3 "$build"
-    run_ops_pipeline=1
+    if [[ -f "$out_snapshot" ]]; then
+      cp "$out_snapshot" "$TARGET_SNAPSHOT"
+      log "Snapshot synced (synth + build + copy)."
+      exit 0
+    fi
   fi
-  if [[ -f "$out_snapshot" ]]; then
-    source_snapshot="$out_snapshot"
-    break
-  fi
+
 done
 
-if [[ -n "${COMMAND_CENTER_SOURCE_SNAPSHOT:-}" && -f "${COMMAND_CENTER_SOURCE_SNAPSHOT}" ]]; then
-  source_snapshot="${COMMAND_CENTER_SOURCE_SNAPSHOT}"
+if [[ -n "$SOURCE_SNAPSHOT_FILE" && -f "$SOURCE_SNAPSHOT_FILE" ]]; then
+  log "Copying snapshot from COMMAND_CENTER_SOURCE_SNAPSHOT"
+  cp "$SOURCE_SNAPSHOT_FILE" "$TARGET_SNAPSHOT"
+  log "Snapshot synced (copy only)."
+  exit 0
 fi
 
-if [[ -z "$source_snapshot" ]]; then
-  echo "No source snapshot found. Set COMMAND_CENTER_OPS_ROOT or COMMAND_CENTER_SOURCE_SNAPSHOT." >&2
-  exit 1
+if [[ -n "$SNAPSHOT_URL" ]]; then
+  log "Fetching snapshot from COMMAND_CENTER_SNAPSHOT_SOURCE_URL"
+  curl -fsSL "$SNAPSHOT_URL" -o "$TARGET_SNAPSHOT"
+  log "Snapshot downloaded to ${TARGET_SNAPSHOT}"
+  exit 0
 fi
 
-if [[ "$source_snapshot" != "$TARGET_SNAPSHOT" ]]; then
-  cp "$source_snapshot" "$TARGET_SNAPSHOT"
-fi
+cat >&2 <<EOF
+[sync] ERROR: No valid snapshot source configured.
 
-if [[ "$run_ops_pipeline" -eq 1 ]]; then
-  echo "Snapshot synced (synth + build + copy)."
-else
-  echo "Snapshot synced (copy only)."
-fi
+Tried in order:
+1) COMMAND_CENTER_LIVE_SYNC_CMD
+2) Local build via COMMAND_CENTER_OPS_ROOT/default OPS roots
+3) COMMAND_CENTER_SOURCE_SNAPSHOT (file path)
+4) COMMAND_CENTER_SNAPSHOT_SOURCE_URL
+
+Set one of these env vars and retry.
+EOF
+exit 1

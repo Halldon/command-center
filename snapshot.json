@@ -1,6 +1,6 @@
 {
   "schemaVersion": "2.0.0",
-  "generatedAt": "2026-02-16T20:10:17.980033Z",
+  "generatedAt": "2026-02-17T18:33:35.996206Z",
   "featureFlags": {
     "attentionQueue": true,
     "executiveDailyBrief": true,
@@ -31,13 +31,13 @@
       "name": "Outreach Engine",
       "status": "ok",
       "summary": "Queue 61 \u00b7 healthRows 6 \u00b7 paused 0",
-      "lastUpdate": "2026-02-16T18:58:43.009170Z"
+      "lastUpdate": "2026-02-17T17:33:19.057729Z"
     },
     {
       "name": "Provider Budget/Capacity",
       "status": "ok",
       "summary": "Providers healthy: 4/4",
-      "lastUpdate": "2026-02-16T19:29:32.537807Z"
+      "lastUpdate": "2026-02-17T13:29:31.887975Z"
     },
     {
       "name": "Decisioning & Automation",
@@ -78,7 +78,15 @@
       "at": "2026-02-13T16:00:41.890438Z"
     }
   ],
-  "decisionsNeeded": [],
+  "decisionsNeeded": [
+    "[must-ship] Ship Bunny website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+    "[must-ship] Ship Odious website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+    "[must-ship] Ship Halldon website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+    "[must-ship] Ensure Halldon outreach is profitable \u00b7 owner: James \u00b7 due: Tomorrow morning",
+    "[must-ship] Verify TikTok engine is working \u00b7 owner: James \u00b7 due: Tomorrow morning",
+    "[assigned] Ship VidPlus outreach \u00b7 owner: JP \u00b7 due: Tomorrow morning",
+    "[assigned] Ship MoltBlocks \u00b7 owner: Hunt \u00b7 due: Tomorrow morning"
+  ],
   "incidentFeed": [],
   "agents": {
     "opsFixMiniAgent": {
@@ -180,7 +188,7 @@
       ]
     },
     "snapshot": {
-      "generatedAt": "2026-02-16T18:58:43.008584Z",
+      "generatedAt": "2026-02-17T17:33:19.056880Z",
       "adaptiveQueueCount": 61,
       "routeMix": {
         "standard_short": 42,
@@ -210,7 +218,9 @@
       },
       "hotLeadCount": 0,
       "pausedSenders": 0,
-      "healthRows": 6
+      "healthRows": 6,
+      "netNewPushUrgent": 0,
+      "netNewPushStartup": 1
     },
     "senderStoplights": {
       "senders": [
@@ -284,7 +294,7 @@
     }
   },
   "attentionQueue": {
-    "generatedAt": "2026-02-16T20:10:17.980015Z",
+    "generatedAt": "2026-02-17T18:33:35.996187Z",
     "model": {
       "id": "priority_v3",
       "weights": {
@@ -324,7 +334,7 @@
     "items": []
   },
   "executiveDailyBrief": {
-    "generatedAt": "2026-02-16T20:10:17.980094Z",
+    "generatedAt": "2026-02-17T18:33:35.996267Z",
     "readTimeSeconds": 60,
     "summary": "Critical reliability issues remain the top constraint; execute the top attention action and validate deltas before scaling throughput.",
     "highlights": [
@@ -332,7 +342,11 @@
       "Morning brief priority: [smoke-1] Urgent incident: outreach snapshot stale"
     ],
     "risks": [],
-    "decisions": [],
+    "decisions": [
+      "[must-ship] Ship Bunny website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+      "[must-ship] Ship Odious website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+      "[must-ship] Ship Halldon website \u00b7 owner: James \u00b7 due: Tomorrow morning"
+    ],
     "deltas": [
       {
         "metric": "Open alerts",
@@ -381,7 +395,7 @@
     }
   },
   "decisionConsole": {
-    "generatedAt": "2026-02-16T20:10:17.980126Z",
+    "generatedAt": "2026-02-17T18:33:35.996296Z",
     "safeControlsEnabled": true,
     "globalMode": "dry-run",
     "controls": [
@@ -461,7 +475,7 @@
     ]
   },
   "reliabilityRadar": {
-    "generatedAt": "2026-02-16T20:10:17.982225Z",
+    "generatedAt": "2026-02-17T18:33:35.998378Z",
     "overallStatus": "warn",
     "summary": {
       "providersHealthy": 4,
@@ -561,7 +575,7 @@
     ]
   },
   "revenuePipeline": {
-    "generatedAt": "2026-02-16T20:10:17.982243Z",
+    "generatedAt": "2026-02-17T18:33:35.998393Z",
     "dataQuality": "partial",
     "totals": {
       "pipelineValue": 75850,
@@ -593,7 +607,7 @@
     "notes": "Derived from outreach queue + synthetic fallback when direct revenue telemetry is absent."
   },
   "portfolioCommandView": {
-    "generatedAt": "2026-02-16T20:10:17.984236Z",
+    "generatedAt": "2026-02-17T18:33:36.005010Z",
     "summary": "Portfolio lens balances local urgency against cross-project cascade risk.",
     "domains": [
       {
@@ -601,7 +615,7 @@
         "status": "ok",
         "riskScore": 46.0,
         "confidence": 0.68,
-        "note": "Runner heartbeat 0m ago \u00b7 open positions 6."
+        "note": "Runner heartbeat 0m ago \u00b7 open positions 8."
       },
       {
         "domain": "Outreach",
@@ -647,7 +661,7 @@
     ]
   },
   "personalFocusMode": {
-    "generatedAt": "2026-02-16T20:10:17.984265Z",
+    "generatedAt": "2026-02-17T18:33:36.005034Z",
     "status": "monitoring",
     "criticalOnly": false,
     "noiseSuppressionLevel": "balanced",
@@ -663,11 +677,11 @@
     "suppressedEstimate": 4
   },
   "explainability": {
-    "generatedAt": "2026-02-16T20:10:17.984271Z",
+    "generatedAt": "2026-02-17T18:33:36.005039Z",
     "anomalies": []
   },
   "trustSecurity": {
-    "generatedAt": "2026-02-16T20:10:17.984279Z",
+    "generatedAt": "2026-02-17T18:33:36.005048Z",
     "overallStatus": "ok",
     "secretHealth": {
       "status": "stub",
@@ -704,7 +718,7 @@
     ]
   },
   "scenarioSimulator": {
-    "generatedAt": "2026-02-16T20:10:17.984305Z",
+    "generatedAt": "2026-02-17T18:33:36.005072Z",
     "recommendedScenarioId": "balanced",
     "options": [
       {
@@ -773,7 +787,7 @@
     ]
   },
   "operatorMemory": {
-    "generatedAt": "2026-02-16T20:10:17.984312Z",
+    "generatedAt": "2026-02-17T18:33:36.005079Z",
     "profile": {
       "operator": "James",
       "timezone": "America/New_York"
@@ -805,16 +819,16 @@
     "feedbackLoop": {
       "recentFeedback": [
         {
-          "ts": "2026-02-16T19:56:22.623128Z",
+          "ts": "2026-02-17T18:33:35.931966Z",
           "type": "synthetic_seed",
           "note": "No explicit operator feedback file detected; seeded defaults applied."
         }
       ],
-      "nextReview": "2026-02-17T20:10:17.984315Z"
+      "nextReview": "2026-02-18T18:33:36.005082Z"
     }
   },
   "godView": {
-    "generatedAt": "2026-02-16T20:10:17.984325Z",
+    "generatedAt": "2026-02-17T18:33:36.005093Z",
     "topStrip": {
       "criticalAlerts": 0,
       "hardDeadlinesToday": 0,
@@ -832,13 +846,13 @@
         "name": "Outreach Engine",
         "status": "ok",
         "summary": "Queue 61 \u00b7 healthRows 6 \u00b7 paused 0",
-        "updatedAt": "2026-02-16T18:58:43.009170Z"
+        "updatedAt": "2026-02-17T17:33:19.057729Z"
       },
       {
         "name": "Provider Budget/Capacity",
         "status": "ok",
         "summary": "Providers healthy: 4/4",
-        "updatedAt": "2026-02-16T19:29:32.537807Z"
+        "updatedAt": "2026-02-17T13:29:31.887975Z"
       },
       {
         "name": "Decisioning & Automation",
@@ -852,7 +866,36 @@
     "summary": {
       "whatCanHurtToday": "No critical blockers",
       "whatCanPayToday": "Execute highest-confidence queue items and resolve top bottleneck",
-      "mustDecideNow": []
+      "mustDecideNow": [
+        "[must-ship] Ship Bunny website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+        "[must-ship] Ship Odious website \u00b7 owner: James \u00b7 due: Tomorrow morning",
+        "[must-ship] Ship Halldon website \u00b7 owner: James \u00b7 due: Tomorrow morning"
+      ]
     }
+  },
+  "decisionNow": {
+    "statement": "No immediate decision required.",
+    "recommendedAction": {},
+    "expectedConsequence24h": "Weighted forecast 14,472 \u00b7 alert load 1",
+    "ifIdle24h": "No critical blockers",
+    "confidence": 0.0,
+    "reversible": false,
+    "whyNow": "Top-ranked by priority model",
+    "trust": {
+      "freshnessBand": "unknown",
+      "confidence": 0.0,
+      "source": "unknown",
+      "reasonCodes": []
+    },
+    "blastRadius": {
+      "risk": "low",
+      "scope": "command-center artifacts",
+      "preview": "Sync and publish Command Center snapshot"
+    }
+  },
+  "uiHints": {
+    "primaryActionId": null,
+    "maxVisibleActions": 3,
+    "progressiveDisclosureDefault": "compact"
   }
 }
