@@ -7,6 +7,9 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_TIMEOUT_MS = 120000;
 const MAX_OUTPUT_CHARS = 12000;
 const BRANCH_NAME_RE = /^[A-Za-z0-9._/-]+$/;
+const EXEC_RUNTIME_ROOT = process.env.COMMAND_CENTER_EXEC_RUNTIME_ROOT
+  ? path.resolve(process.env.COMMAND_CENTER_EXEC_RUNTIME_ROOT)
+  : path.join('/tmp', 'command-center', 'exec');
 
 function slugify(text) {
   return String(text || '')
@@ -207,7 +210,7 @@ function startBackgroundCommand(command) {
 
 function appendAudit(event) {
   try {
-    const runtimeDir = path.join(process.cwd(), 'runtime');
+    const runtimeDir = EXEC_RUNTIME_ROOT;
     fs.mkdirSync(runtimeDir, { recursive: true });
     const file = path.join(runtimeDir, 'exec_audit.jsonl');
     fs.appendFileSync(file, `${JSON.stringify(event)}\n`, 'utf8');
@@ -218,7 +221,7 @@ function appendAudit(event) {
 
 function readAuditHistory(limit) {
   try {
-    const file = path.join(process.cwd(), 'runtime', 'exec_audit.jsonl');
+    const file = path.join(EXEC_RUNTIME_ROOT, 'exec_audit.jsonl');
     if (!fs.existsSync(file)) return [];
     const raw = fs.readFileSync(file, 'utf8');
     const lines = raw.split('\n').map((line) => line.trim()).filter(Boolean);

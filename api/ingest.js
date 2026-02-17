@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const { ingestCloudEvents } = require('./_central_state');
+const { proxyToControlPlane } = require('./_control_plane_proxy');
 
 function parseBody(req) {
   if (!req.body) return {};
@@ -36,6 +37,10 @@ module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Command-Center-Ingest-Key, Idempotency-Key');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
+
+  if (req.method === 'GET' || req.method === 'POST') {
+    if (await proxyToControlPlane(req, res, '/api/ingest')) return;
+  }
 
   if (req.method === 'GET') {
     return res.status(200).json({

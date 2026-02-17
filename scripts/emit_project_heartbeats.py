@@ -202,8 +202,8 @@ def main() -> int:
             if cd_path and not Path(cd_path).expanduser().exists():
                 health_mode = "skipped_missing_cd_path"
                 cmd_result = CmdResult(
-                    ok=True,
-                    exit_code=0,
+                    ok=False,
+                    exit_code=2,
                     duration_ms=0,
                     stderr_tail=f"skipped: cd path missing ({cd_path})",
                 )
@@ -211,7 +211,7 @@ def main() -> int:
                 cmd_result = run_command(health_cmd, timeout_seconds=max(5, int(args.timeout_seconds)))
         else:
             health_mode = "skipped_no_health_command"
-            cmd_result = CmdResult(ok=True, exit_code=0, duration_ms=0, stderr_tail="skipped: no health_check command configured")
+            cmd_result = CmdResult(ok=False, exit_code=2, duration_ms=0, stderr_tail="skipped: no health_check command configured")
 
         metrics = dict(baseline_metrics.get(project_id, {}))
         for key in required_metrics:
@@ -227,8 +227,18 @@ def main() -> int:
         metrics["healthCheckSkipped"] = 1 if health_mode.startswith("skipped") else 0
         metrics["repoPathExists"] = 1 if repo_exists else 0
 
-        status = "ok" if cmd_result.ok else "warn"
-        severity = "ok" if cmd_result.ok else "warn"
+        if not repo_exists or health_mode == "skipped_missing_cd_path":
+            status = "critical"
+            severity = "critical"
+        elif health_mode.startswith("skipped"):
+            status = "warn"
+            severity = "warn"
+        elif cmd_result.ok:
+            status = "ok"
+            severity = "ok"
+        else:
+            status = "critical"
+            severity = "critical"
 
         events.append(
             {

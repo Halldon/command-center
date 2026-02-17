@@ -1,4 +1,5 @@
 const { readPublishedState, publishBlockMeta } = require('./_central_state');
+const { proxyToControlPlane } = require('./_control_plane_proxy');
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -10,6 +11,8 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    if (await proxyToControlPlane(req, res, '/api/state')) return;
+
     const published = readPublishedState();
     const block = publishBlockMeta(published.state);
     if (block.blocked) {

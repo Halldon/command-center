@@ -1,4 +1,5 @@
 const { readPublishedState, clampNumber, nowIso } = require('./_central_state');
+const { proxyToControlPlane } = require('./_control_plane_proxy');
 
 const DEFAULT_WAIT_MS = 25000;
 const DEFAULT_POLL_MS = 1000;
@@ -79,6 +80,8 @@ module.exports = async (req, res) => {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    if (await proxyToControlPlane(req, res, '/api/stream')) return;
+
     const cfg = streamConfig();
     const sinceId = String(req.headers['last-event-id'] || req.query?.since || '').trim();
     const result = await waitForUpdate(sinceId, cfg);

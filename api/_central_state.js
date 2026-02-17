@@ -2,7 +2,9 @@ const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
 
-const RUNTIME_ROOT = path.join(process.cwd(), 'runtime', 'ingest');
+const RUNTIME_ROOT = process.env.COMMAND_CENTER_RUNTIME_ROOT
+  ? path.resolve(process.env.COMMAND_CENTER_RUNTIME_ROOT)
+  : path.join('/tmp', 'command-center', 'ingest');
 const STATE_PATH = path.join(RUNTIME_ROOT, 'state.json');
 const EVENTS_PATH = path.join(RUNTIME_ROOT, 'events.jsonl');
 const INCIDENTS_PATH = path.join(RUNTIME_ROOT, 'incidents.jsonl');

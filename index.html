@@ -1271,13 +1271,13 @@
         {
           name: "Outreach Pipeline",
           type: "outreach",
-          repoPath: "/Users/j/Documents/Builds/Outreach",
+          repoPath: "/Users/jameshalldon/Documents/Builds/Outreach",
           repoUrl: "https://github.com/Halldon-Inc/outreach",
           owner: "James (Halldon)",
           priority: "P1",
           automationMode: "auto-fix-allowed",
           commandCenter: {
-            contractPath: "/Users/j/Documents/Builds/Outreach/command-center/project_contract.json",
+            contractPath: "/Users/jameshalldon/Documents/Builds/Outreach/command-center/project_contract.json",
             maxStalenessSeconds: 900
           },
           adapter: {
@@ -1303,22 +1303,22 @@
           actions: {
             health_check: {
               label: "Health Check",
-              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py && python3 scripts/build_lock_readiness.py",
+              cmd: "cd /Users/jameshalldon/Documents/Builds/Outreach && python3.11 scripts/build_operational_snapshot.py && python3.11 scripts/build_lock_readiness.py",
               classification: "internal_diagnostic"
             },
             verify: {
               label: "Verify",
-              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/validate_emails.py && python3 scripts/build_channel_queues.py",
+              cmd: "cd /Users/jameshalldon/Documents/Builds/Outreach && python3.11 scripts/validate_emails.py && python3.11 scripts/build_channel_queues.py",
               classification: "internal_diagnostic"
             },
             go_live: {
               label: "Go Live",
-              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/orchestrate_daily.py",
+              cmd: "cd /Users/jameshalldon/Documents/Builds/Outreach && python3.11 scripts/orchestrate_daily.py",
               classification: "external_irreversible"
             },
             rollback: {
               label: "Rollback",
-              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py",
+              cmd: "cd /Users/jameshalldon/Documents/Builds/Outreach && python3.11 scripts/build_operational_snapshot.py",
               classification: "internal_safe"
             }
           }
@@ -1326,13 +1326,13 @@
         {
           name: "Polymarket Bot (paper-first)",
           type: "polymarket",
-          repoPath: "/Users/j/.openclaw/workspace/polymarket-bot",
+          repoPath: "/Users/jameshalldon/.openclaw/workspace/polymarket-bot",
           repoUrl: "https://github.com/Halldon-Inc/polymarket-bot",
           owner: "James",
           priority: "P1",
           automationMode: "auto-fix-allowed",
           commandCenter: {
-            contractPath: "/Users/j/.openclaw/workspace/polymarket-bot/command-center/project_contract.json",
+            contractPath: "/Users/jameshalldon/.openclaw/workspace/polymarket-bot/command-center/project_contract.json",
             maxStalenessSeconds: 300
           },
           adapter: {
@@ -1358,22 +1358,22 @@
           actions: {
             health_check: {
               label: "Health Check",
-              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main status",
+              cmd: "cd /Users/jameshalldon/.openclaw/workspace/polymarket-bot && python3.11 scripts/verify_launch_guards.py",
               classification: "internal_diagnostic"
             },
             verify: {
               label: "Verify Guards",
-              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 scripts/verify_launch_guards.py && python3 scripts/build_dashboard_snapshot.py",
+              cmd: "cd /Users/jameshalldon/.openclaw/workspace/polymarket-bot && python3.11 scripts/verify_launch_guards.py && python3.11 scripts/build_dashboard_snapshot.py",
               classification: "internal_diagnostic"
             },
             go_live: {
               label: "Run Paper Loop",
-              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main run --mode paper --loop",
+              cmd: "cd /Users/jameshalldon/.openclaw/workspace/polymarket-bot && python3.11 -m polymarket_bot.main run --mode paper --loop",
               classification: "internal_paper"
             },
             rollback: {
               label: "Kill Switch",
-              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main kill-switch",
+              cmd: "cd /Users/jameshalldon/.openclaw/workspace/polymarket-bot && python3.11 -m polymarket_bot.main kill-switch",
               classification: "internal_safe"
             }
           }
@@ -2246,24 +2246,24 @@
       const repoPath = String(project?.config?.repoPath || "").trim();
       const repoPrefix = repoPath ? `cd "${repoPath}" && ` : "";
       if (actionKey === "health_check") {
-        if (type === "polymarket") return `${repoPrefix}python3 -m polymarket_bot.main status`;
+        if (type === "polymarket") return `${repoPrefix}python3.11 scripts/verify_launch_guards.py`;
         return findControlCommand("sync");
       }
       if (actionKey === "verify") {
-        if (type === "polymarket") return `${repoPrefix}python3 scripts/verify_launch_guards.py`;
+        if (type === "polymarket") return `${repoPrefix}python3.11 scripts/verify_launch_guards.py`;
         return findControlCommand("verify") || findControlCommand("sync");
       }
       if (actionKey === "go_live") {
-        if (type === "polymarket") return `${repoPrefix}python3 -m polymarket_bot.main run --mode paper --loop`;
+        if (type === "polymarket") return `${repoPrefix}python3.11 -m polymarket_bot.main run --mode paper --loop`;
         return findControlCommand("sync");
       }
       if (actionKey === "rollback") {
-        if (type === "polymarket") return `${repoPrefix}python3 -m polymarket_bot.main kill-switch`;
+        if (type === "polymarket") return `${repoPrefix}python3.11 -m polymarket_bot.main kill-switch`;
         return findControlCommand("sync");
       }
       if (actionKey === "preventive_guardrail") {
-        if (type === "outreach") return `${repoPrefix}python3 scripts/build_lock_readiness.py`;
-        if (type === "polymarket") return `${repoPrefix}python3 scripts/verify_launch_guards.py`;
+        if (type === "outreach") return `${repoPrefix}python3.11 scripts/build_lock_readiness.py`;
+        if (type === "polymarket") return `${repoPrefix}python3.11 scripts/verify_launch_guards.py`;
         return `guardrail:install --project ${slugify(project?.name || "project")}`;
       }
       if (actionKey === "custom_setup") {
@@ -3007,10 +3007,10 @@
       const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading") || {};
       const scenario = state.data?.scenarioSimulator || {};
       const reliability = state.data?.reliabilityRadar?.signals || [];
-      const healthAction = projectAction(project, "health_check", "Health Check", "python3 -m polymarket_bot.main status");
-      const verifyAction = projectAction(project, "verify", "Verify Guards", "python3 scripts/verify_launch_guards.py");
-      const goLiveAction = projectAction(project, "go_live", "Run Paper Loop", "python3 -m polymarket_bot.main run --mode paper --loop");
-      const rollbackAction = projectAction(project, "rollback", "Kill Switch", "python3 -m polymarket_bot.main kill-switch");
+      const healthAction = projectAction(project, "health_check", "Health Check", "python3.11 scripts/verify_launch_guards.py");
+      const verifyAction = projectAction(project, "verify", "Verify Guards", "python3.11 scripts/verify_launch_guards.py");
+      const goLiveAction = projectAction(project, "go_live", "Run Paper Loop", "python3.11 -m polymarket_bot.main run --mode paper --loop");
+      const rollbackAction = projectAction(project, "rollback", "Kill Switch", "python3.11 -m polymarket_bot.main kill-switch");
       const preventiveAction = {
         key: "preventive_guardrail",
         label: "Queue drawdown guardrail",

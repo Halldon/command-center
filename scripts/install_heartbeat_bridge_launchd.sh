@@ -3,7 +3,12 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PLIST_PATH="$HOME/Library/LaunchAgents/com.commandcenter.heartbeat-bridge.plist"
-PYTHON_BIN="$(command -v python3)"
+if command -v python3.11 >/dev/null 2>&1; then
+  PYTHON_BIN="$(command -v python3.11)"
+else
+  PYTHON_BIN="$(command -v python3)"
+fi
+PATH_VALUE="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 RUNTIME_ROOT="$HOME/.command-center/heartbeat-bridge"
 SCRIPT_PATH="$RUNTIME_ROOT/emit_project_heartbeats.py"
 CONFIG_PATH="$RUNTIME_ROOT/operator.config.json"
@@ -42,6 +47,11 @@ cat > "$PLIST_PATH" <<PLIST
       <string>--timeout-seconds</string>
       <string>25</string>
     </array>
+    <key>EnvironmentVariables</key>
+    <dict>
+      <key>PATH</key>
+      <string>$PATH_VALUE</string>
+    </dict>
     <key>RunAtLoad</key>
     <true/>
     <key>StartInterval</key>

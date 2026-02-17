@@ -2,6 +2,14 @@
 set -euo pipefail
 
 APP_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PYTHON_BIN="${COMMAND_CENTER_PYTHON_BIN:-}"
+if [[ -z "$PYTHON_BIN" ]]; then
+  if command -v python3.11 >/dev/null 2>&1; then
+    PYTHON_BIN="python3.11"
+  else
+    PYTHON_BIN="python3"
+  fi
+fi
 TARGET_SNAPSHOT="${COMMAND_CENTER_TARGET_SNAPSHOT:-$APP_ROOT/snapshot.json}"
 MAX_SNAPSHOT_AGE_MINUTES="${COMMAND_CENTER_MAX_SNAPSHOT_AGE_MINUTES:-30}"
 MAX_OUTREACH_SNAPSHOT_AGE_MINUTES="${COMMAND_CENTER_MAX_OUTREACH_SNAPSHOT_AGE_MINUTES:-90}"
@@ -45,7 +53,7 @@ apply_project_contract_overlay() {
   fi
   if [[ -f "$PROJECT_CONTRACT_OVERLAY_SCRIPT" ]]; then
     log "Applying project contract overlay"
-    python3 "$PROJECT_CONTRACT_OVERLAY_SCRIPT" \
+    "$PYTHON_BIN" "$PROJECT_CONTRACT_OVERLAY_SCRIPT" \
       --snapshot "$TARGET_SNAPSHOT" \
       --operator-config "$OPERATOR_CONFIG_PATH" \
       --output "$TARGET_SNAPSHOT"
@@ -55,7 +63,7 @@ apply_project_contract_overlay() {
 }
 
 validate_snapshot_freshness() {
-  python3 - "$TARGET_SNAPSHOT" \
+  "$PYTHON_BIN" - "$TARGET_SNAPSHOT" \
     "$MAX_SNAPSHOT_AGE_MINUTES" \
     "$MAX_OUTREACH_SNAPSHOT_AGE_MINUTES" \
     "$MAX_OUTREACH_TELEMETRY_AGE_MINUTES" \
@@ -260,8 +268,8 @@ for OPS_ROOT in "${OPS_ROOT_CANDIDATES[@]}"; do
 
   if [[ -f "$synth" && -f "$build" ]]; then
     log "Using OPS_ROOT build path: ${OPS_ROOT}"
-    python3 "$synth"
-    python3 "$build"
+    "$PYTHON_BIN" "$synth"
+    "$PYTHON_BIN" "$build"
     if [[ -f "$out_snapshot" ]]; then
       copy_snapshot_file "$out_snapshot" "$TARGET_SNAPSHOT"
       apply_project_contract_overlay
