@@ -4,1170 +4,3710 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Command Center</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg: #050911;
-      --bg2: #0b1629;
-      --panel: rgba(11, 19, 33, 0.88);
-      --panel-soft: rgba(11, 18, 30, 0.62);
-      --line: #21314d;
-      --text: #dbe8ff;
-      --muted: #8ea4cc;
-      --ok: #34d399;
-      --warn: #fbbf24;
-      --bad: #fb7185;
-      --info: #7dd3fc;
-      --chip: rgba(95, 128, 186, 0.2);
-      --glow: 0 0 0 1px rgba(120, 170, 255, 0.12), 0 12px 28px rgba(0, 0, 0, 0.36);
+      --bg: #d4d4d2;
+      --bg-soft: #ececeb;
+      --panel: #f3f3f2;
+      --panel-line: rgba(18, 22, 31, 0.12);
+      --ink: #111319;
+      --muted: #666b75;
+      --muted-soft: #8b919b;
+      --dark-surface: #0f1116;
+      --dark-elev: #141821;
+      --dark-line: rgba(255, 255, 255, 0.14);
+      --dark-text: #f3f5fa;
+      --accent: #9ea96d;
+      --accent-soft: rgba(158, 169, 109, 0.22);
+      --warn: #af7e2a;
+      --bad: #b34c63;
+      --ok: #3f845f;
+      --radius-xl: 30px;
+      --radius-lg: 22px;
+      --radius-md: 16px;
+      --lift: 0 14px 30px rgba(0, 0, 0, 0.12);
+      --ease-out: cubic-bezier(0, 0, 0.2, 1);
+      --ease-smooth: cubic-bezier(0.41, 0.19, 0.13, 0.95);
     }
 
-    * { box-sizing: border-box; }
+    html[data-nav-theme="dark"] {
+      --topbar-bg: rgba(15, 17, 24, 0.92);
+      --topbar-line: rgba(255, 255, 255, 0.16);
+      --topbar-text: #f0f2f8;
+      --topbar-muted: #aeb5c4;
+    }
+
+    html[data-nav-theme="light"] {
+      --topbar-bg: rgba(246, 246, 244, 0.94);
+      --topbar-line: rgba(24, 28, 38, 0.13);
+      --topbar-text: #12151d;
+      --topbar-muted: #636974;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       margin: 0;
-      color: var(--text);
-      font: 14px/1.45 Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      min-height: 100vh;
+      font-family: "Instrument Sans", "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
       background:
-        radial-gradient(1200px 580px at 0% -15%, #1a2a48 0%, transparent 58%),
-        radial-gradient(900px 500px at 100% -10%, #1b3d40 0%, transparent 55%),
-        var(--bg);
+        radial-gradient(980px 560px at -5% -15%, rgba(255, 255, 255, 0.56), transparent 58%),
+        radial-gradient(920px 540px at 105% -20%, rgba(7, 9, 14, 0.07), transparent 60%),
+        linear-gradient(180deg, #d6d6d4 0%, #cececc 100%);
     }
 
-    .wrap { max-width: 1520px; margin: 0 auto; padding: 16px 18px 28px; }
+    .app {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 16px 18px 34px;
+    }
 
     .topbar {
       position: sticky;
       top: 10px;
       z-index: 30;
       display: flex;
+      align-items: flex-start;
       justify-content: space-between;
-      align-items: center;
-      gap: 10px;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      background: linear-gradient(180deg, rgba(11,18,30,.95), rgba(8,14,24,.95));
-      box-shadow: var(--glow);
-      backdrop-filter: blur(8px);
+      gap: 18px;
+      padding: 13px 16px;
+      border-radius: 18px;
+      border: 1px solid var(--topbar-line, rgba(24, 28, 38, 0.14));
+      background: var(--topbar-bg, rgba(244, 244, 242, 0.9));
+      box-shadow: 0 10px 26px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(11px);
+      transition: background 0.52s var(--ease-smooth), border-color 0.52s var(--ease-smooth), color 0.52s var(--ease-smooth);
     }
 
-    .title { font-size: 20px; font-weight: 800; letter-spacing: 0.2px; }
-    .sub { margin-top: 2px; color: var(--muted); font-size: 12px; }
+    .brand h1 {
+      margin: 2px 0 0;
+      font-family: "Manrope", "Instrument Sans", sans-serif;
+      font-size: clamp(20px, 2.1vw, 28px);
+      letter-spacing: -0.01em;
+      font-weight: 740;
+      color: var(--topbar-text, #111520);
+    }
 
-    .ctrls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+    .kicker {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--topbar-muted, #5c6270);
+    }
 
-    button, .pill, select, input {
-      border: 1px solid #2d4164;
-      background: #111d31;
-      color: var(--text);
+    .stamp {
+      margin: 6px 0 0;
+      font-size: 12px;
+      color: var(--topbar-muted, #5c6270);
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .pill {
+      border: 1px solid var(--topbar-line, rgba(24, 28, 38, 0.14));
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--topbar-text, #111520);
+      background: rgba(255, 255, 255, 0.66);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    .ghost-btn,
+    .solid-btn,
+    .mini-btn,
+    .tiny-btn {
+      border: 1px solid var(--panel-line);
+      border-radius: 999px;
+      cursor: pointer;
+      transition: transform 0.3s var(--ease-out), filter 0.3s var(--ease-out), background 0.3s var(--ease-out);
+      font-family: "Manrope", "Instrument Sans", sans-serif;
+    }
+
+    .ghost-btn {
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 650;
+      background: rgba(255, 255, 255, 0.78);
+      color: #191c24;
+    }
+
+    .solid-btn {
+      padding: 8px 14px;
+      font-size: 12px;
+      font-weight: 670;
+      color: #f4f5f7;
+      border-color: rgba(255, 255, 255, 0.24);
+      background: linear-gradient(145deg, #1a1d26, #12141b);
+    }
+
+    .mini-btn {
+      padding: 8px 12px;
+      font-size: 12px;
+      font-weight: 650;
+      color: #171b24;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .tiny-btn {
+      padding: 6px 10px;
+      font-size: 11px;
+      font-weight: 630;
+      color: #1c2029;
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .ghost-btn:hover,
+    .solid-btn:hover,
+    .mini-btn:hover,
+    .tiny-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.03);
+    }
+
+    main {
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel {
+      border: 1px solid var(--panel-line);
+      border-radius: var(--radius-xl);
+      background: linear-gradient(180deg, rgba(246, 246, 244, 0.95), rgba(239, 239, 237, 0.95));
+      box-shadow: var(--lift);
+      padding: 20px;
+    }
+
+    .hero {
+      position: relative;
+      overflow: hidden;
+      padding: 22px;
+      border-radius: 32px;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: -28% 58% auto -18%;
+      height: 360px;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.62), transparent 66%);
+      pointer-events: none;
+    }
+
+    .hero-head {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .hero-copy {
+      max-width: 660px;
+    }
+
+    .hero h2 {
+      margin: 8px 0 0;
+      font-family: "Manrope", "Instrument Sans", sans-serif;
+      font-size: clamp(32px, 3.3vw, 46px);
+      line-height: 1.04;
+      letter-spacing: -0.03em;
+      font-weight: 700;
+      max-width: 620px;
+    }
+
+    .hero h2 .tone-soft {
+      color: #9699a1;
+      font-weight: 560;
+      display: inline;
+    }
+
+    .hero h2 .tone-strong {
+      color: #181b24;
+      font-weight: 710;
+      display: inline;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      color: var(--muted);
+      max-width: 610px;
+      font-size: 14px;
+    }
+
+    .mode-switch {
+      margin-top: 2px;
+      display: inline-flex;
+      gap: 3px;
+      padding: 4px;
+      border-radius: 999px;
+      border: 1px solid rgba(20, 24, 35, 0.1);
+      background: rgba(237, 237, 234, 0.92);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.68);
+      flex-shrink: 0;
+    }
+
+    .mode-btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 12px;
+      font-weight: 600;
+      color: #5f6470;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.3s var(--ease-out), color 0.3s var(--ease-out), transform 0.3s var(--ease-out);
+      position: relative;
+    }
+
+    .mode-btn.active {
+      color: #181b25;
+      background: #f9f9f8;
+      box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 7px 14px rgba(0, 0, 0, 0.1);
+      padding-left: 24px;
+    }
+
+    .mode-btn.active::before {
+      content: "";
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #f2a04b;
+      transform: translateY(-50%);
+      box-shadow: 0 0 0 3px rgba(242, 160, 75, 0.15);
+    }
+
+    .mode-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .mission-grid {
+      margin-top: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 9px;
+    }
+
+    .metric-card {
+      border-radius: 14px;
+      border: 1px solid rgba(18, 22, 31, 0.12);
+      background: rgba(248, 248, 247, 0.84);
+      padding: 12px 13px;
+    }
+
+    .metric-label {
+      margin: 0;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: var(--muted-soft);
+    }
+
+    .metric-value {
+      margin: 6px 0 0;
+      font-size: 26px;
+      font-weight: 760;
+      color: #0f1420;
+    }
+
+    .metric-sub {
+      margin: 3px 0 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .section-head h3 {
+      margin: 0;
+      font-family: "Manrope", "Instrument Sans", sans-serif;
+      font-size: 21px;
+      letter-spacing: -0.02em;
+      font-weight: 730;
+    }
+
+    .section-head p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .lane-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .lane-card {
+      border-radius: 18px;
+      border: 1px solid rgba(20, 24, 34, 0.12);
+      background: linear-gradient(180deg, rgba(249, 249, 248, 0.9), rgba(242, 242, 240, 0.88));
+      padding: 15px;
+    }
+
+    .lane-card h4 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      font-weight: 700;
+    }
+
+    .lane-card p {
+      margin: 6px 0 11px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .lane-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(120px, auto) auto;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .lane-form-appointments {
+      grid-template-columns: minmax(0, 1fr) minmax(170px, auto) minmax(130px, auto) auto;
+    }
+
+    .field {
+      border: 1px solid rgba(24, 28, 38, 0.18);
       border-radius: 10px;
       padding: 8px 10px;
-      font-weight: 600;
-      font-size: 12px;
+      background: #f7f7f5;
+      color: #1b202e;
+      font-size: 13px;
+      min-width: 0;
     }
 
-    button { cursor: pointer; }
-    button:hover { filter: brightness(1.1); }
-
-    input { width: 100%; font-weight: 500; }
-
-    .kpis {
-      margin-top: 12px;
+    .list-rows {
       display: grid;
-      gap: 10px;
-      grid-template-columns: repeat(5, minmax(160px, 1fr));
+      gap: 7px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
     }
 
-    .kpi {
-      padding: 10px 12px;
-      border: 1px solid var(--line);
+    .row-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      border: 1px solid rgba(24, 28, 38, 0.12);
       border-radius: 12px;
-      background: var(--panel-soft);
-      box-shadow: var(--glow);
+      background: rgba(251, 251, 250, 0.9);
+      padding: 8px 10px;
     }
 
-    .kpi .label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .35px; }
-    .kpi .val { margin-top: 5px; font-size: 24px; font-weight: 850; }
+    .row-main {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
 
-    .grid {
-      margin-top: 12px;
+    .row-main input[type="checkbox"] {
+      accent-color: #2f8f62;
+      width: 16px;
+      height: 16px;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    .row-title {
+      font-size: 13px;
+      color: #151927;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 100%;
+    }
+
+    .row-title.done {
+      text-decoration: line-through;
+      color: #8890a0;
+    }
+
+    .row-meta {
+      font-size: 11px;
+      color: #6d7485;
+      white-space: nowrap;
+    }
+
+    .proactive-grid {
       display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 9px;
+    }
+
+    .pro-card {
+      border: 1px solid rgba(24, 28, 38, 0.12);
+      border-radius: 16px;
+      background: linear-gradient(180deg, rgba(250, 250, 249, 0.92), rgba(241, 241, 239, 0.92));
+      padding: 13px;
+    }
+
+    .pro-card h4 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+    }
+
+    .pro-card p {
+      margin: 6px 0;
+      color: #4f5563;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .pro-actions {
+      margin-top: 8px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .project-lane {
+      display: grid;
+      gap: 14px;
+    }
+
+    .project-shell {
+      border-radius: 30px;
+      border: 1px solid rgba(26, 30, 40, 0.12);
+      background: linear-gradient(180deg, rgba(247, 247, 245, 0.95), rgba(236, 236, 233, 0.94));
+      box-shadow: var(--lift);
+      padding: 18px;
+    }
+
+    .project-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
       gap: 10px;
-      grid-template-columns: repeat(12, 1fr);
+      margin-bottom: 12px;
     }
 
-    .card {
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      background: var(--panel);
-      box-shadow: var(--glow);
-      padding: 12px;
-      min-height: 92px;
+    .project-title {
+      margin: 0;
+      font-family: "Manrope", "Instrument Sans", sans-serif;
+      font-size: clamp(21px, 1.7vw, 27px);
+      letter-spacing: -0.02em;
+      font-weight: 740;
     }
 
-    .card h3 { margin: 0 0 8px; font-size: 14px; letter-spacing: 0.25px; }
-    .small { color: var(--muted); font-size: 12px; }
-
-    .span-12 { grid-column: span 12; }
-    .span-8 { grid-column: span 8; }
-    .span-6 { grid-column: span 6; }
-    .span-4 { grid-column: span 4; }
+    .project-summary {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 14px;
+      max-width: 920px;
+    }
 
     .status-chip {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       border-radius: 999px;
-      padding: 3px 9px;
+      padding: 4px 10px;
       font-size: 11px;
-      font-weight: 700;
+      font-weight: 640;
       text-transform: uppercase;
       border: 1px solid transparent;
-    }
-
-    .ok { color: #7ef5be; background: rgba(53, 211, 153, .15); border-color: rgba(53, 211, 153, .34); }
-    .warn { color: #ffdb8d; background: rgba(251, 191, 36, .16); border-color: rgba(251, 191, 36, .4); }
-    .alert { color: #ff9aae; background: rgba(251, 113, 133, .15); border-color: rgba(251, 113, 133, .35); }
-    .unknown { color: #b8d8ff; background: rgba(147, 197, 253, .14); border-color: rgba(147, 197, 253, .35); }
-
-    .attention-list {
-      display: grid;
-      gap: 8px;
-    }
-
-    .attention-item {
-      border: 1px solid #2a3e60;
-      border-radius: 10px;
-      padding: 10px;
-      background: rgba(10, 17, 30, 0.85);
-    }
-
-    .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
-    .row .left { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-
-    .score {
-      font-size: 11px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid #32507f;
-      color: #bdd7ff;
-      background: rgba(36, 58, 92, .4);
-    }
-
-    .action-row { margin-top: 7px; display: flex; gap: 6px; flex-wrap: wrap; }
-
-    .delta-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; margin-top: 8px; }
-    .delta {
-      border: 1px solid #2a3f63;
-      border-radius: 10px;
-      background: rgba(10, 16, 28, 0.72);
-      padding: 8px;
-    }
-
-    .signal-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 8px; }
-    .signal {
-      border: 1px solid #2a3f63;
-      border-radius: 10px;
-      background: rgba(10, 16, 28, 0.72);
-      padding: 9px;
-    }
-
-    .spark {
-      margin-top: 6px;
-      font-size: 11px;
-      color: #9db4dc;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
       white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
-    .list { margin: 0; padding-left: 18px; }
-    .list li { margin: 6px 0; }
-
-    .audit {
-      max-height: 230px;
-      overflow: auto;
-      border: 1px solid #2b4065;
-      border-radius: 10px;
-      background: rgba(10, 16, 27, 0.7);
-      padding: 8px;
+    .status-ok {
+      color: #2d6b4c;
+      background: rgba(63, 132, 95, 0.12);
+      border-color: rgba(63, 132, 95, 0.22);
     }
 
-    .audit-item { padding: 7px; border-bottom: 1px dashed #32486f; }
-    .audit-item:last-child { border-bottom: none; }
-
-    .scenario-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(235px, 1fr)); gap: 8px; }
-    .scenario {
-      border: 1px solid #2b4068;
-      border-radius: 10px;
-      padding: 9px;
-      background: rgba(9, 15, 27, 0.7);
+    .status-warn {
+      color: #81581a;
+      background: rgba(175, 126, 42, 0.14);
+      border-color: rgba(175, 126, 42, 0.24);
     }
 
-    .scenario.recommended { border-color: #3f6ca8; box-shadow: inset 0 0 0 1px rgba(110, 170, 255, 0.22); }
-
-    .roadmap-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
-    .roadmap-item {
-      border: 1px solid #2b4068;
-      border-radius: 10px;
-      padding: 9px;
-      background: rgba(9, 15, 27, 0.7);
+    .status-alert {
+      color: #882f43;
+      background: rgba(179, 76, 99, 0.14);
+      border-color: rgba(179, 76, 99, 0.28);
     }
 
-    .mem-form {
+    .status-unknown {
+      color: #4b5670;
+      background: rgba(110, 122, 144, 0.12);
+      border-color: rgba(110, 122, 144, 0.25);
+    }
+
+    .project-mode {
+      margin-bottom: 12px;
+    }
+
+    .pair-shell {
+      border: 1px solid rgba(20, 24, 34, 0.12);
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(244, 244, 242, 0.92), rgba(238, 238, 236, 0.92));
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.7);
+      padding: 10px;
+    }
+
+    .pair-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .problem-card,
+    .solution-card {
+      border-radius: 20px;
+      padding: 20px;
+      min-height: 340px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .problem-card {
+      border: 1px solid rgba(16, 19, 28, 0.11);
+      background: linear-gradient(180deg, #efefee, #ebebea);
+      color: #151923;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+    }
+
+    .solution-card {
+      border: 1px solid var(--dark-line);
+      background: radial-gradient(130% 110% at 15% 0%, #262933 0%, #11141d 50%, #0b0e15 100%);
+      color: var(--dark-text);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.09), 0 18px 28px rgba(0, 0, 0, 0.28);
+    }
+
+    .pair-eyebrow {
+      margin: 0;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #838896;
+    }
+
+    .solution-card .pair-eyebrow {
+      color: #a6adbb;
+    }
+
+    .pair-title {
+      margin: 8px 0 0;
+      font-size: 13px;
+      line-height: 1.1;
+      letter-spacing: 0.03em;
+      font-weight: 640;
+      text-transform: uppercase;
+      color: #787e8e;
+    }
+
+    .solution-card .pair-title {
+      color: #a1a9ba;
+    }
+
+    .pair-heading {
+      margin: 10px 0 0;
+      font-size: clamp(21px, 1.95vw, 29px);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+      font-family: "Manrope", "Instrument Sans", sans-serif;
+      font-weight: 730;
+    }
+
+    .pair-body {
+      margin: 10px 0 0;
+      font-size: 15px;
+      line-height: 1.43;
+      color: #565c69;
+      max-width: 98%;
+    }
+
+    .solution-card .pair-body {
+      color: #c8cfde;
+    }
+
+    .tag-row {
+      margin-top: 14px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tag {
+      border: 1px solid rgba(19, 22, 32, 0.13);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      color: #4f5563;
+      background: rgba(250, 250, 249, 0.8);
+    }
+
+    .solution-card .tag {
+      border-color: rgba(255, 255, 255, 0.18);
+      color: #d2d9e7;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .pair-footer {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       gap: 8px;
-      margin-top: 6px;
+      flex-wrap: wrap;
     }
 
-    .projects { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
-    .project {
-      border: 1px solid #2a3f63;
+    .solution-card .pair-footer {
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding-top: 12px;
+      margin-top: 18px;
+    }
+
+    .tiny-note {
+      font-size: 12px;
+      color: #6f7482;
+    }
+
+    .solution-card .tiny-note {
+      color: #a0a8b8;
+    }
+
+    .action-row {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .go-live-btn {
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 999px;
+      padding: 9px 15px;
+      color: #161b25;
+      font-weight: 690;
+      font-size: 12px;
+      cursor: pointer;
+      background: linear-gradient(165deg, #fbfbfa, #eceeeb);
+    }
+
+    .go-live-btn:disabled,
+    .tiny-btn:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      filter: grayscale(0.1);
+    }
+
+    .module-grid {
+      margin-top: 12px;
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .module-card {
+      border: 1px solid rgba(24, 28, 38, 0.12);
+      border-radius: 15px;
+      background: linear-gradient(180deg, rgba(250, 250, 249, 0.92), rgba(242, 242, 240, 0.92));
+      padding: 12px;
+      min-height: 120px;
+    }
+
+    .module-card h4 {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: -0.01em;
+      font-weight: 700;
+    }
+
+    .module-card p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #5f6675;
+    }
+
+    .review-module .review-list {
+      margin-top: 8px;
+    }
+
+    .review-row {
+      border: 1px solid rgba(22, 27, 38, 0.1);
+      border-radius: 12px;
+      padding: 8px;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .review-row-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .review-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #303645;
+    }
+
+    .review-check input[type="checkbox"] {
+      margin: 0;
+      width: 14px;
+      height: 14px;
+      accent-color: #2f8f62;
+    }
+
+    .review-title {
+      margin: 7px 0 0;
+      font-size: 13px;
+      font-weight: 650;
+      color: #1a1f2c;
+    }
+
+    .review-summary {
+      margin: 4px 0 0;
+      font-size: 12px;
+      color: #596171;
+      line-height: 1.38;
+    }
+
+    .module-kv {
+      margin-top: 8px;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 6px;
+    }
+
+    .module-kv div {
+      border: 1px solid rgba(24, 28, 38, 0.11);
       border-radius: 10px;
-      padding: 9px;
-      background: rgba(9, 16, 30, 0.7);
+      background: rgba(248, 248, 246, 0.88);
+      padding: 6px;
     }
 
-    .split { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .module-kv b {
+      display: block;
+      font-size: 11px;
+      color: #7d8494;
+      margin-bottom: 2px;
+      letter-spacing: 0.02em;
+    }
 
-    .hidden { display: none !important; }
+    .module-kv span {
+      font-size: 14px;
+      font-weight: 680;
+    }
+
+    .mini-list {
+      margin: 7px 0 0;
+      padding-left: 17px;
+      color: #434958;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .mini-list li {
+      margin: 4px 0;
+    }
+
+    .journal-list {
+      list-style: none;
+      margin: 8px 0 0;
+      padding: 0;
+      display: grid;
+      gap: 7px;
+    }
+
+    .journal-item {
+      border: 1px solid rgba(20, 24, 35, 0.12);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(249, 249, 248, 0.9);
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .journal-item h4 {
+      margin: 0;
+      font-size: 13px;
+    }
+
+    .journal-item p {
+      margin: 3px 0 0;
+      color: #5d6371;
+      font-size: 12px;
+    }
+
+    .history-grid {
+      margin-top: 8px;
+      display: grid;
+      gap: 9px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .history-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 7px;
+      max-height: 420px;
+      overflow: auto;
+    }
+
+    .history-item {
+      border: 1px solid rgba(20, 24, 35, 0.12);
+      border-radius: 12px;
+      padding: 10px;
+      background: rgba(249, 249, 248, 0.9);
+      display: grid;
+      gap: 6px;
+    }
+
+    .history-item.active {
+      border-color: rgba(37, 41, 52, 0.28);
+      box-shadow: inset 0 0 0 1px rgba(37, 41, 52, 0.16);
+      background: rgba(252, 252, 251, 0.97);
+    }
+
+    .history-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .history-title {
+      font-size: 13px;
+      font-weight: 800;
+      margin: 0;
+    }
+
+    .history-sub {
+      margin: 3px 0 0;
+      font-size: 11px;
+      color: #5d6371;
+    }
+
+    .history-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .history-detail {
+      border: 1px solid rgba(20, 24, 35, 0.12);
+      border-radius: 12px;
+      background: rgba(249, 249, 248, 0.92);
+      padding: 12px;
+      min-height: 220px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .history-meta {
+      margin: 0;
+      font-size: 12px;
+      color: #525866;
+      line-height: 1.45;
+    }
+
+    .history-output {
+      margin: 0;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      background: #10131b;
+      color: #dbe1f0;
+      padding: 10px;
+      font-size: 11px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 300px;
+      overflow: auto;
+    }
 
     .footer {
-      margin-top: 12px;
-      color: var(--muted);
-      text-align: right;
+      margin-top: 2px;
       font-size: 11px;
+      color: #5a6070;
+      text-align: right;
+    }
+
+    .empty {
+      color: #676e7d;
+      font-size: 12px;
+      padding: 6px 0;
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.52s var(--ease-out), transform 0.6s var(--ease-smooth);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .toast {
       position: fixed;
-      right: 14px;
-      bottom: 14px;
+      right: 12px;
+      bottom: 12px;
       z-index: 40;
-      background: rgba(11, 20, 34, 0.95);
-      border: 1px solid #36598b;
-      border-radius: 10px;
-      padding: 8px 10px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 11px;
+      background: rgba(10, 12, 18, 0.93);
+      color: #e8edff;
+      padding: 8px 11px;
       font-size: 12px;
-      color: #cde2ff;
-      box-shadow: var(--glow);
       opacity: 0;
-      transform: translateY(6px);
-      transition: all .2s ease;
+      transform: translateY(8px);
+      transition: opacity 0.3s var(--ease-out), transform 0.3s var(--ease-out);
       pointer-events: none;
     }
 
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    @media (max-width: 1240px) {
-      .kpis { grid-template-columns: repeat(3, minmax(160px, 1fr)); }
-      .span-8, .span-6, .span-4 { grid-column: span 12; }
-      .split { grid-template-columns: 1fr; }
-      .mem-form { grid-template-columns: 1fr; }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
-    @media (max-width: 900px) {
-      .wrap { padding: 10px 10px 20px; }
+    @media (max-width: 1160px) {
+      .mission-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .hero-head {
+        flex-direction: column;
+      }
+
+      .pair-grid,
+      .lane-grid,
+      .module-grid,
+      .history-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .lane-form {
+        grid-template-columns: 1fr;
+      }
+
+      .lane-form-appointments {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        padding: 10px 8px 20px;
+      }
+
       .topbar {
-        top: 0;
-        border-radius: 10px;
-        padding: 10px;
-        align-items: flex-start;
+        position: static;
+        border-radius: 14px;
       }
-      .title { font-size: 17px; line-height: 1.25; }
-      .sub { font-size: 11px; }
-      .ctrls { width: 100%; justify-content: flex-start; gap: 6px; }
-      button, .pill, select, input {
-        min-height: 36px;
-        font-size: 12px;
-        padding: 8px 9px;
+
+      .toolbar {
+        justify-content: flex-start;
       }
-      .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
-      .kpi { padding: 9px 10px; }
-      .kpi .val { font-size: 20px; }
-      .card { padding: 10px; border-radius: 10px; }
-      .card h3 { font-size: 13px; margin-bottom: 7px; }
-      .attention-item { padding: 9px; }
-      .action-row button { flex: 1 1 100%; }
-      .delta-grid, .signal-grid, .scenario-grid, .roadmap-grid, .projects { grid-template-columns: 1fr; }
-      .footer { text-align: left; font-size: 10px; }
+
+      .mission-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .project-shell {
+        border-radius: 18px;
+        padding: 12px;
+      }
+
+      .pair-heading {
+        font-size: 23px;
+        line-height: 1.05;
+      }
+
+      .go-live-btn,
+      .mini-btn,
+      .tiny-btn {
+        flex: 1 1 100%;
+      }
+
+      .footer {
+        text-align: left;
+      }
     }
 
-    @media (max-width: 640px) {
-      .wrap { padding: 8px 8px 16px; }
-      .topbar { position: static; }
-      .kpis { grid-template-columns: 1fr; }
-      .row { align-items: flex-start; }
-      .score { font-size: 10px; }
-      .small { font-size: 11px; }
-      .audit { max-height: 180px; }
-      .toast {
-        right: 8px;
-        left: 8px;
-        bottom: 8px;
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation: none !important;
+        transition-duration: 0s !important;
+      }
+
+      .reveal {
+        opacity: 1;
+        transform: none;
       }
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div>
-        <div class="title">🛰️ Command Center · Operator Edition</div>
-        <div class="sub" id="stamp">Loading snapshot…</div>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <p class="kicker">Adaptive Command Center</p>
+        <h1>Life + Business Operations</h1>
+        <p id="stamp" class="stamp">Loading snapshot...</p>
       </div>
-      <div class="ctrls">
-        <span class="pill" id="safeModePill">Console mode: DRY-RUN</span>
-        <span class="pill" id="streamPill">Live stream: CONNECTING</span>
-        <span class="pill" id="autoRefreshPill">Auto-refresh: ON</span>
-        <button id="focusToggleBtn">Toggle Focus</button>
-        <button id="refreshBtn">Refresh</button>
+      <div class="toolbar">
+        <span id="safeModePill" class="pill">Console: DRY-RUN</span>
+        <span id="streamPill" class="pill">Stream: CONNECTING</span>
+        <span id="securityPill" class="pill">Triggers: LOCAL</span>
+        <span id="execPill" class="pill">Exec: LOCKED</span>
+        <button id="setExecTokenBtn" class="ghost-btn">Set Exec Token</button>
+        <button id="autoRefreshBtn" class="ghost-btn">Auto-refresh ON</button>
+        <button id="refreshBtn" class="solid-btn">Refresh</button>
       </div>
-    </div>
+    </header>
 
-    <div class="kpis">
-      <div class="kpi"><div class="label">Delivery Risk Now</div><div class="val" id="kpiStatus">—</div></div>
-      <div class="kpi"><div class="label">Decisions Due</div><div class="val" id="kpiAttention">—</div></div>
-      <div class="kpi"><div class="label">Commitments Overdue</div><div class="val" id="kpiBreaches">—</div></div>
-      <div class="kpi"><div class="label">Confidence in Plan</div><div class="val" id="kpiForecast">—</div></div>
-      <div class="kpi"><div class="label">Trust Guardrails</div><div class="val" id="kpiTrust">—</div></div>
-    </div>
-
-    <div class="grid">
-      <section class="card span-12" id="godViewCard">
-        <h3>0) God View (60s)</h3>
-        <div id="godViewSummary" class="small">Loading…</div>
-        <div class="kpis" style="margin-top:8px;" id="godViewTop"></div>
-        <div class="split" style="margin-top:8px;">
-          <div>
-            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Decision Queue (max 5)</h4>
-            <div id="godViewDecisions"></div>
+    <main>
+      <section class="hero panel reveal" data-theme="light">
+        <div class="hero-head">
+          <div class="hero-copy">
+            <p class="kicker">Project Sections + Problem/Solution Flow</p>
+            <h2><span class="tone-soft">Smarter systems spot problems</span> <span class="tone-strong">and solve them.</span></h2>
+            <p>Every major project gets a custom framework with paired cards you can review, verify, and execute.</p>
           </div>
-          <div>
-            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Execution Queue (max 7)</h4>
-            <div id="godViewExecution"></div>
+          <div class="mode-switch" id="globalModeSwitch">
+            <button class="mode-btn active" data-global-mode="reviews">Reviews</button>
+            <button class="mode-btn" data-global-mode="solve">Solve</button>
+            <button class="mode-btn" data-global-mode="prevent">Prevent</button>
           </div>
+        </div>
+        <div class="mission-grid">
+          <article class="metric-card">
+            <p class="metric-label">Active Projects</p>
+            <p class="metric-value" id="mActiveProjects">0</p>
+            <p class="metric-sub" id="mActiveProjectsSub">Loading...</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Open Work Queue</p>
+            <p class="metric-value" id="mOpenTasks">0</p>
+            <p class="metric-sub" id="mOpenTasksSub">Loading...</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Next Appointment</p>
+            <p class="metric-value" id="mNextAppointment">-</p>
+            <p class="metric-sub" id="mNextAppointmentSub">Loading...</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Autonomous Improvements</p>
+            <p class="metric-value" id="mAutonomous">0</p>
+            <p class="metric-sub" id="mAutonomousSub">Loading...</p>
+          </article>
         </div>
       </section>
 
-      <section class="card span-8" id="attentionCard">
-        <h3>1) Triage Now (Action Queue)</h3>
-        <div class="small" id="attentionSummary">Loading…</div>
-        <div class="attention-list" id="attentionList"></div>
-      </section>
+      <section class="panel reveal" data-theme="light">
+        <div class="section-head">
+          <div>
+            <h3>Daily Control Stack</h3>
+            <p>Track commitments and appointments in the same workspace as project telemetry.</p>
+          </div>
+        </div>
+        <div class="lane-grid">
+          <article class="lane-card">
+            <h4>To-do Queue</h4>
+            <p>Personal and project tasks you can clear today.</p>
+            <form id="todoForm" class="lane-form">
+              <input id="todoInput" class="field" type="text" maxlength="160" placeholder="Add a task..." />
+              <select id="todoProject" class="field">
+                <option value="General">General</option>
+              </select>
+              <button type="submit" class="mini-btn">Add</button>
+            </form>
+            <ul id="todoList" class="list-rows"></ul>
+          </article>
 
-      <section class="card span-4" id="briefCard">
-        <h3>2) Operator Brief (60s)</h3>
-        <div id="briefSummary" class="small">Loading…</div>
-        <ul class="list" id="briefHighlights"></ul>
-        <div class="delta-grid" id="briefDeltas"></div>
-      </section>
-
-      <section class="card span-6" id="decisionCard">
-        <h3>3) What Needs My Decision Today</h3>
-        <div class="small" id="decisionMeta"></div>
-        <div id="decisionControls"></div>
-        <h3 style="margin-top:10px;">Audit Trail</h3>
-        <div class="audit" id="decisionAudit"></div>
-      </section>
-
-      <section class="card span-6" id="reliabilityCard">
-        <h3>4) Delivery Threat Radar</h3>
-        <div class="signal-grid" id="reliabilitySignals"></div>
-      </section>
-
-      <section class="card span-4" id="revenueCard">
-        <h3>5) Cash & Pipeline Snapshot</h3>
-        <div id="revenueMain"></div>
-        <ul class="list" id="revenueLeakage"></ul>
-      </section>
-
-      <section class="card span-4" id="focusCard">
-        <h3>6) Focus Capacity</h3>
-        <div id="focusMain" class="small"></div>
-        <ul class="list" id="focusIndicators"></ul>
-      </section>
-
-      <section class="card span-4" id="explainCard">
-        <h3>7) Why This Is Ranked Here</h3>
-        <div id="explainList"></div>
-      </section>
-
-      <section class="card span-6" id="trustCard">
-        <h3>8) Safety & Permission Boundaries</h3>
-        <div id="trustMain" class="small"></div>
-        <div class="split" style="margin-top:8px;">
-          <div><h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Checks</h4><div id="trustChecks"></div></div>
-          <div><h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Blast Radius Preview</h4><div id="blastPreview"></div></div>
+          <article class="lane-card">
+            <h4>Calendar Lane</h4>
+            <p>Keep upcoming blocks visible while triaging projects.</p>
+            <form id="appointmentForm" class="lane-form lane-form-appointments">
+              <input id="appointmentTitle" class="field" type="text" maxlength="100" placeholder="Meeting / session title" />
+              <input id="appointmentWhen" class="field" type="datetime-local" />
+              <input id="appointmentContext" class="field" type="text" maxlength="80" placeholder="Context" />
+              <button type="submit" class="mini-btn">Add</button>
+            </form>
+            <ul id="appointmentList" class="list-rows"></ul>
+          </article>
         </div>
       </section>
 
-      <section class="card span-6" id="portfolioCard">
-        <h3>9) Portfolio Command View</h3>
-        <div class="small" id="portfolioSummary"></div>
-        <div class="split" style="margin-top:8px;">
+      <section class="panel reveal" data-theme="dark">
+        <div class="section-head">
           <div>
-            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Domain Risk Grid</h4>
-            <div id="portfolioDomains"></div>
+            <h3>OpenClaw 24/7 Proactive Feed</h3>
+            <p>Improvements that can be applied before they become incidents.</p>
           </div>
+        </div>
+        <div id="proactiveList" class="proactive-grid"></div>
+      </section>
+
+      <section id="projectSections" class="project-lane"></section>
+
+      <section class="panel reveal" data-theme="dark">
+        <div class="section-head">
           <div>
-            <h4 style="margin:0 0 6px; font-size:12px; color:var(--muted);">Resource Contention</h4>
-            <div id="portfolioContention"></div>
+            <h3>Action Journal</h3>
+            <p>Review, queue, and go-live intents are recorded here.</p>
+          </div>
+        </div>
+        <ul id="actionJournal" class="journal-list"></ul>
+      </section>
+
+      <section class="panel reveal" data-theme="light">
+        <div class="section-head">
+          <div>
+            <h3>Execution History</h3>
+            <p>Inspect stdout/stderr, then retry any action with one click.</p>
+          </div>
+          <div class="pro-actions">
+            <button id="refreshHistoryBtn" class="mini-btn">Refresh History</button>
+          </div>
+        </div>
+        <div class="history-grid">
+          <ul id="execHistoryList" class="history-list"></ul>
+          <div class="history-detail">
+            <p id="execDetailMeta" class="history-meta">Select an execution row to view details.</p>
+            <pre id="execDetail" class="history-output">No execution selected.</pre>
           </div>
         </div>
       </section>
+    </main>
 
-      <section class="card span-6" id="scenarioCard">
-        <h3>10) If We Do Nothing, What Breaks?</h3>
-        <div class="small" id="scenarioMeta"></div>
-        <div class="scenario-grid" id="scenarioGrid"></div>
-      </section>
-
-      <section class="card span-6" id="memoryCard">
-        <h3>11) Decision Journal & Learning Loop</h3>
-        <div class="small" id="memoryMeta"></div>
-        <ul class="list" id="memoryPrefs"></ul>
-        <div class="mem-form">
-          <input id="prefKey" placeholder="preference key" />
-          <input id="prefValue" placeholder="value" />
-          <button id="savePrefBtn">Save Preference</button>
-        </div>
-      </section>
-
-      <section class="card span-6" id="roadmapCard">
-        <h3>12) Parking Lot — Not for Today</h3>
-        <div class="small" id="roadmapMeta"></div>
-        <div class="roadmap-grid" id="roadmapTop"></div>
-        <ul class="list" id="roadmapFirstAction"></ul>
-      </section>
-
-      <section class="card span-6" id="classicCard">
-        <h3>Legacy Mission Panels (preserved)</h3>
-        <div class="projects" id="projects"></div>
-      </section>
-
-      <section class="card span-6" id="classicMetaCard">
-        <h3>Latest Updates & Decisions</h3>
-        <div class="split">
-          <div>
-            <div class="small">Latest Updates</div>
-            <ul class="list" id="updates"></ul>
-          </div>
-          <div>
-            <div class="small">Decisions Needed</div>
-            <ul class="list" id="decisions"></ul>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <div class="footer">R = refresh · A = toggle auto-refresh · Data source: <code>snapshot.json</code></div>
+    <div class="footer">Snapshot source: <code>snapshot.json</code> | Keyboard: <code>R</code> refresh, <code>A</code> auto-refresh</div>
   </div>
 
   <div id="toast" class="toast"></div>
 
-<script>
-const state = {
-  data: null,
-  autoRefresh: true,
-  timer: null,
-  focusOverride: null,
-  stream: { enabled: false, connected: false, lastEventAt: null, source: null },
-  localAudit: loadLocal('cc.local.audit', []),
-  localPrefs: loadLocal('cc.local.prefs', {}),
-};
-
-function loadLocal(key, fallback){
-  try {
-    const raw = localStorage.getItem(key);
-    if(!raw) return fallback;
-    return JSON.parse(raw);
-  } catch {
-    return fallback;
-  }
-}
-
-function saveLocal(key, value){
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-function esc(v){
-  return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-}
-
-function cls(status){
-  const s = String(status || '').toLowerCase();
-  if(['ok','healthy','good'].includes(s)) return 'ok';
-  if(['critical','alert','high'].includes(s)) return 'alert';
-  if(['warn','warning','degraded'].includes(s)) return 'warn';
-  return 'unknown';
-}
-
-function relTime(iso){
-  if(!iso) return 'n/a';
-  const d = new Date(iso);
-  if(Number.isNaN(d.getTime())) return String(iso);
-  const s = Math.floor((Date.now() - d.getTime())/1000);
-  if(s < 0){
-    const a = Math.abs(s);
-    if(a < 60) return `in ${a}s`;
-    if(a < 3600) return `in ${Math.floor(a/60)}m`;
-    return `in ${Math.floor(a/3600)}h`;
-  }
-  if(s < 60) return `${s}s ago`;
-  if(s < 3600) return `${Math.floor(s/60)}m ago`;
-  if(s < 86400) return `${Math.floor(s/3600)}h ago`;
-  return `${Math.floor(s/86400)}d ago`;
-}
-
-function fmtPercent(v, digits=0){
-  const n = Number(v);
-  if(Number.isNaN(n)) return 'n/a';
-  return `${(n*100).toFixed(digits)}%`;
-}
-
-function fmtMoney(v){
-  const n = Number(v);
-  if(Number.isNaN(n)) return 'n/a';
-  return new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(n);
-}
-
-function showToast(msg){
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(()=> el.classList.remove('show'), 1600);
-}
-
-async function copyText(text){
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function addLocalAudit(action, detail){
-  const row = {
-    ts: new Date().toISOString(),
-    actor: 'operator-local',
-    action,
-    result: 'queued',
-    rollbackAvailable: true,
-    detail,
-  };
-  state.localAudit = [row, ...(state.localAudit || [])].slice(0, 40);
-  saveLocal('cc.local.audit', state.localAudit);
-}
-
-function featureEnabled(flag){
-  const ff = state.data?.featureFlags || {};
-  if(flag in ff) return !!ff[flag];
-  return true;
-}
-
-function applyFeatureVisibility(){
-  const map = {
-    godView: 'godViewCard',
-    attentionQueue: 'attentionCard',
-    executiveDailyBrief: 'briefCard',
-    decisionConsole: 'decisionCard',
-    reliabilityRadar: 'reliabilityCard',
-    revenuePipeline: 'revenueCard',
-    personalFocusMode: 'focusCard',
-    explainability: 'explainCard',
-    trustSecurity: 'trustCard',
-    portfolioCommandView: 'portfolioCard',
-    scenarioSimulator: 'scenarioCard',
-    operatorMemory: 'memoryCard',
-    commandSensorRoadmap: 'roadmapCard',
-    classicPanels: 'classicCard',
-  };
-  Object.entries(map).forEach(([flag, id]) => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.classList.toggle('hidden', !featureEnabled(flag));
-  });
-}
-
-function renderTop(){
-  const d = state.data || {};
-  const h = d.headline || {};
-  const attention = d.attentionQueue || {};
-  const rev = d.revenuePipeline || {};
-  const trust = d.trustSecurity || {};
-
-  document.getElementById('kpiStatus').textContent = String(h.globalStatus || 'unknown').toUpperCase();
-  document.getElementById('kpiAttention').textContent = (attention.summary?.total ?? 0);
-  document.getElementById('kpiBreaches').textContent = (attention.summary?.breached ?? 0);
-  document.getElementById('kpiForecast').textContent = `${Math.round((rev.forecastConfidence?.score ?? 0) * 100)}%`;
-  document.getElementById('kpiTrust').textContent = String(trust.overallStatus || 'unknown').toUpperCase();
-
-  const safeMode = (d.decisionConsole?.globalMode || 'dry-run').toUpperCase();
-  document.getElementById('safeModePill').textContent = `Console mode: ${safeMode}`;
-
-  const stamp = `Generated ${d.generatedAt || 'n/a'} · ${relTime(d.generatedAt)} · Schema ${d.schemaVersion || 'legacy'}`;
-  document.getElementById('stamp').textContent = stamp;
-}
-
-function renderGodView(){
-  const g = state.data?.godView || {};
-  const top = g.topStrip || {};
-  const summary = g.summary || {};
-
-  document.getElementById('godViewSummary').innerHTML =
-    `<b>Hurt today:</b> ${esc(summary.whatCanHurtToday || 'n/a')} · <b>Pay today:</b> ${esc(summary.whatCanPayToday || 'n/a')}`;
-
-  const topEl = document.getElementById('godViewTop');
-  topEl.innerHTML = `
-    <div class="kpi"><div class="label">Critical Alerts</div><div class="val">${esc(top.criticalAlerts ?? 0)}</div></div>
-    <div class="kpi"><div class="label">Hard Decisions</div><div class="val">${esc(top.hardDeadlinesToday ?? 0)}</div></div>
-    <div class="kpi"><div class="label">Focus Capacity</div><div class="val">${esc(top.focusCapacity || 'NORMAL')}</div></div>
-    <div class="kpi"><div class="label">Trust Score</div><div class="val">${esc(top.trustScore ?? 0)}%</div></div>
-  `;
-
-  const dec = document.getElementById('godViewDecisions');
-  dec.innerHTML = '';
-  (g.decisionQueue || []).forEach(i => {
-    dec.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(i.severity)}">${esc(i.severity || 'unknown')}</span> <b>${esc(i.title || '')}</b> · score ${esc(i.score ?? 0)}</div>`;
-  });
-  if(!dec.innerHTML) dec.innerHTML = '<div class="small">No immediate decisions.</div>';
-
-  const exe = document.getElementById('godViewExecution');
-  exe.innerHTML = '';
-  (g.executionQueue || []).forEach(i => {
-    exe.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(i.severity)}">${esc(i.severity || 'unknown')}</span> <b>${esc(i.title || '')}</b> · score ${esc(i.score ?? 0)}</div>`;
-  });
-  if(!exe.innerHTML) exe.innerHTML = '<div class="small">No queued execution items.</div>';
-}
-
-function attentionBias(item){
-  const bias = state.data?.operatorMemory?.recommendationBiasing?.weights || {};
-  const localCritical = state.localPrefs?.criticalOnly === true;
-  let factor = 1;
-  const tags = item.tags || [];
-  if(tags.includes('reliability')) factor *= Number(bias.reliability || 1);
-  if(tags.includes('revenue')) factor *= Number(bias.revenue || 1);
-  if(tags.includes('trust')) factor *= Number(bias.trust || 1);
-  if(localCritical && ['critical','high'].includes(String(item.severity||'').toLowerCase())) factor *= 1.15;
-  return factor;
-}
-
-function renderAttention(){
-  const q = state.data?.attentionQueue || {};
-  const listEl = document.getElementById('attentionList');
-  listEl.innerHTML = '';
-
-  const scoreOf = (i) => i.priority?.score ?? i.score ?? 0;
-  const items = [...(q.items || [])].sort((a,b)=> (scoreOf(b) * attentionBias(b)) - (scoreOf(a) * attentionBias(a)));
-
-  const summary = q.summary || {};
-  const model = q.model?.id || 'priority_v2';
-  document.getElementById('attentionSummary').innerHTML =
-    `Process in this order to protect delivery (${esc(model)}) · <b>${summary.total || 0}</b> items · <b>${summary.breached || 0}</b> overdue`;
-
-  if(!items.length){
-    listEl.innerHTML = '<div class="small">No urgent queue items. Pull the next highest-impact task.</div>';
-    return;
-  }
-
-  items.forEach(item => {
-    const c = cls(item.severity || item.status);
-    const remaining = item.sla?.remainingMinutes;
-    const slaText = typeof remaining === 'number' ? `${remaining >= 0 ? `${remaining}m left` : `${Math.abs(remaining)}m overdue`}` : 'SLA n/a';
-    const score = ((item.priority?.score ?? item.score ?? 0) * attentionBias(item)).toFixed(1);
-    const p = item.priority || {};
-
-    listEl.innerHTML += `
-      <article class="attention-item">
-        <div class="row">
-          <div class="left">
-            <span class="status-chip ${c}">${esc(item.severity || 'unknown')}</span>
-            <span class="score">#${esc(item.rank || '?')} · score ${esc(score)} · ${esc(p.band || 'P?')}</span>
-            <span class="status-chip ${cls(item.dataTrust === 'stale' ? 'warn' : (item.dataTrust === 'aging' ? 'warning' : 'ok'))}">${esc(item.dataTrust || 'unknown')} data</span>
-            <span class="small">${esc(item.source || 'source')}</span>
-          </div>
-          <div class="small" data-sla-target="${esc(item.sla?.targetAt || '')}">${esc(slaText)}</div>
-        </div>
-        <div style="font-weight:700; margin-top:6px;">${esc(item.title || 'Untitled')}</div>
-        <div class="small" style="margin-top:2px;">${esc(item.summary || '')}</div>
-        <div class="small">${esc(p.confidenceBand || '')} · ${esc(p.freshnessBand || '')} · S1 ${(Number(p.firstOrder||0)*100).toFixed(0)} · S2 ${(Number(p.secondOrder||0)*100).toFixed(0)}</div>
-        <div class="action-row">
-          <button class="copy-action" data-cmd="${esc(item.recommendedAction?.command || '')}" data-id="${esc(item.id || '')}">Copy recommended action</button>
-          <button class="queue-action" data-cmd="${esc(item.recommendedAction?.command || '')}" data-label="${esc(item.title || '')}">Queue dry-run</button>
-          <button class="copy-rollback" data-cmd="${esc(item.recommendedAction?.rollbackCommand || '')}" data-id="${esc(item.id || '')}">Copy rollback</button>
-        </div>
-      </article>
-    `;
-  });
-}
-
-function renderBrief(){
-  const b = state.data?.executiveDailyBrief || {};
-  document.getElementById('briefSummary').innerHTML =
-    `<div><b>${esc(b.summary || 'No summary.')}</b></div><div class="small">Read time: ${esc(b.readTimeSeconds || 60)}s</div>`;
-
-  const highlights = document.getElementById('briefHighlights');
-  highlights.innerHTML = '';
-  const lines = [...(b.highlights || []), ...(b.risks || []).slice(0,2)];
-  lines.forEach(line => highlights.innerHTML += `<li>${esc(line)}</li>`);
-  if(!lines.length) highlights.innerHTML = '<li class="small">No highlights.</li>';
-
-  const deltas = document.getElementById('briefDeltas');
-  deltas.innerHTML = '';
-  (b.deltas || []).forEach(d => {
-    const dir = d.direction === 'up' ? '↑' : d.direction === 'down' ? '↓' : '→';
-    deltas.innerHTML += `
-      <div class="delta">
-        <div class="small">${esc(d.metric)}</div>
-        <div style="font-weight:750; margin-top:2px;">${esc(d.after)} ${esc(d.unit || '')}</div>
-        <div class="small">${dir} ${esc(d.delta)}</div>
-      </div>
-    `;
-  });
-  if(!deltas.innerHTML) deltas.innerHTML = '<div class="small">No delta data.</div>';
-}
-
-function renderDecisionConsole(){
-  const dc = state.data?.decisionConsole || {};
-  document.getElementById('decisionMeta').textContent =
-    `Safe controls enabled: ${dc.safeControlsEnabled ? 'yes' : 'no'} · Mode: ${dc.globalMode || 'dry-run'}`;
-
-  const controls = document.getElementById('decisionControls');
-  controls.innerHTML = '';
-  (dc.controls || []).forEach(c => {
-    controls.innerHTML += `
-      <div class="attention-item" style="margin-bottom:7px;">
-        <div class="row">
-          <div class="left">
-            <span class="status-chip ${cls(c.risk === 'high' ? 'alert' : c.risk === 'medium' ? 'warn' : 'ok')}">${esc(c.risk || 'low')} risk</span>
-            <div style="font-weight:700;">${esc(c.label || 'Control')}</div>
-          </div>
-        </div>
-        <div class="small">${esc(c.description || '')}</div>
-        <div class="action-row">
-          <button class="queue-control" data-cmd="${esc(c.command || '')}" data-label="${esc(c.label || '')}">Queue (dry-run)</button>
-          <button class="copy-rollback" data-cmd="${esc(c.rollback || '')}">Copy rollback</button>
-        </div>
-      </div>
-    `;
-  });
-
-  const audit = [...(dc.auditTrail || []), ...(state.localAudit || [])]
-    .sort((a,b)=> new Date(b.ts || 0) - new Date(a.ts || 0))
-    .slice(0, 24);
-
-  const auditEl = document.getElementById('decisionAudit');
-  auditEl.innerHTML = '';
-  audit.forEach(row => {
-    auditEl.innerHTML += `
-      <div class="audit-item">
-        <div class="row">
-          <div style="font-weight:700;">${esc(row.action || 'action')}</div>
-          <div class="small">${esc(relTime(row.ts))}</div>
-        </div>
-        <div class="small">${esc(row.actor || 'actor')} · ${esc(row.result || '')}</div>
-        ${row.detail ? `<div class="small">${esc(row.detail)}</div>` : ''}
-      </div>
-    `;
-  });
-  if(!auditEl.innerHTML) auditEl.innerHTML = '<div class="small">No audit events.</div>';
-}
-
-function miniSpark(values){
-  if(!Array.isArray(values) || !values.length) return '—';
-  return values.slice(-12).map(v => Number(v).toFixed(1)).join(' · ');
-}
-
-function renderReliability(){
-  const r = state.data?.reliabilityRadar || {};
-  const el = document.getElementById('reliabilitySignals');
-  el.innerHTML = '';
-  (r.signals || []).forEach(s => {
-    el.innerHTML += `
-      <div class="signal">
-        <div class="row">
-          <div style="font-weight:700;">${esc(s.label || s.key)}</div>
-          <span class="status-chip ${cls(s.status)}">${esc(s.status)}</span>
-        </div>
-        <div style="font-size:20px; font-weight:800; margin-top:4px;">${esc(s.current)} ${esc(s.unit || '')}</div>
-        <div class="small">Target: ${esc(s.target || 'n/a')} · Trend: ${esc(s.trend || 'flat')}</div>
-        <div class="spark">${esc(miniSpark(s.history || []))}</div>
-      </div>
-    `;
-  });
-  if(!el.innerHTML) el.innerHTML = '<div class="small">No reliability signals.</div>';
-}
-
-function renderRevenue(){
-  const r = state.data?.revenuePipeline || {};
-  const totals = r.totals || {};
-  document.getElementById('revenueMain').innerHTML = `
-    <div style="font-weight:800; font-size:18px;">${fmtMoney(totals.weightedForecast || 0)}</div>
-    <div class="small">Weighted forecast · pipeline ${fmtMoney(totals.pipelineValue || 0)}</div>
-    <div class="small">Data quality: <b>${esc(r.dataQuality || 'unknown')}</b> · Confidence <b>${Math.round((r.forecastConfidence?.score || 0) * 100)}%</b></div>
-  `;
-
-  const leakage = document.getElementById('revenueLeakage');
-  leakage.innerHTML = '';
-  (r.leakage || []).forEach(l => {
-    leakage.innerHTML += `<li><b>${esc(l.stage)}</b>: ${fmtPercent(l.rate,1)} leakage · impact ${fmtMoney(l.estimatedImpact || 0)}</li>`;
-  });
-  if((r.forecastConfidence?.missingInputs || []).length){
-    leakage.innerHTML += `<li class="small">Missing inputs: ${(r.forecastConfidence.missingInputs || []).map(esc).join(', ')}</li>`;
-  }
-}
-
-function renderFocus(){
-  const f = state.data?.personalFocusMode || {};
-  const criticalOnly = state.focusOverride !== null ? state.focusOverride : !!f.criticalOnly;
-  document.getElementById('focusMain').innerHTML = `
-    <div><span class="status-chip ${cls(f.status)}">${esc(f.status || 'monitoring')}</span></div>
-    <div style="margin-top:6px;"><b>Critical-only:</b> ${criticalOnly ? 'ON' : 'OFF'}</div>
-    <div><b>Quiet hours:</b> ${f.quietHours?.start || '22:00'}–${f.quietHours?.end || '07:00'} (${f.quietHours?.activeNow ? 'active' : 'inactive'})</div>
-    <div><b>Suppressed estimate:</b> ${esc(f.suppressedEstimate ?? 0)} notifications</div>
-  `;
-
-  const indicators = document.getElementById('focusIndicators');
-  indicators.innerHTML = '';
-  (f.indicators || []).forEach(i => indicators.innerHTML += `<li>${esc(i)}</li>`);
-}
-
-function renderExplainability(){
-  const ex = state.data?.explainability || {};
-  const el = document.getElementById('explainList');
-  el.innerHTML = '';
-  (ex.anomalies || []).slice(0,5).forEach(a => {
-    const ev = (a.evidence || []).slice(0,2).map(e => esc(e.path)).join('<br>');
-    el.innerHTML += `
-      <div class="attention-item" style="margin-bottom:7px;">
-        <div class="row">
-          <div style="font-weight:700;">${esc(a.title || 'anomaly')}</div>
-          <span class="status-chip ${cls(a.severity)}">${esc(a.severity || 'warn')}</span>
-        </div>
-        <div class="small" style="margin-top:4px;"><b>Hypothesis:</b> ${esc(a.hypothesis || '')}</div>
-        <div class="small"><b>Confidence:</b> ${Math.round((a.confidence || 0)*100)}%</div>
-        <div class="small"><b>Suggested fix:</b> ${esc(a.suggestedFix || '')}</div>
-        ${ev ? `<div class="small"><b>Evidence:</b><br>${ev}</div>` : ''}
-      </div>
-    `;
-  });
-  if(!el.innerHTML) el.innerHTML = '<div class="small">No explainability rows.</div>';
-}
-
-function renderTrust(){
-  const t = state.data?.trustSecurity || {};
-  document.getElementById('trustMain').innerHTML =
-    `<span class="status-chip ${cls(t.overallStatus)}">${esc(t.overallStatus || 'unknown')}</span> Overall trust posture`;
-
-  const checks = document.getElementById('trustChecks');
-  checks.innerHTML = '';
-  (t.secretHealth?.checks || []).forEach(c => {
-    checks.innerHTML += `<div class="small">${c.exists ? '✅' : '⚠️'} ${esc(c.name)} <code>${esc(c.path)}</code></div>`;
-  });
-  checks.innerHTML += `<div class="small">Permission drift: ${esc(t.permissionDrift?.status || 'n/a')} (${esc(t.permissionDrift?.driftCount ?? 0)} drifts)</div>`;
-  checks.innerHTML += `<div class="small">Dependency status: ${esc(t.dependencyStatus?.status || 'n/a')}</div>`;
-
-  const blast = document.getElementById('blastPreview');
-  blast.innerHTML = '';
-  (t.blastRadiusPreview || []).slice(0,5).forEach(b => {
-    blast.innerHTML += `<div class="small">• <b>${esc(b.control)}</b> (${esc(b.risk)}) → ${esc(b.scope)}</div>`;
-  });
-  if(!blast.innerHTML) blast.innerHTML = '<div class="small">No blast previews.</div>';
-}
-
-function renderScenario(){
-  const s = state.data?.scenarioSimulator || {};
-  document.getElementById('scenarioMeta').innerHTML =
-    `Recommended: <b>${esc(s.recommendedScenarioId || 'n/a')}</b> · compare ${esc((s.compareDimensions || []).join(', '))}`;
-
-  const grid = document.getElementById('scenarioGrid');
-  grid.innerHTML = '';
-  (s.options || []).forEach(o => {
-    const rec = o.id === s.recommendedScenarioId;
-    const m = o.projectedMetrics || {};
-    grid.innerHTML += `
-      <article class="scenario ${rec ? 'recommended':''}">
-        <div class="row">
-          <div style="font-weight:800;">${esc(o.name || o.id)}</div>
-          ${rec ? '<span class="status-chip ok">recommended</span>' : ''}
-        </div>
-        <div class="small">${esc(o.description || '')}</div>
-        <ul class="list">
-          <li>Forecast: <b>${fmtMoney(m.weightedForecast || 0)}</b></li>
-          <li>Alert load: <b>${esc(m.alertLoad ?? 'n/a')}</b></li>
-          <li>SLA risk Δ: <b>${esc(m.slaRiskDeltaPct ?? 'n/a')}%</b></li>
-          <li>Confidence: <b>${Math.round((m.forecastConfidence || 0)*100)}%</b></li>
-        </ul>
-      </article>
-    `;
-  });
-  if(!grid.innerHTML) grid.innerHTML = '<div class="small">No scenarios available.</div>';
-}
-
-function renderPortfolio(){
-  const p = state.data?.portfolioCommandView || {};
-  document.getElementById('portfolioSummary').textContent = p.summary || 'Portfolio-level risk view unavailable.';
-
-  const d = document.getElementById('portfolioDomains');
-  d.innerHTML = '';
-  (p.domains || []).forEach(row => {
-    d.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(row.status)}">${esc(row.status)}</span> <b>${esc(row.domain)}</b> · risk ${esc(row.riskScore)} · conf ${Math.round((row.confidence||0)*100)}%<br>${esc(row.note || '')}</div>`;
-  });
-  if(!d.innerHTML) d.innerHTML = '<div class="small">No domain rows.</div>';
-
-  const c = document.getElementById('portfolioContention');
-  c.innerHTML = '';
-  (p.contention || []).forEach(row => {
-    c.innerHTML += `<div class="small" style="margin-bottom:6px;"><span class="status-chip ${cls(row.status)}">${esc(row.status)}</span> <b>${esc(row.resource)}</b> · pressure ${esc(row.pressure)}<br>${esc(row.note || '')}</div>`;
-  });
-  if(!c.innerHTML) c.innerHTML = '<div class="small">No contention rows.</div>';
-}
-
-function mergedPreferences(){
-  const prefs = [...(state.data?.operatorMemory?.preferences || [])];
-  Object.entries(state.localPrefs || {}).forEach(([k,v]) => prefs.push({ key: k, value: v, source: 'local' }));
-  const seen = new Set();
-  return prefs.filter(p => {
-    const key = String(p.key || '').trim();
-    if(!key || seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-function renderMemory(){
-  const m = state.data?.operatorMemory || {};
-  document.getElementById('memoryMeta').textContent =
-    `Operator: ${m.profile?.operator || 'James'} · Strategy: ${m.recommendationBiasing?.strategy || 'safe-first'}`;
-
-  const list = document.getElementById('memoryPrefs');
-  list.innerHTML = '';
-  mergedPreferences().forEach(p => list.innerHTML += `<li><b>${esc(p.key)}</b>: ${esc(p.value)}</li>`);
-  if(!list.innerHTML) list.innerHTML = '<li class="small">No preferences stored.</li>';
-}
-
-function renderRoadmap(){
-  const r = state.data?.commandSensorRoadmap || {};
-  document.getElementById('roadmapMeta').innerHTML =
-    `North star: <b>${esc(r.northStar || 'Confident Action Closure Rate')}</b> · Horizon: ${esc(r.horizon || '30/60/90')}`;
-
-  const top = document.getElementById('roadmapTop');
-  top.innerHTML = '';
-  (r.topFeatures || []).slice(0,4).forEach(f => {
-    top.innerHTML += `
-      <div class="roadmap-item">
-        <div style="font-weight:800;">${esc(f.name || 'Feature')}</div>
-        <div class="small">Owner: ${esc(f.owner || 'TBD')}</div>
-        <div class="small">Why now: ${esc(f.whyNow || '')}</div>
-      </div>
-    `;
-  });
-  if(!top.innerHTML) top.innerHTML = '<div class="small">No roadmap features loaded.</div>';
-
-  const first = document.getElementById('roadmapFirstAction');
-  first.innerHTML = '';
-  (r.firstAction || []).forEach(x => first.innerHTML += `<li>${esc(x)}</li>`);
-  if(!first.innerHTML) first.innerHTML = '<li class="small">No immediate action.</li>';
-}
-
-function renderClassic(){
-  const d = state.data || {};
-  const pj = document.getElementById('projects');
-  pj.innerHTML = '';
-  (d.projects || []).forEach(p => {
-    pj.innerHTML += `
-      <article class="project">
-        <span class="status-chip ${cls(p.status)}">${esc(p.status || 'unknown')}</span>
-        <div style="font-weight:700; margin-top:7px;">${esc(p.name || 'project')}</div>
-        <div class="small">${esc(p.summary || '')}</div>
-        <div class="small" style="margin-top:5px;">Updated ${esc(relTime(p.lastUpdate))}</div>
-      </article>
-    `;
-  });
-
-  const updates = document.getElementById('updates');
-  updates.innerHTML = '';
-  (d.latestUpdates || []).forEach(u => updates.innerHTML += `<li>${esc(u.item)} <span class="small">(${esc(relTime(u.at))})</span></li>`);
-  if(!updates.innerHTML) updates.innerHTML = '<li class="small">No updates.</li>';
-
-  const decisions = document.getElementById('decisions');
-  decisions.innerHTML = '';
-  (d.decisionsNeeded || []).forEach(x => decisions.innerHTML += `<li>${esc(x)}</li>`);
-  if(!decisions.innerHTML) decisions.innerHTML = '<li class="small">No immediate decisions required.</li>';
-}
-
-function updateSlaTimers(){
-  document.querySelectorAll('[data-sla-target]').forEach(el => {
-    const target = new Date(el.getAttribute('data-sla-target'));
-    if(Number.isNaN(target.getTime())) return;
-    const remaining = Math.round((target.getTime() - Date.now()) / 60000);
-    el.textContent = remaining >= 0 ? `${remaining}m left` : `${Math.abs(remaining)}m overdue`;
-  });
-}
-
-function renderAll(){
-  applyFeatureVisibility();
-  renderTop();
-  if(featureEnabled('godView')) renderGodView();
-  if(featureEnabled('attentionQueue')) renderAttention();
-  if(featureEnabled('executiveDailyBrief')) renderBrief();
-  if(featureEnabled('decisionConsole')) renderDecisionConsole();
-  if(featureEnabled('reliabilityRadar')) renderReliability();
-  if(featureEnabled('revenuePipeline')) renderRevenue();
-  if(featureEnabled('personalFocusMode')) renderFocus();
-  if(featureEnabled('explainability')) renderExplainability();
-  if(featureEnabled('trustSecurity')) renderTrust();
-  if(featureEnabled('portfolioCommandView')) renderPortfolio();
-  if(featureEnabled('scenarioSimulator')) renderScenario();
-  if(featureEnabled('operatorMemory')) renderMemory();
-  if(featureEnabled('commandSensorRoadmap')) renderRoadmap();
-  if(featureEnabled('classicPanels')) renderClassic();
-  updateSlaTimers();
-}
-
-function updateStreamPill(){
-  const el = document.getElementById('streamPill');
-  if(!el) return;
-  if(!state.stream.enabled){
-    el.textContent = 'Live stream: OFF';
-    return;
-  }
-  if(state.stream.connected){
-    el.textContent = `Live stream: ON${state.stream.lastEventAt ? ` · ${relTime(state.stream.lastEventAt)}` : ''}`;
-    return;
-  }
-  el.textContent = 'Live stream: RECONNECTING';
-}
-
-async function loadData(){
-  const r = await fetch('./snapshot.json?ts=' + Date.now());
-  if(!r.ok) throw new Error('snapshot fetch failed');
-  return r.json();
-}
-
-async function refresh(){
-  try {
-    state.data = await loadData();
-    renderAll();
-  } catch (e) {
-    console.error(e);
-    document.getElementById('stamp').textContent = 'Snapshot unavailable — run sync script and redeploy.';
-  }
-}
-
-function startLiveStream(){
-  if(typeof EventSource === 'undefined'){
-    state.stream.enabled = false;
-    updateStreamPill();
-    return;
-  }
-
-  if(state.stream.source){
-    try { state.stream.source.close(); } catch {}
-  }
-
-  state.stream.enabled = true;
-  const es = new EventSource('/api/stream');
-  state.stream.source = es;
-  updateStreamPill();
-
-  es.addEventListener('snapshot', (ev) => {
-    try {
-      const payload = JSON.parse(ev.data || '{}');
-      if(payload && payload.snapshot){
-        state.data = payload.snapshot;
-        state.stream.connected = true;
-        state.stream.lastEventAt = new Date().toISOString();
-        renderAll();
-        updateStreamPill();
+  <script>
+    const STORAGE_KEYS = {
+      todos: "cc.v2.todos",
+      appointments: "cc.v2.appointments",
+      audit: "cc.v2.audit",
+      projectModes: "cc.v2.projectModes",
+      execToken: "cc.v2.execToken",
+      reviewChecks: "cc.v2.reviewChecks"
+    };
+
+    const DEFAULT_OPERATOR_CONFIG = {
+      timezone: "America/New_York",
+      calendarSource: "local-only",
+      tasksSource: "local-only",
+      projects: [
+        {
+          name: "Outreach Pipeline",
+          type: "outreach",
+          repoPath: "/Users/j/Documents/Builds/Outreach",
+          owner: "James (Halldon)",
+          priority: "P1",
+          automationMode: "auto-fix-allowed",
+          branchFlow: ["dev", "main"],
+          metricsSource: "file+db",
+          refreshCadence: "event-driven + cron",
+          actions: {
+            health_check: {
+              label: "Health Check",
+              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py && python3 scripts/build_lock_readiness.py",
+              classification: "internal_diagnostic"
+            },
+            verify: {
+              label: "Verify",
+              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/validate_emails.py && python3 scripts/build_channel_queues.py",
+              classification: "internal_diagnostic"
+            },
+            go_live: {
+              label: "Go Live",
+              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/orchestrate_daily.py",
+              classification: "external_irreversible"
+            },
+            rollback: {
+              label: "Rollback",
+              cmd: "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py",
+              classification: "internal_safe"
+            }
+          }
+        },
+        {
+          name: "Polymarket Bot (paper-first)",
+          type: "polymarket",
+          repoPath: "/Users/j/.openclaw/workspace/polymarket-bot",
+          owner: "James",
+          priority: "P1",
+          automationMode: "auto-fix-allowed",
+          branchFlow: ["main"],
+          metricsSource: "db+file",
+          refreshCadence: "loop poll ~2s + hourly scoreboard",
+          actions: {
+            health_check: {
+              label: "Health Check",
+              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main status",
+              classification: "internal_diagnostic"
+            },
+            verify: {
+              label: "Verify Guards",
+              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 scripts/verify_launch_guards.py && python3 scripts/build_dashboard_snapshot.py",
+              classification: "internal_diagnostic"
+            },
+            go_live: {
+              label: "Run Paper Loop",
+              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main run --mode paper --loop",
+              classification: "internal_paper"
+            },
+            rollback: {
+              label: "Kill Switch",
+              cmd: "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main kill-switch",
+              classification: "internal_safe"
+            }
+          }
+        }
+      ],
+      securityRules: {
+        liveActionTriggers: "James only (direct session + approved automations)",
+        liveConfirmationPolicy: "required every time for true external irreversible actions; no confirmation required for local paper-mode/internal diagnostics/autofixes",
+        autoFixScope: "local files/scripts/services only; external publish/send/live-trade requires explicit confirmation"
       }
-    } catch (err){
-      console.error('stream parse failed', err);
-    }
-  });
+    };
 
-  es.onopen = () => {
-    state.stream.connected = true;
-    updateStreamPill();
-  };
-
-  es.onerror = () => {
-    state.stream.connected = false;
-    updateStreamPill();
-  };
-}
-
-function setAuto(on){
-  state.autoRefresh = !!on;
-  document.getElementById('autoRefreshPill').textContent = `Auto-refresh: ${state.autoRefresh ? 'ON' : 'OFF'}`;
-  if(state.timer) clearInterval(state.timer);
-  if(state.autoRefresh) state.timer = setInterval(refresh, 30000);
-}
-
-function wireEvents(){
-  document.getElementById('refreshBtn').addEventListener('click', refresh);
-  document.getElementById('autoRefreshPill').addEventListener('click', () => setAuto(!state.autoRefresh));
-
-  document.getElementById('focusToggleBtn').addEventListener('click', ()=> {
-    state.focusOverride = !(state.focusOverride ?? !!state.data?.personalFocusMode?.criticalOnly);
-    state.localPrefs.criticalOnly = state.focusOverride;
-    saveLocal('cc.local.prefs', state.localPrefs);
-    renderFocus();
-    showToast(`Focus critical-only ${state.focusOverride ? 'ON' : 'OFF'}`);
-  });
-
-  document.getElementById('savePrefBtn').addEventListener('click', ()=> {
-    const key = (document.getElementById('prefKey').value || '').trim();
-    const value = (document.getElementById('prefValue').value || '').trim();
-    if(!key) return;
-    state.localPrefs[key] = value;
-    saveLocal('cc.local.prefs', state.localPrefs);
-    document.getElementById('prefKey').value = '';
-    document.getElementById('prefValue').value = '';
-    renderMemory();
-    showToast('Preference saved');
-  });
-
-  document.addEventListener('click', async (e)=> {
-    const t = e.target;
-    if(!(t instanceof HTMLElement)) return;
-
-    if(t.classList.contains('copy-action') || t.classList.contains('copy-rollback')){
-      const cmd = t.getAttribute('data-cmd') || '';
-      if(!cmd){ showToast('No command available'); return; }
-      const ok = await copyText(cmd);
-      showToast(ok ? 'Command copied' : 'Copy failed');
-      return;
+    function loadLocal(key, fallback) {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return fallback;
+        return JSON.parse(raw);
+      } catch {
+        return fallback;
+      }
     }
 
-    if(t.classList.contains('queue-action') || t.classList.contains('queue-control')){
-      const cmd = t.getAttribute('data-cmd') || '';
-      const label = t.getAttribute('data-label') || 'action';
-      addLocalAudit(label, cmd.slice(0,140));
-      renderDecisionConsole();
-      showToast('Action queued in local audit');
-      return;
+    function saveLocal(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
     }
-  });
 
-  window.addEventListener('keydown', (e)=> {
-    const key = e.key.toLowerCase();
-    if(key === 'r') refresh();
-    if(key === 'a') setAuto(!state.autoRefresh);
-  });
+    function normalizeOperatorConfig(raw) {
+      if (!raw || typeof raw !== "object") return DEFAULT_OPERATOR_CONFIG;
+      const projects = Array.isArray(raw.projects) ? raw.projects : DEFAULT_OPERATOR_CONFIG.projects;
+      return {
+        timezone: raw.timezone || DEFAULT_OPERATOR_CONFIG.timezone,
+        calendarSource: raw.calendarSource || DEFAULT_OPERATOR_CONFIG.calendarSource,
+        tasksSource: raw.tasksSource || DEFAULT_OPERATOR_CONFIG.tasksSource,
+        projects: projects.map((project) => ({
+          ...project,
+          type: project.type || projectTypeFromName(project.name),
+          actions: project.actions || {}
+        })),
+        securityRules: {
+          ...DEFAULT_OPERATOR_CONFIG.securityRules,
+          ...(raw.securityRules || {})
+        }
+      };
+    }
 
-  setInterval(updateSlaTimers, 60000);
-}
+    async function loadOperatorConfig() {
+      try {
+        const response = await fetch(`./operator.config.json?ts=${Date.now()}`);
+        if (!response.ok) return state.operatorConfig || DEFAULT_OPERATOR_CONFIG;
+        const payload = await response.json();
+        return normalizeOperatorConfig(payload);
+      } catch {
+        return state.operatorConfig || DEFAULT_OPERATOR_CONFIG;
+      }
+    }
 
-wireEvents();
-refresh();
-startLiveStream();
-setAuto(true);
-setInterval(updateStreamPill, 10000);
-</script>
+    function isoAtHour(hour, minute) {
+      const now = new Date();
+      const d = new Date();
+      d.setHours(hour, minute, 0, 0);
+      if (d.getTime() < now.getTime()) d.setDate(d.getDate() + 1);
+      return d.toISOString();
+    }
+
+    const DEFAULT_TODOS = [
+      { id: "todo-a", text: "Review outreach queue quality before next volume push", project: "Outreach Pipeline", done: false, createdAt: new Date().toISOString() },
+      { id: "todo-b", text: "Check Polymarket paper bot risk envelope after morning run", project: "Polymarket Bot (paper-first)", done: false, createdAt: new Date().toISOString() },
+      { id: "todo-c", text: "Approve one preventive automation for Command Center Ops", project: "Command Center Ops", done: false, createdAt: new Date().toISOString() }
+    ];
+
+    function defaultAppointments() {
+      return [
+        { id: "appt-a", title: "Agency outreach standup", when: isoAtHour(9, 30), context: "Outreach" },
+        { id: "appt-b", title: "Polymarket paper-trade review", when: isoAtHour(14, 0), context: "Trading" },
+        { id: "appt-c", title: "Ops closeout and commits", when: isoAtHour(18, 0), context: "Ops" }
+      ];
+    }
+
+    const state = {
+      data: null,
+      operatorConfig: DEFAULT_OPERATOR_CONFIG,
+      autoRefresh: true,
+      timer: null,
+      stream: { enabled: false, connected: false, lastEventAt: null, source: null, lastSnapshotVersion: null },
+      globalMode: "reviews",
+      projectModes: loadLocal(STORAGE_KEYS.projectModes, {}),
+      localAudit: loadLocal(STORAGE_KEYS.audit, []),
+      todos: loadLocal(STORAGE_KEYS.todos, DEFAULT_TODOS),
+      appointments: loadLocal(STORAGE_KEYS.appointments, defaultAppointments()),
+      execToken: loadLocal(STORAGE_KEYS.execToken, ""),
+      reviewChecks: loadLocal(STORAGE_KEYS.reviewChecks, {}),
+      revealObserver: null,
+      revealBootstrapped: false,
+      renderedProjects: [],
+      execHistory: [],
+      selectedExecId: null
+    };
+
+    function esc(v) {
+      return String(v ?? "").replace(/[&<>"']/g, (c) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "\"": "&quot;",
+        "'": "&#39;"
+      }[c]));
+    }
+
+    function relTime(iso) {
+      if (!iso) return "n/a";
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "n/a";
+      const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+      if (seconds < 0) {
+        const a = Math.abs(seconds);
+        if (a < 3600) return `in ${Math.max(1, Math.floor(a / 60))}m`;
+        if (a < 86400) return `in ${Math.floor(a / 3600)}h`;
+        return `in ${Math.floor(a / 86400)}d`;
+      }
+      if (seconds < 60) return `${seconds}s ago`;
+      if (seconds < 3600) return `${Math.floor(seconds / 60)}m ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)}h ago`;
+      return `${Math.floor(seconds / 86400)}d ago`;
+    }
+
+    function fmtMoney(v) {
+      const n = Number(v);
+      if (Number.isNaN(n)) return "n/a";
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(n);
+    }
+
+    function fmtPercent(v, digits = 0) {
+      const n = Number(v);
+      if (Number.isNaN(n)) return "n/a";
+      return `${(n * 100).toFixed(digits)}%`;
+    }
+
+    function fmtDateTime(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "n/a";
+      const tz = state.operatorConfig?.timezone || "America/New_York";
+      return new Intl.DateTimeFormat("en-US", {
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone: tz
+      }).format(d);
+    }
+
+    function toInputDateTime(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "";
+      const pad = (n) => String(n).padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    }
+
+    function statusClass(status) {
+      const s = String(status || "").toLowerCase();
+      if (["ok", "healthy", "good", "active", "done", "low"].includes(s)) return "status-ok";
+      if (["warn", "warning", "degraded", "medium", "pending", "monitoring"].includes(s)) return "status-warn";
+      if (["critical", "alert", "high", "blocked", "error"].includes(s)) return "status-alert";
+      return "status-unknown";
+    }
+
+    function showToast(msg) {
+      const el = document.getElementById("toast");
+      el.textContent = msg;
+      el.classList.add("show");
+      clearTimeout(showToast._timer);
+      showToast._timer = setTimeout(() => el.classList.remove("show"), 1800);
+    }
+
+    function slugify(text) {
+      return String(text || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    }
+
+    function uid(prefix) {
+      return `${prefix}-${Math.random().toString(36).slice(2, 9)}`;
+    }
+
+    async function copyText(value) {
+      if (!value) return false;
+      try {
+        await navigator.clipboard.writeText(value);
+        return true;
+      } catch {
+        return false;
+      }
+    }
+
+    function recordAudit(action, detail, result = "queued", meta = {}) {
+      const row = {
+        id: uid("audit"),
+        ts: new Date().toISOString(),
+        actor: "operator-ui",
+        action,
+        result,
+        detail,
+        ...meta
+      };
+      state.localAudit = [row, ...state.localAudit].slice(0, 80);
+      saveLocal(STORAGE_KEYS.audit, state.localAudit);
+      renderActionJournal();
+    }
+
+    function setExecToken() {
+      const current = String(state.execToken || "");
+      const next = window.prompt("Set COMMAND_CENTER_EXEC_TOKEN value for /api/execute.", current);
+      if (next === null) return;
+      state.execToken = String(next).trim();
+      saveLocal(STORAGE_KEYS.execToken, state.execToken);
+      renderTopBar();
+      fetchExecutionHistory().catch(() => {});
+      showToast(state.execToken ? "Execution token saved" : "Execution token cleared");
+    }
+
+    function executionSummary(payload) {
+      const result = payload?.result || {};
+      if (result.background) return `started background pid ${result.pid || "n/a"}`;
+      if (typeof result.exitCode === "number") return result.exitCode === 0 ? "exit 0" : `exit ${result.exitCode}`;
+      if (payload?.dryRun) return "preview";
+      return payload?.ok ? "ok" : "failed";
+    }
+
+    function normalizeHistoryRow(raw, source = "remote") {
+      const resultObject = (raw?.result && typeof raw.result === "object")
+        ? raw.result
+        : { ok: String(raw?.result || "").toLowerCase().includes("fail") ? false : true, summary: String(raw?.result || "queued") };
+      const derivedId = raw?.id || `${raw?.ts || Date.now()}-${slugify(raw?.projectId || raw?.actionKey || raw?.action || "event")}`;
+      return {
+        id: derivedId,
+        ts: raw?.ts || new Date().toISOString(),
+        actor: raw?.actor || "operator-ui",
+        projectId: raw?.projectId || "",
+        projectName: raw?.projectName || raw?.project || "Unscoped",
+        actionKey: raw?.actionKey || "",
+        actionLabel: raw?.actionLabel || raw?.action || "action",
+        classification: raw?.classification || "",
+        command: raw?.command || raw?.detail || "",
+        fromBranch: raw?.fromBranch || "",
+        toBranch: raw?.toBranch || "",
+        reviewId: raw?.reviewId || "",
+        dryRun: Boolean(raw?.dryRun),
+        result: resultObject,
+        source
+      };
+    }
+
+    function localAuditToHistoryRows(limit = 40) {
+      return [...state.localAudit]
+        .sort((a, b) => new Date(b.ts) - new Date(a.ts))
+        .slice(0, limit)
+        .map((row) => normalizeHistoryRow(row, "local"));
+    }
+
+    function historyStatusText(row) {
+      const result = row?.result || {};
+      if (result.background) return `Background PID ${result.pid || "n/a"}`;
+      if (typeof result.exitCode === "number") return result.exitCode === 0 ? "Exit 0" : `Exit ${result.exitCode}`;
+      if (row.dryRun || result.dryRun) return "Dry run";
+      if (result.ok === false) return "Failed";
+      if (result.ok === true) return "Success";
+      return "Queued";
+    }
+
+    function historyStatusClass(row) {
+      const result = row?.result || {};
+      if (result.background) return "status-ok";
+      if (typeof result.exitCode === "number") return result.exitCode === 0 ? "status-ok" : "status-alert";
+      if (result.ok === false) return "status-alert";
+      if (row.dryRun || result.dryRun) return "status-warn";
+      return "status-unknown";
+    }
+
+    function sanitizeOutput(value, fallback = "(empty)") {
+      const text = String(value ?? "").trim();
+      return text || fallback;
+    }
+
+    function selectExecutionRow(historyId) {
+      state.selectedExecId = historyId;
+      renderExecutionHistory();
+    }
+
+    async function fetchExecutionHistory(limit = 40) {
+      if (!state.execToken) {
+        state.execHistory = localAuditToHistoryRows(limit);
+        state.selectedExecId = state.execHistory[0]?.id || null;
+        renderExecutionHistory();
+        return;
+      }
+
+      try {
+        const response = await fetch("/api/execute", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Command-Center-Token": state.execToken
+          },
+          body: JSON.stringify({
+            action: "history",
+            actor: "James",
+            limit
+          })
+        });
+        const payload = await response.json().catch(() => ({}));
+        if (!response.ok) {
+          throw new Error(payload.error || `History request failed (${response.status})`);
+        }
+        const rows = Array.isArray(payload.history) ? payload.history : [];
+        state.execHistory = rows.map((row) => normalizeHistoryRow(row, "remote"));
+      } catch (error) {
+        state.execHistory = localAuditToHistoryRows(limit);
+        if (state.execToken) {
+          showToast(String(error.message || error));
+        }
+      }
+
+      if (!state.execHistory.length) {
+        state.execHistory = localAuditToHistoryRows(limit);
+      }
+      if (!state.execHistory.some((row) => row.id === state.selectedExecId)) {
+        state.selectedExecId = state.execHistory[0]?.id || null;
+      }
+      renderExecutionHistory();
+      if (state.data) {
+        renderProjectSections();
+        renderMissionMetrics();
+      }
+    }
+
+    function renderExecutionHistory() {
+      const list = document.getElementById("execHistoryList");
+      const meta = document.getElementById("execDetailMeta");
+      const detail = document.getElementById("execDetail");
+      if (!list || !meta || !detail) return;
+
+      const rows = state.execHistory || [];
+      if (!rows.length) {
+        list.innerHTML = '<li class="empty">No execution history yet.</li>';
+        meta.textContent = "Select an execution row to view details.";
+        detail.textContent = "No execution selected.";
+        return;
+      }
+
+      const selectedId = state.selectedExecId || rows[0].id;
+      if (!state.selectedExecId) state.selectedExecId = selectedId;
+      const selected = rows.find((row) => row.id === selectedId) || rows[0];
+
+      list.innerHTML = rows.map((row) => `
+        <li class="history-item ${row.id === selected.id ? "active" : ""}" data-history-id="${esc(row.id)}">
+          <div class="history-head">
+            <div>
+              <p class="history-title">${esc(row.projectName || "Unscoped")} | ${esc(row.actionLabel || row.actionKey || "action")}</p>
+              <p class="history-sub">${esc(relTime(row.ts))} | ${esc(row.actor || "operator-ui")} | ${esc(row.source)}</p>
+            </div>
+            <span class="status-chip ${historyStatusClass(row)}">${esc(historyStatusText(row))}</span>
+          </div>
+          <div class="history-actions">
+            <button class="tiny-btn history-view" data-history-id="${esc(row.id)}">View</button>
+            <button class="tiny-btn history-retry" data-history-id="${esc(row.id)}">Retry</button>
+          </div>
+        </li>
+      `).join("");
+
+      const stdout = sanitizeOutput(selected.result?.stdout, "(stdout empty)");
+      const stderr = sanitizeOutput(selected.result?.stderr, "(stderr empty)");
+      const summary = [
+        `Project: ${selected.projectName || "Unscoped"}`,
+        `Action: ${selected.actionLabel || selected.actionKey || "action"} (${selected.actionKey || "n/a"})`,
+        `When: ${selected.ts ? fmtDateTime(selected.ts) : "n/a"} (${relTime(selected.ts)})`,
+        `Status: ${historyStatusText(selected)}`,
+        `Mode: ${selected.dryRun || selected.result?.dryRun ? "dry-run" : "execute"}`,
+        `Classification: ${selected.classification || "n/a"}`,
+        `Command: ${selected.command || "n/a"}`
+      ];
+      if (selected.fromBranch || selected.toBranch) {
+        summary.push(`Promotion: ${selected.fromBranch || "?"} -> ${selected.toBranch || "?"}`);
+      }
+      meta.textContent = summary.join(" | ");
+      detail.textContent = `STDOUT\n${stdout}\n\nSTDERR\n${stderr}`;
+    }
+
+    async function retryHistoryRow(historyId) {
+      const row = (state.execHistory || []).find((item) => item.id === historyId);
+      if (!row) {
+        showToast("History row not found");
+        return;
+      }
+      if (!row.projectId || !row.actionKey) {
+        showToast("Retry unavailable for this row");
+        return;
+      }
+
+      let project = findRenderedProject(row.projectId);
+      if (!project) {
+        const configProject = getConfiguredProjectById(row.projectId);
+        if (configProject) {
+          project = {
+            id: slugify(configProject.name),
+            name: configProject.name,
+            config: configProject
+          };
+        }
+      }
+      if (!project?.config) {
+        showToast("Retry unavailable: project config missing");
+        return;
+      }
+
+      const action = projectAction(project, row.actionKey, row.actionLabel || row.actionKey, row.command || "");
+      const requiresConfirm = actionNeedsConfirmation(project, row.actionKey);
+      if (requiresConfirm) {
+        const policy = state.operatorConfig?.securityRules?.liveConfirmationPolicy || "confirmation required";
+        const ok = window.confirm(`${project.name}: retry "${action.label}"?\n\nPolicy: ${policy}`);
+        if (!ok) {
+          recordAudit(`retry-cancelled:${project.name}`, action.cmd || "no command", "cancelled");
+          return;
+        }
+      }
+
+      try {
+        const payload = await executeProjectAction(project, row.actionKey, { confirmed: requiresConfirm });
+        const summary = executionSummary(payload);
+        const resultLabel = payload.ok ? `retried (${summary})` : `retry_failed (${summary})`;
+        const detail = `${action.cmd || "no command"}${payload.result?.stderr ? ` | stderr: ${String(payload.result.stderr).slice(0, 180)}` : ""}`;
+        recordAudit(`retry:${project.name}:${action.label}`, detail, resultLabel, {
+          projectId: project.id,
+          projectName: project.name,
+          actionKey: row.actionKey,
+          actionLabel: action.label,
+          command: action.cmd,
+          classification: action.classification,
+          dryRun: Boolean(payload.dryRun),
+          result: payload.result
+        });
+        await fetchExecutionHistory();
+        showToast(payload.ok ? "Retry executed" : "Retry failed");
+      } catch (error) {
+        recordAudit(`retry:${project.name}:${action.label}`, action.cmd || "no command", "retry_error");
+        showToast(String(error.message || error));
+      }
+    }
+
+    async function executeProjectAction(project, actionKey, options = {}) {
+      if (!project?.config) {
+        throw new Error("Project is not configured for remote execution.");
+      }
+      if (!state.execToken) {
+        throw new Error("Execution token not set. Click Set Exec Token.");
+      }
+
+      const mode = String(state.data?.decisionConsole?.globalMode || "dry-run").toLowerCase();
+      const payloadBody = {
+        projectId: project.id,
+        actionKey,
+        actor: "James",
+        confirmed: !!options.confirmed,
+        dryRun: !!options.dryRun,
+        mode
+      };
+      if (options.fromBranch) payloadBody.fromBranch = String(options.fromBranch);
+      if (options.toBranch) payloadBody.toBranch = String(options.toBranch);
+      if (options.reviewId) payloadBody.reviewId = String(options.reviewId);
+
+      const response = await fetch("/api/execute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Command-Center-Token": state.execToken
+        },
+        body: JSON.stringify(payloadBody)
+      });
+
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(payload.error || `Execution request failed (${response.status})`);
+      }
+      return payload;
+    }
+
+    function projectTypeFromName(name) {
+      const n = String(name || "").toLowerCase();
+      if (n.includes("outreach")) return "outreach";
+      if (n.includes("polymarket") || n.includes("trading")) return "polymarket";
+      if (n.includes("decision") || n.includes("automation") || n.includes("ops")) return "ops";
+      if (n.includes("reliability") || n.includes("provider") || n.includes("infra")) return "infrastructure";
+      return "generic";
+    }
+
+    function findControlCommand(keyword) {
+      const controls = state.data?.decisionConsole?.controls || [];
+      const key = String(keyword || "").toLowerCase();
+      const match = controls.find((c) => String(c.label || "").toLowerCase().includes(key));
+      return match?.command || controls[0]?.command || "";
+    }
+
+    function configuredProjects() {
+      return state.operatorConfig?.projects || [];
+    }
+
+    function getConfiguredProjectById(projectId) {
+      const target = slugify(projectId);
+      if (!target) return null;
+      return configuredProjects().find((project) => projectKeySet(project).has(target)) || null;
+    }
+
+    function getConfiguredProjectByType(type) {
+      return configuredProjects().find((project) => project.type === type) || null;
+    }
+
+    function projectKeySet(project) {
+      const keys = new Set();
+      const add = (value) => {
+        const key = slugify(value);
+        if (key) keys.add(key);
+      };
+      add(project?.name);
+      add(project?.id);
+      add(project?.projectId);
+      add(project?.slug);
+      const aliases = [
+        ...(Array.isArray(project?.aliases) ? project.aliases : []),
+        ...(Array.isArray(project?.matchNames) ? project.matchNames : [])
+      ];
+      aliases.forEach(add);
+      return keys;
+    }
+
+    function projectAction(project, key, fallbackLabel, fallbackCmd) {
+      const actions = project?.config?.actions || {};
+      const action = actions[key] || {};
+      return {
+        key,
+        label: action.label || fallbackLabel || key,
+        cmd: action.cmd || fallbackCmd || "",
+        classification: action.classification || "internal_diagnostic"
+      };
+    }
+
+    function normalizeMode(mode) {
+      return ["reviews", "solve", "prevent"].includes(mode) ? mode : "reviews";
+    }
+
+    function projectModeFor(project) {
+      return normalizeMode(state.projectModes[project?.id] || state.globalMode);
+    }
+
+    function isValidBranchName(value) {
+      return /^[A-Za-z0-9._/-]+$/.test(String(value || ""));
+    }
+
+    function projectBranchFlow(project) {
+      const configured = Array.isArray(project?.config?.branchFlow) ? project.config.branchFlow : [];
+      const flow = configured
+        .map((branch) => String(branch || "").trim())
+        .filter((branch) => isValidBranchName(branch));
+      const unique = [];
+      flow.forEach((branch) => {
+        if (!unique.includes(branch)) unique.push(branch);
+      });
+      return unique.length ? unique : ["main"];
+    }
+
+    function projectPromotionStep(project, fromBranchHint = "") {
+      const flow = projectBranchFlow(project);
+      if (flow.length < 2) return null;
+      const hint = String(fromBranchHint || "").trim();
+      if (hint && isValidBranchName(hint)) {
+        const idx = flow.indexOf(hint);
+        if (idx >= 0 && idx < flow.length - 1) {
+          return { from: flow[idx], to: flow[idx + 1], flow };
+        }
+      }
+      return { from: flow[0], to: flow[1], flow };
+    }
+
+    function reviewApprovalId(projectId, reviewId, fromBranch, toBranch) {
+      return slugify(`${projectId}:${reviewId}:${fromBranch || "none"}:${toBranch || "none"}`);
+    }
+
+    function isOpenClawActor(actor, action = "", detail = "") {
+      const actorText = String(actor || "").toLowerCase();
+      if (/(openclaw|ops-fix|auto-remediation|automation|cron-runner|scheduler)/.test(actorText)) {
+        return true;
+      }
+      if (!actorText || actorText === "unknown") {
+        const context = `${action || ""} ${detail || ""}`.toLowerCase();
+        return /(openclaw|ops-fix|auto-remediation|approved automation|cron automation)/.test(context);
+      }
+      return false;
+    }
+
+    function reviewRowMatchesProject(row, project) {
+      if (!row || !project) return false;
+      if (row.projectId) return row.projectId === project.id;
+      if (row.projectName) return slugify(row.projectName || "") === project.id;
+      const repo = String(project.config?.repoPath || "").toLowerCase();
+      const command = String(row.command || "").toLowerCase();
+      return Boolean(repo && command.includes(repo));
+    }
+
+    function auditTrailMatchesProject(entry, project) {
+      if (entry?.projectId) return slugify(entry.projectId) === project.id;
+      if (entry?.projectName) return slugify(entry.projectName) === project.id;
+      const text = `${entry?.action || ""} ${entry?.detail || ""} ${entry?.result || ""}`.toLowerCase();
+      if (project.type === "outreach") return /(outreach|sender|queue|telemetry|email)/.test(text);
+      if (project.type === "polymarket") return /(polymarket|trade|runner|position|market)/.test(text);
+      if (project.type === "ops") return /(incident|route|control|trust|secret|automation|remediation|ops)/.test(text);
+      return true;
+    }
+
+    function deriveProjectReviewItems(project) {
+      const items = [];
+      const seen = new Set();
+      const pushItem = (item) => {
+        const key = String(item?.id || "");
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        items.push(item);
+      };
+
+      (state.execHistory || [])
+        .filter((row) => isOpenClawActor(row.actor, row.actionLabel, row.command))
+        .filter((row) => reviewRowMatchesProject(row, project))
+        .filter((row) => {
+          const result = row.result || {};
+          if (result.ok === false) return false;
+          if (typeof result.exitCode === "number" && result.exitCode !== 0) return false;
+          return true;
+        })
+        .forEach((row) => {
+          const result = row.result || {};
+          const summary = result.background
+            ? `Background PID ${result.pid || "n/a"}`
+            : typeof result.exitCode === "number"
+              ? `Exit ${result.exitCode}`
+              : result.summary || historyStatusText(row);
+          pushItem({
+            id: `exec-${row.id}`,
+            ts: row.ts,
+            title: row.actionLabel || row.actionKey || "Bot action",
+            summary: `${summary} | actor ${row.actor || "unknown"}`,
+            source: "exec_history",
+            historyId: row.id
+          });
+        });
+
+      (state.data?.decisionConsole?.auditTrail || [])
+        .filter((entry) => isOpenClawActor(entry.actor, entry.action, entry.detail))
+        .filter((entry) => auditTrailMatchesProject(entry, project))
+        .forEach((entry) => {
+          pushItem({
+            id: `audit-${slugify(`${entry.ts || ""}-${entry.action || ""}-${entry.actor || ""}`)}`,
+            ts: entry.ts || new Date().toISOString(),
+            title: entry.action || "Automation event",
+            summary: `${entry.result || "completed"} | actor ${entry.actor || "unknown"}`,
+            source: "snapshot_audit",
+            historyId: ""
+          });
+        });
+
+      return items
+        .sort((a, b) => new Date(b.ts) - new Date(a.ts))
+        .slice(0, 6);
+    }
+
+    function modePresentation(mode) {
+      return {
+        reviews: {
+          problemTag: "What Is Happening",
+          solutionTag: "Verification Move",
+          impactLabel: "Review impact",
+          policyLabel: "Diagnostics only"
+        },
+        solve: {
+          problemTag: "Priority To Solve",
+          solutionTag: "Direct Resolution",
+          impactLabel: "Solve impact",
+          policyLabel: "Execution enabled"
+        },
+        prevent: {
+          problemTag: "Future Risk",
+          solutionTag: "Preventive Framework",
+          impactLabel: "Prevent impact",
+          policyLabel: "Guardrails only"
+        }
+      }[normalizeMode(mode)];
+    }
+
+    function modeExecutionGate(mode, actionKey, classification) {
+      const normalized = normalizeMode(mode);
+      const key = String(actionKey || "").toLowerCase();
+      const cls = String(classification || "").toLowerCase();
+      const isExternal = cls.startsWith("external");
+      if (normalized === "reviews") {
+        if (key === "promote_review") {
+          return { allowed: true, reason: "" };
+        }
+        if (key === "go_live") {
+          return { allowed: false, reason: "Reviews mode is diagnostics-only. Switch to Solve to execute go-live actions." };
+        }
+        if (isExternal) {
+          return { allowed: false, reason: "Reviews mode blocks external actions." };
+        }
+        const diagnosticKey = /(health|verify|status|check|inspect|review|audit|read)/.test(key);
+        if (!diagnosticKey) {
+          return { allowed: false, reason: "Reviews mode only allows diagnostics and verification actions." };
+        }
+      }
+      if (normalized === "prevent") {
+        if (key === "promote_review") {
+          return { allowed: false, reason: "Prevent mode does not allow branch promotion. Review and approve in Reviews mode." };
+        }
+        if (key === "go_live") {
+          return { allowed: false, reason: "Prevent mode blocks go-live commits. Use Solve mode for execution." };
+        }
+        if (isExternal) {
+          return { allowed: false, reason: "Prevent mode blocks external publish/send/live-trade actions." };
+        }
+        const preventiveKey = /(health|verify|rollback|prevent|guard|auto|setup|check|monitor|scan|policy|cadence|template)/.test(key);
+        if (!preventiveKey) {
+          return { allowed: false, reason: "Prevent mode only allows guardrails, setup, and safe maintenance actions." };
+        }
+      }
+      return { allowed: true, reason: "" };
+    }
+
+    function fallbackActionLabel(project, actionKey, mode) {
+      const key = String(actionKey || "");
+      if (key === "go_live") return mode === "solve" ? "Execute Solve Action" : "Go Live";
+      if (key === "health_check") return "Run Health Check";
+      if (key === "verify") return "Run Verify";
+      if (key === "rollback") return "Queue Rollback";
+      if (key === "preventive_guardrail") return "Queue Guardrail";
+      if (key === "custom_setup") return "Queue Framework Setup";
+      if (key === "promote_review") return "Promote Reviewed Change";
+      return key || "Action";
+    }
+
+    function fallbackActionCommand(project, actionKey) {
+      const type = project?.type || "generic";
+      const repoPath = String(project?.config?.repoPath || "").trim();
+      const repoPrefix = repoPath ? `cd "${repoPath}" && ` : "";
+      if (actionKey === "health_check") {
+        if (type === "polymarket") return `${repoPrefix}python3 -m polymarket_bot.main status`;
+        return findControlCommand("sync");
+      }
+      if (actionKey === "verify") {
+        if (type === "polymarket") return `${repoPrefix}python3 scripts/verify_launch_guards.py`;
+        return findControlCommand("verify") || findControlCommand("sync");
+      }
+      if (actionKey === "go_live") {
+        if (type === "polymarket") return `${repoPrefix}python3 -m polymarket_bot.main run --mode paper --loop`;
+        return findControlCommand("sync");
+      }
+      if (actionKey === "rollback") {
+        if (type === "polymarket") return `${repoPrefix}python3 -m polymarket_bot.main kill-switch`;
+        return findControlCommand("sync");
+      }
+      if (actionKey === "preventive_guardrail") {
+        if (type === "outreach") return `${repoPrefix}python3 scripts/build_lock_readiness.py`;
+        if (type === "polymarket") return `${repoPrefix}python3 scripts/verify_launch_guards.py`;
+        return `guardrail:install --project ${slugify(project?.name || "project")}`;
+      }
+      if (actionKey === "custom_setup") {
+        return `framework:init --project '${String(project?.name || "project").replace(/'/g, "")}'`;
+      }
+      if (actionKey === "promote_review") {
+        const promotion = projectPromotionStep(project);
+        if (!promotion || !repoPath) return "";
+        return `${repoPrefix}git fetch --all --prune && git checkout "${promotion.to}" && git merge --no-ff --no-edit "${promotion.from}"`;
+      }
+      return findControlCommand("sync");
+    }
+
+    function primaryActionKeyForMode(project, mode) {
+      const type = project?.type || "generic";
+      const has = (key) => Boolean(project?.config?.actions?.[key]);
+      if (mode === "reviews") {
+        if (projectPromotionStep(project)) return "promote_review";
+        if (has("verify")) return "verify";
+        if (has("health_check")) return "health_check";
+        return "health_check";
+      }
+      if (mode === "solve") {
+        if (has("go_live")) return "go_live";
+        if (has("verify")) return "verify";
+        if (has("health_check")) return "health_check";
+        return type === "ops" ? "verify" : "health_check";
+      }
+      if (type === "generic") return "custom_setup";
+      return "preventive_guardrail";
+    }
+
+    function resolveModePrimaryAction(project, mode, fallbackCmd = "") {
+      const actionKey = primaryActionKeyForMode(project, mode);
+      const fallbackLabel = fallbackActionLabel(project, actionKey, mode);
+      const derivedFallbackCmd = fallbackCmd || fallbackActionCommand(project, actionKey);
+      const isConfiguredAction = Boolean(project?.config?.actions?.[actionKey]);
+      const action = isConfiguredAction
+        ? projectAction(project, actionKey, fallbackLabel, derivedFallbackCmd)
+        : {
+            key: actionKey,
+            label: fallbackLabel,
+            cmd: derivedFallbackCmd,
+            classification: actionKey === "go_live" ? "external_irreversible" : "internal_safe"
+          };
+      const gate = modeExecutionGate(mode, action.key, action.classification);
+      return {
+        ...action,
+        mode,
+        isConfiguredAction,
+        triggerClass: action.key === "promote_review" ? "promote-review go-live" : action.key === "go_live" ? "go-live" : "queue-command",
+        disabled: !gate.allowed,
+        disabledReason: gate.reason
+      };
+    }
+
+    function actionNeedsConfirmation(project, actionKey) {
+      if (actionKey === "promote_review") return true;
+      if (actionKey !== "go_live") return false;
+      const hasDefinedAction = Boolean(project?.config?.actions?.[actionKey]);
+      if (!hasDefinedAction) return true;
+      const action = projectAction(project, actionKey, "Go Live", "");
+      return String(action.classification || "").toLowerCase().startsWith("external");
+    }
+
+    function findRenderedProject(projectId) {
+      return state.renderedProjects.find((project) => project.id === projectId) || null;
+    }
+
+    function deriveProjectStatus(type, fallbackStatus) {
+      if (type === "outreach") return state.data?.outreach?.telemetry?.overallStatus || fallbackStatus || "monitoring";
+      if (type === "polymarket") {
+        const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading");
+        return domain?.status || fallbackStatus || "monitoring";
+      }
+      if (type === "ops") return state.data?.headline?.globalStatus || fallbackStatus || "monitoring";
+      return fallbackStatus || "unknown";
+    }
+
+    function deriveProjectLastUpdate(type, fallback) {
+      if (type === "outreach") return state.data?.outreach?.snapshot?.generatedAt || state.data?.generatedAt || fallback;
+      if (type === "polymarket") return state.data?.portfolioCommandView?.generatedAt || state.data?.generatedAt || fallback;
+      if (type === "ops") return state.data?.generatedAt || fallback;
+      return fallback || state.data?.generatedAt;
+    }
+
+    function deriveProjectSummary(type, configuredSummary, fallbackSummary) {
+      if (configuredSummary) return configuredSummary;
+      if (fallbackSummary) return fallbackSummary;
+      if (type === "outreach") {
+        const queueCount = state.data?.outreach?.snapshot?.adaptiveQueueCount ?? 0;
+        const checks = state.data?.outreach?.telemetry?.summary?.checks ?? 0;
+        return `Queue ${queueCount} | telemetry checks ${checks}`;
+      }
+      if (type === "polymarket") {
+        const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading");
+        return domain?.note || "Paper-first strategy loop and risk controls.";
+      }
+      if (type === "ops") return "Decision controls, trust boundaries, and rollout controls.";
+      return "No summary available.";
+    }
+
+    function buildProjects() {
+      const snapshotProjects = [...(state.data?.projects || [])];
+      const usedSnapshotIds = new Set();
+
+      const configured = configuredProjects().map((configProject) => {
+        const configId = slugify(configProject.name);
+        const configType = configProject.type || projectTypeFromName(configProject.name);
+        const configKeys = projectKeySet(configProject);
+        configKeys.add(configId);
+        const matchIndex = snapshotProjects.findIndex((project, idx) => {
+          if (usedSnapshotIds.has(idx)) return false;
+          const snapshotKeys = projectKeySet(project);
+          for (const key of snapshotKeys) {
+            if (configKeys.has(key)) return true;
+          }
+          return false;
+        });
+        const snapshotProject = matchIndex >= 0 ? snapshotProjects[matchIndex] : null;
+        if (matchIndex >= 0) usedSnapshotIds.add(matchIndex);
+
+        return {
+          id: configId,
+          name: configProject.name,
+          type: configType,
+          status: deriveProjectStatus(configType, snapshotProject?.status),
+          summary: deriveProjectSummary(configType, configProject.summary, snapshotProject?.summary),
+          lastUpdate: deriveProjectLastUpdate(configType, snapshotProject?.lastUpdate),
+          mode: normalizeMode(state.projectModes[configId] || state.globalMode),
+          config: configProject
+        };
+      });
+
+      const snapshotExtras = snapshotProjects
+        .filter((_, idx) => !usedSnapshotIds.has(idx))
+        .map((project) => {
+          const id = slugify(project.id || project.projectId || project.name) || uid("project");
+          return {
+            ...project,
+            id,
+            type: project.type || projectTypeFromName(project.name),
+            mode: normalizeMode(state.projectModes[id] || state.globalMode),
+            config: null
+          };
+        });
+
+      return [...configured, ...snapshotExtras];
+    }
+
+    function deriveProactiveItems(mode = state.globalMode) {
+      const activeMode = normalizeMode(mode);
+      const items = [];
+      const outreachConfig = getConfiguredProjectByType("outreach");
+      const polymarketConfig = getConfiguredProjectByType("polymarket");
+      const outreachHealth = projectAction({ config: outreachConfig }, "health_check", "Health Check", findControlCommand("sync"));
+      const outreachVerify = projectAction({ config: outreachConfig }, "verify", "Verify", findControlCommand("sync"));
+      const polymarketVerify = projectAction({ config: polymarketConfig }, "verify", "Verify", "python3 scripts/eval_realtime_dashboard.py");
+
+      items.push({
+        id: "review-baseline",
+        modes: ["reviews"],
+        title: "Re-run diagnostic baseline",
+        status: "ok",
+        summary: "Capture fresh health, queue, and risk baselines before applying changes.",
+        actionKey: "health_check",
+        action: "Queue health check",
+        command: outreachHealth.cmd,
+        verifyHref: "./docs/operator-quickstart.md"
+      });
+
+      const trustChecks = state.data?.trustSecurity?.secretHealth?.checks || [];
+      const missingChecks = trustChecks.filter((check) => !check.exists);
+      if (missingChecks.length) {
+        items.push({
+          id: "trust-secrets",
+          modes: ["solve", "prevent"],
+          title: "Close secret hygiene gaps",
+          status: "warn",
+          summary: `${missingChecks.length} secret checks are missing and can be hardened before the next deployment.`,
+          actionKey: activeMode === "solve" ? "verify" : "preventive_guardrail",
+          action: activeMode === "solve" ? "Queue secret remediation" : "Queue guardrail bootstrap",
+          command: outreachHealth.cmd,
+          verifyHref: "./docs/verification.md"
+        });
+      }
+
+      const missingInputs = state.data?.revenuePipeline?.forecastConfidence?.missingInputs || [];
+      if (missingInputs.length) {
+        items.push({
+          id: "forecast-data",
+          modes: ["reviews", "solve"],
+          title: "Increase forecast confidence",
+          status: "warn",
+          summary: `Missing revenue signals: ${missingInputs.join(", ")}. Fill these for stronger scenario comparisons.`,
+          actionKey: activeMode === "reviews" ? "verify" : "custom_setup",
+          action: activeMode === "reviews" ? "Queue verify pass" : "Create telemetry task",
+          command: outreachVerify.cmd,
+          verifyHref: "./docs/command-sensor-next-stack.md"
+        });
+      }
+
+      const recommendedScenario = state.data?.scenarioSimulator?.recommendedScenarioId;
+      if (recommendedScenario) {
+        items.push({
+          id: "scenario-loop",
+          modes: ["reviews", "solve"],
+          title: activeMode === "reviews" ? "Review scenario confidence loop" : "Run scenario confidence loop",
+          status: "ok",
+          summary: `Recommended scenario is "${recommendedScenario}". Compare projected vs actual outcomes before promoting changes.`,
+          actionKey: "verify",
+          action: activeMode === "reviews" ? "Queue scenario verification" : "Queue scenario pass",
+          command: polymarketVerify.cmd,
+          verifyHref: "./docs/priority-model-v3.md"
+        });
+      }
+
+      const focus = state.data?.personalFocusMode;
+      if (focus && !focus.criticalOnly) {
+        items.push({
+          id: "focus-protect",
+          modes: ["prevent"],
+          title: "Protect deep work windows",
+          status: "ok",
+          summary: `Critical-only mode is off. Quiet hours can suppress ~${focus.suppressedEstimate || 0} low-value pings.`,
+          actionKey: "preventive_guardrail",
+          action: "Enable critical-only windows",
+          command: "focus-mode:set --critical-only=true",
+          verifyHref: "./docs/operator-quickstart.md"
+        });
+      }
+
+      const reliabilitySignals = state.data?.reliabilityRadar?.signals || [];
+      reliabilitySignals
+        .filter((signal) => ["warn", "critical", "alert"].includes(String(signal.status || "").toLowerCase()))
+        .slice(0, 2)
+        .forEach((signal) => {
+          items.push({
+            id: `signal-${signal.key}`,
+            modes: ["prevent"],
+            title: `Preventive check for ${signal.label}`,
+            status: signal.status,
+            summary: `Current ${signal.current}${signal.unit || ""} vs target ${signal.target}. Schedule an automatic guardrail before this drifts.`,
+            actionKey: "preventive_guardrail",
+            action: "Queue guardrail",
+            command: `check:${signal.key}`,
+            verifyHref: "./docs/implementation-summary.md"
+          });
+        });
+
+      const filtered = items.filter((item) => (item.modes || ["reviews", "solve", "prevent"]).includes(activeMode));
+      if (filtered.length) return filtered.slice(0, 8);
+
+      return [{
+        id: `default-${activeMode}`,
+        title: activeMode === "solve" ? "No urgent solve actions" : activeMode === "reviews" ? "No urgent review actions" : "No urgent preventive actions",
+        status: "ok",
+        summary: activeMode === "solve"
+          ? "Core systems are stable right now. Keep solve mode focused on highest-impact commits."
+          : activeMode === "reviews"
+            ? "Signals are stable. Keep running verification passes before new changes."
+            : "System is stable. Keep proactive scans running to catch drift early.",
+        actionKey: activeMode === "reviews" ? "verify" : "health_check",
+        action: activeMode === "reviews" ? "Queue verify scan" : "Run health scan",
+        command: "bash scripts_sync_snapshot.sh",
+        verifyHref: "./docs/operator-quickstart.md"
+      }];
+    }
+
+    function projectCards(project, mode) {
+      const activeMode = normalizeMode(mode);
+      const modeText = modePresentation(activeMode);
+
+      if (project.type === "outreach") {
+        const senders = state.data?.outreach?.senderStoplights?.senders || [];
+        const warningSenders = senders.filter((s) => ["yellow", "red"].includes(String(s.stoplight || "").toLowerCase())).length;
+        const queueCount = state.data?.outreach?.snapshot?.adaptiveQueueCount ?? 0;
+        const reviewCount = deriveProjectReviewItems(project).length;
+        const goLiveAction = projectAction(project, "go_live", "Go Live", findControlCommand("sync"));
+        const issueTitle = activeMode === "reviews"
+          ? reviewCount
+            ? `${reviewCount} OpenClaw outreach changes are waiting review`
+            : "No OpenClaw outreach changes are waiting review"
+          : warningSenders
+            ? `${warningSenders} sender lanes are not converting`
+            : "Outreach quality can drift while volume looks healthy";
+        const solutionTitle = activeMode === "reviews"
+          ? "Run verification pass before touching volume"
+          : activeMode === "prevent"
+            ? "Automate weekly sender calibration"
+            : "Run route + sender cap experiment now";
+
+        return {
+          problem: {
+            title: issueTitle,
+            body: activeMode === "reviews"
+              ? `Queue depth is ${queueCount}. Review OpenClaw execution output first, then approve promotion when checks look clean.`
+              : `Queue depth is ${queueCount}. Quality checks show low reply velocity across active lanes, so scaling now can hide inefficiency.`,
+            tags: [`queue ${queueCount}`, `sender risk ${warningSenders}`, `mode ${activeMode}`],
+            impact: "Lead quality and close rate",
+            evidenceHref: `#project-${project.id}`
+          },
+          solution: {
+            title: solutionTitle,
+            body: activeMode === "reviews"
+              ? "Run health + verify commands and inspect sender stoplights first. Do not scale send volume until diagnostics confirm stability."
+              : activeMode === "prevent"
+                ? "Define a fixed calibration cadence: evaluate stoplights, tighten caps, and rotate underperforming variants before daily send windows."
+                : "Apply the recommended scenario, test one cap increase and one copy route, then verify changes with the telemetry checks before broad rollout.",
+            tags: activeMode === "solve" ? ["execution path", "verification required"] : ["ops-safe", "mode-guarded"],
+            eta: activeMode === "solve" ? "6 minutes to execute" : "6 minutes to queue",
+            command: goLiveAction.cmd,
+            verifyHref: "./docs/operator-quickstart.md",
+            verifyLabel: "Check solution"
+          },
+          meta: modeText
+        };
+      }
+
+      if (project.type === "polymarket") {
+        const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading") || {};
+        const note = String(domain.note || "Runner heartbeat and open positions are being tracked.");
+        const match = note.match(/open positions\s+(\d+)/i);
+        const openPositions = match ? Number(match[1]) : null;
+        const riskScore = Number(domain.riskScore ?? 0);
+        const reviewCount = deriveProjectReviewItems(project).length;
+        const goLiveAction = projectAction(project, "go_live", "Run Paper Loop", "python3 scripts/eval_realtime_dashboard.py");
+
+        return {
+          problem: {
+            title: activeMode === "reviews"
+              ? reviewCount
+                ? `${reviewCount} OpenClaw trading changes are waiting review`
+                : "No OpenClaw trading changes are waiting review"
+              : openPositions !== null ? `Paper bot exposure at ${openPositions} open positions` : "Paper bot exposure drift needs tighter controls",
+            body: activeMode === "reviews"
+              ? `Trading risk score is ${riskScore || "n/a"}. Validate bot run output and only then approve branch promotion.`
+              : `Trading domain risk score is ${riskScore || "n/a"}. ${note}`,
+            tags: [`risk ${riskScore || "n/a"}`, `domain ${domain.status || "monitoring"}`, `mode ${activeMode}`],
+            impact: "Model confidence and downside control",
+            evidenceHref: `#project-${project.id}`
+          },
+          solution: {
+            title: activeMode === "reviews"
+              ? "Validate replay and risk controls first"
+              : activeMode === "prevent"
+                ? "Install always-on trade guardrails"
+                : "Tighten risk envelope and verify replay",
+            body: activeMode === "reviews"
+              ? "Run status + guard verification and review scenario deltas before any strategy execution."
+              : activeMode === "prevent"
+                ? "Schedule automatic drawdown checks and cap adjustments every cycle so the paper bot learns without scaling accidental risk."
+                : "Run a replay with updated limits, compare projected scenario confidence, and only then mark strategy changes as ready for production staging.",
+            tags: activeMode === "solve" ? ["paper mode", "execution path"] : ["paper mode", "risk-first"],
+            eta: activeMode === "solve" ? "4 minutes to execute" : "4 minutes to queue",
+            command: goLiveAction.cmd,
+            verifyHref: "./docs/priority-model-v3.md",
+            verifyLabel: "Check solution"
+          },
+          meta: modeText
+        };
+      }
+
+      if (project.type === "ops") {
+        const missing = (state.data?.trustSecurity?.secretHealth?.checks || []).filter((check) => !check.exists).length;
+        const controls = state.data?.decisionConsole?.controls || [];
+        const primaryControl = controls[0];
+        const reviewCount = deriveProjectReviewItems(project).length;
+        const title = activeMode === "reviews"
+          ? reviewCount
+            ? `${reviewCount} OpenClaw ops changes are waiting review`
+            : "No OpenClaw ops changes are waiting review"
+          : missing > 0 ? `${missing} trust boundary checks need attention` : "Deployment controls require constant verification";
+
+        return {
+          problem: {
+            title,
+            body: activeMode === "reviews"
+              ? "Review agent-executed run logs and trust context before approving promotion."
+              : "The command center can queue safe actions quickly, but missing secret checks or stale control context can slow live commits.",
+            tags: [`controls ${controls.length}`, `missing checks ${missing}`, `mode ${activeMode}`],
+            impact: "Deployment safety and response speed",
+            evidenceHref: `#project-${project.id}`
+          },
+          solution: {
+            title: activeMode === "reviews"
+              ? "Validate control state before run"
+              : activeMode === "prevent"
+                ? "Enforce preflight + rollback template"
+                : "Run control preflight and stage commit",
+            body: activeMode === "reviews"
+              ? "Review trust checks, blast radius, and latest audit entries before touching execution controls."
+              : activeMode === "prevent"
+                ? "Gate every live action behind trust checks, dependency health, and rollback preview so fast commits stay safe."
+                : `Use "${primaryControl?.label || "sync command center snapshot"}" as the first action, then validate blast radius and journal the outcome.`,
+            tags: activeMode === "solve" ? ["safe controls", "commit path"] : ["safe controls", "rollback ready"],
+            eta: activeMode === "solve" ? "3 minutes to execute" : "3 minutes to queue",
+            command: primaryControl?.command || findControlCommand("sync"),
+            verifyHref: "./docs/verification.md",
+            verifyLabel: "Check solution"
+          },
+          meta: modeText
+        };
+      }
+
+      const topSignal = (state.data?.reliabilityRadar?.signals || [])[0];
+      const reviewCount = deriveProjectReviewItems(project).length;
+      return {
+        problem: {
+          title: activeMode === "reviews"
+            ? reviewCount
+              ? `${reviewCount} OpenClaw changes are waiting review`
+              : "No OpenClaw changes are waiting review"
+            : "Project visibility is incomplete",
+          body: activeMode === "reviews"
+            ? "Use review mode to validate bot-executed changes, then approve promotion if branch flow allows."
+            : "No dedicated framework detected for this project yet. Base health signals are available but should be specialized.",
+          tags: [`status ${project.status || "unknown"}`, `signal ${topSignal?.label || "none"}`, `mode ${activeMode}`],
+          impact: "Decision speed and clarity",
+          evidenceHref: `#project-${project.id}`
+        },
+        solution: {
+          title: "Attach a custom framework for this project",
+          body: "Select core metrics, define one operator action, and add one preventive automation so this section becomes fully actionable.",
+          tags: ["customize", "framework setup"],
+          eta: "5 minutes to define",
+          command: findControlCommand("sync"),
+          verifyHref: "./docs/implementation-summary.md",
+          verifyLabel: "Check solution"
+        },
+        meta: modeText
+      };
+    }
+
+    function projectUpdates(name) {
+      const updates = state.data?.latestUpdates || [];
+      const tokens = String(name || "").toLowerCase().split(/\s+/).filter((t) => t.length > 3);
+      const matches = updates.filter((entry) => tokens.some((token) => String(entry.item || "").toLowerCase().includes(token)));
+      if (matches.length) return matches.slice(0, 3);
+      return updates.slice(0, 3);
+    }
+
+    function renderActionButton(project, action, kind = "queue", labelOverride = "") {
+      const label = labelOverride || action?.label || "Action";
+      const command = action?.cmd || "";
+      const actionKey = action?.key || "";
+      if (kind === "copy") {
+        return `<button class="tiny-btn copy-command" data-command="${esc(command)}">${esc(label)}</button>`;
+      }
+      const projectAttrs = project
+        ? ` data-project-id="${esc(project.id)}" data-project-name="${esc(project.name)}"`
+        : "";
+      if (kind === "go-live") {
+        return `<button class="tiny-btn go-live" data-action-key="${esc(actionKey)}" data-command="${esc(command)}"${projectAttrs}>${esc(label)}</button>`;
+      }
+      return `<button class="tiny-btn queue-command" data-action-key="${esc(actionKey)}" data-label="${esc(label)}" data-command="${esc(command)}"${projectAttrs}>${esc(label)}</button>`;
+    }
+
+    function renderReviewQueueModule(project) {
+      const reviewItems = deriveProjectReviewItems(project);
+      const promotion = projectPromotionStep(project);
+      const branchHint = promotion
+        ? `Promotion path: ${promotion.from} -> ${promotion.to}`
+        : "No promotion path configured. Set branchFlow with at least two branches.";
+
+      const rowsHtml = reviewItems.map((item) => {
+        const reviewKey = reviewApprovalId(project.id, item.id, promotion?.from, promotion?.to);
+        const checked = Boolean(state.reviewChecks[reviewKey]);
+        const promoteDisabled = !promotion || !checked;
+        const disabledTitle = !promotion
+          ? "No promotion path configured for this project."
+          : !checked
+            ? "Check review after validation to enable promotion."
+            : "";
+        return `
+          <li class="review-row">
+            <div class="review-row-head">
+              <label class="review-check">
+                <input type="checkbox" class="review-approve" data-review-key="${esc(reviewKey)}" ${checked ? "checked" : ""} />
+                <span>Reviewed and approved</span>
+              </label>
+              <span class="tiny-note">${esc(relTime(item.ts))}</span>
+            </div>
+            <p class="review-title">${esc(item.title)}</p>
+            <p class="review-summary">${esc(item.summary)}</p>
+            <div class="pro-actions">
+              ${item.historyId ? `<button class="tiny-btn history-view" data-history-id="${esc(item.historyId)}">View run</button>` : ""}
+              <button class="tiny-btn promote-review" data-project-id="${esc(project.id)}" data-review-id="${esc(item.id)}" data-review-key="${esc(reviewKey)}" data-from-branch="${esc(promotion?.from || "")}" data-to-branch="${esc(promotion?.to || "")}" ${disabledTitle ? `title="${esc(disabledTitle)}"` : ""} ${promoteDisabled ? "disabled" : ""}>${esc(promotion ? `Promote ${promotion.from} -> ${promotion.to}` : "Promotion unavailable")}</button>
+            </div>
+          </li>
+        `;
+      }).join("");
+
+      return `
+        <article class="module-card review-module">
+          <h4>OpenClaw Review Queue</h4>
+          <p>Only bot/agent-executed changes are shown here for approval and promotion.</p>
+          <p class="tiny-note">${esc(branchHint)}</p>
+          <ul class="mini-list review-list">
+            ${rowsHtml || '<li>No OpenClaw review candidates found yet.</li>'}
+          </ul>
+        </article>
+      `;
+    }
+
+    function renderOutreachModules(project, mode) {
+      const activeMode = normalizeMode(mode);
+      const snapshot = state.data?.outreach?.snapshot || {};
+      const telemetry = state.data?.outreach?.telemetry || {};
+      const stoplights = state.data?.outreach?.senderStoplights?.senders || [];
+      const routeMix = snapshot.routeMix || {};
+      const leakage = state.data?.revenuePipeline?.leakage || [];
+      const checks = telemetry.summary || {};
+      const healthAction = projectAction(project, "health_check", "Health Check", findControlCommand("sync"));
+      const verifyAction = projectAction(project, "verify", "Verify", findControlCommand("sync"));
+      const goLiveAction = projectAction(project, "go_live", "Go Live", findControlCommand("sync"));
+      const rollbackAction = projectAction(project, "rollback", "Rollback", findControlCommand("sync"));
+      const preventiveAction = {
+        key: "preventive_guardrail",
+        label: "Queue calibration guardrail",
+        cmd: fallbackActionCommand(project, "preventive_guardrail"),
+        classification: "internal_safe"
+      };
+      const stoplightSummary = stoplights.reduce((acc, sender) => {
+        const key = String(sender.stoplight || "unknown").toLowerCase();
+        acc[key] = (acc[key] || 0) + 1;
+        return acc;
+      }, {});
+
+      const sendersHtml = stoplights.slice(0, 6).map((sender) => `
+        <li>${esc(sender.sender_id)}: ${esc(sender.stoplight || "unknown")} (${esc(sender.reason || "n/a")})</li>
+      `).join("");
+
+      const routeHtml = Object.entries(routeMix).map(([route, count]) => `
+        <span class="tag">${esc(route)} | ${esc(count)}</span>
+      `).join("") || '<span class="tag">No route data</span>';
+
+      const leakageHtml = leakage.slice(0, 3).map((row) => `
+        <li>${esc(row.stage)}: ${fmtPercent(row.rate, 1)} leakage (${fmtMoney(row.estimatedImpact || 0)})</li>
+      `).join("") || "<li>No leakage rows available.</li>";
+
+      const operatorTitle = activeMode === "reviews"
+        ? "Review Actions"
+        : activeMode === "solve"
+          ? "Solve Actions"
+          : "Preventive Actions";
+      const operatorSummary = activeMode === "reviews"
+        ? "Diagnostics-only lane. Verify baseline before any commit."
+        : activeMode === "solve"
+          ? "Execution lane. Verify then commit with rollback ready."
+          : "Guardrail lane. Queue recurring calibration and monitoring.";
+      const operatorButtons = activeMode === "reviews"
+        ? [
+            renderActionButton(project, healthAction, "queue", "Queue health check"),
+            renderActionButton(project, verifyAction, "queue", "Queue verify"),
+            renderActionButton(project, rollbackAction, "copy", "Copy rollback")
+          ]
+        : activeMode === "solve"
+          ? [
+              renderActionButton(project, verifyAction, "queue", "Queue verify"),
+              renderActionButton(project, goLiveAction, "go-live", `Execute ${goLiveAction.label}`),
+              renderActionButton(project, rollbackAction, "queue", "Queue rollback")
+            ]
+          : [
+              renderActionButton(project, healthAction, "queue", "Queue health check"),
+            renderActionButton(project, preventiveAction, "queue", preventiveAction.label),
+            renderActionButton(project, verifyAction, "queue", "Queue verify")
+          ];
+      const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
+
+      return `
+        ${reviewModule}
+        <article class="module-card" id="module-outreach-${esc(project.id)}">
+          <h4>Outreach Health</h4>
+          <p>Queue pressure, telemetry freshness, and sender condition.</p>
+          <div class="module-kv">
+            <div><b>Adaptive Queue</b><span>${esc(snapshot.adaptiveQueueCount ?? 0)}</span></div>
+            <div><b>Health Rows</b><span>${esc(snapshot.healthRows ?? 0)}</span></div>
+            <div><b>Failing Checks</b><span>${esc(checks.failing ?? 0)}</span></div>
+            <div><b>Stoplights (Y/R)</b><span>${esc((stoplightSummary.yellow || 0) + (stoplightSummary.red || 0))}</span></div>
+          </div>
+        </article>
+        <article class="module-card">
+          <h4>Sender Stoplights</h4>
+          <p>Prioritize yellow/red lanes before scaling volume.</p>
+          <ul class="mini-list">${sendersHtml || "<li>No sender rows available.</li>"}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Route Mix + Leakage</h4>
+          <p>Route balance and conversion leakage in one glance.</p>
+          <div class="tag-row">${routeHtml}</div>
+          <ul class="mini-list">${leakageHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>${esc(operatorTitle)}</h4>
+          <p>${esc(operatorSummary)}</p>
+          <div class="pro-actions">
+            ${operatorButtons.join("")}
+            <a class="tiny-btn" href="./docs/operator-quickstart.md" target="_blank" rel="noopener">Read docs</a>
+          </div>
+          <ul class="mini-list">
+            <li>Hot leads: ${esc(snapshot.hotLeadCount ?? 0)}</li>
+            <li>Paused senders: ${esc(snapshot.pausedSenders ?? 0)}</li>
+            <li>Top route: ${esc(snapshot.topRoute?.variant_id || "n/a")}</li>
+            <li>Repo: ${esc(project.config?.repoPath || "n/a")}</li>
+          </ul>
+        </article>
+      `;
+    }
+
+    function renderPolymarketModules(project, mode) {
+      const activeMode = normalizeMode(mode);
+      const domain = (state.data?.portfolioCommandView?.domains || []).find((d) => String(d.domain || "").toLowerCase() === "trading") || {};
+      const scenario = state.data?.scenarioSimulator || {};
+      const reliability = state.data?.reliabilityRadar?.signals || [];
+      const healthAction = projectAction(project, "health_check", "Health Check", "python3 -m polymarket_bot.main status");
+      const verifyAction = projectAction(project, "verify", "Verify Guards", "python3 scripts/verify_launch_guards.py");
+      const goLiveAction = projectAction(project, "go_live", "Run Paper Loop", "python3 -m polymarket_bot.main run --mode paper --loop");
+      const rollbackAction = projectAction(project, "rollback", "Kill Switch", "python3 -m polymarket_bot.main kill-switch");
+      const preventiveAction = {
+        key: "preventive_guardrail",
+        label: "Queue drawdown guardrail",
+        cmd: fallbackActionCommand(project, "preventive_guardrail"),
+        classification: "internal_safe"
+      };
+      const tradingSignals = reliability.slice(0, 3).map((signal) => `
+        <li>${esc(signal.label)}: ${esc(signal.current)}${esc(signal.unit || "")} (${esc(signal.status || "n/a")})</li>
+      `).join("") || "<li>No reliability signals.</li>";
+
+      const scenarioRows = (scenario.options || []).slice(0, 3).map((option) => `
+        <li>${esc(option.name)}: forecast ${fmtMoney(option.projectedMetrics?.weightedForecast || 0)} | conf ${Math.round((option.projectedMetrics?.forecastConfidence || 0) * 100)}%</li>
+      `).join("") || "<li>No scenario options available.</li>";
+
+      const operatorTitle = activeMode === "reviews"
+        ? "Review Actions"
+        : activeMode === "solve"
+          ? "Solve Actions"
+          : "Preventive Actions";
+      const operatorSummary = activeMode === "reviews"
+        ? "Review status and guard verification before any strategy execution."
+        : activeMode === "solve"
+          ? "Execute paper loop only after verify pass and replay review."
+          : "Queue recurring guardrails and safety checks each cycle.";
+      const operatorButtons = activeMode === "reviews"
+        ? [
+            renderActionButton(project, healthAction, "queue", "Queue health check"),
+            renderActionButton(project, verifyAction, "queue", "Queue verify guards"),
+            renderActionButton(project, rollbackAction, "copy", "Copy kill switch")
+          ]
+        : activeMode === "solve"
+          ? [
+              renderActionButton(project, verifyAction, "queue", "Queue verify guards"),
+              renderActionButton(project, goLiveAction, "go-live", `Execute ${goLiveAction.label}`),
+              renderActionButton(project, rollbackAction, "queue", "Queue kill switch")
+            ]
+          : [
+              renderActionButton(project, healthAction, "queue", "Queue health check"),
+            renderActionButton(project, preventiveAction, "queue", preventiveAction.label),
+            renderActionButton(project, verifyAction, "queue", "Queue verify guards")
+          ];
+      const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
+
+      return `
+        ${reviewModule}
+        <article class="module-card">
+          <h4>Trading Domain Pulse</h4>
+          <p>${esc(domain.note || "Trading telemetry not present in this snapshot.")}</p>
+          <div class="module-kv">
+            <div><b>Status</b><span>${esc(String(domain.status || "unknown").toUpperCase())}</span></div>
+            <div><b>Risk Score</b><span>${esc(domain.riskScore ?? "n/a")}</span></div>
+            <div><b>Confidence</b><span>${Math.round((domain.confidence || 0) * 100)}%</span></div>
+            <div><b>Mode</b><span>PAPER</span></div>
+          </div>
+        </article>
+        <article class="module-card">
+          <h4>Reliability Inputs</h4>
+          <p>Cross-domain infrastructure signals that impact bot execution.</p>
+          <ul class="mini-list">${tradingSignals}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Scenario Outcomes</h4>
+          <p>Use scenario deltas to gate strategy changes.</p>
+          <ul class="mini-list">${scenarioRows}</ul>
+        </article>
+        <article class="module-card">
+          <h4>${esc(operatorTitle)}</h4>
+          <p>${esc(operatorSummary)}</p>
+          <div class="pro-actions">
+            ${operatorButtons.join("")}
+            <a class="tiny-btn" href="./docs/priority-model-v3.md" target="_blank" rel="noopener">Review model</a>
+          </div>
+          <ul class="mini-list">
+            <li>Recommended scenario: ${esc(scenario.recommendedScenarioId || "n/a")}</li>
+            <li>Compare dimensions: ${esc((scenario.compareDimensions || []).join(", ") || "n/a")}</li>
+            <li>Repo: ${esc(project.config?.repoPath || "n/a")}</li>
+          </ul>
+        </article>
+      `;
+    }
+
+    function renderOpsModules(project, mode) {
+      const activeMode = normalizeMode(mode);
+      const controls = state.data?.decisionConsole?.controls || [];
+      const trustChecks = state.data?.trustSecurity?.secretHealth?.checks || [];
+      const blast = state.data?.trustSecurity?.blastRadiusPreview || [];
+      const audit = state.data?.decisionConsole?.auditTrail || [];
+      const security = state.operatorConfig?.securityRules || {};
+      const healthAction = projectAction(project, "health_check", "Run preflight", findControlCommand("sync"));
+      const verifyAction = projectAction(project, "verify", "Verify controls", findControlCommand("sync"));
+      const rollbackAction = projectAction(project, "rollback", "Rollback preview", findControlCommand("sync"));
+      const preventiveAction = {
+        key: "preventive_guardrail",
+        label: "Queue preflight template",
+        cmd: fallbackActionCommand(project, "preventive_guardrail"),
+        classification: "internal_safe"
+      };
+
+      const controlsHtml = controls.map((control) => `
+        <li>
+          <b>${esc(control.label)}</b> (${esc(control.risk || "low")} risk)
+          <div class="pro-actions">
+            <button class="tiny-btn queue-command" data-label="${esc(control.label)}" data-command="${esc(control.command || "")}">Queue dry-run</button>
+            <button class="tiny-btn copy-command" data-command="${esc(control.command || "")}">Copy command</button>
+          </div>
+        </li>
+      `).join("") || "<li>No controls available.</li>";
+
+      const trustHtml = trustChecks.map((check) => `
+        <li>${check.exists ? "OK" : "Missing"}: ${esc(check.name)} (${esc(check.path)})</li>
+      `).join("") || "<li>No trust checks found.</li>";
+
+      const blastHtml = blast.slice(0, 4).map((row) => `
+        <li>${esc(row.control)}: ${esc(row.scope)} (${esc(row.risk)})</li>
+      `).join("") || "<li>No blast radius rows.</li>";
+
+      const auditHtml = audit.slice(0, 4).map((row) => `
+        <li>${esc(row.action)} -> ${esc(row.result)} (${esc(relTime(row.ts))})</li>
+      `).join("") || "<li>No audit events.</li>";
+      const modeActions = activeMode === "reviews"
+        ? [
+            renderActionButton(project, healthAction, "queue", "Queue preflight"),
+            renderActionButton(project, verifyAction, "queue", "Queue control verification"),
+            renderActionButton(project, rollbackAction, "copy", "Copy rollback cmd")
+          ]
+        : activeMode === "solve"
+          ? [
+              renderActionButton(project, verifyAction, "queue", "Queue control verification"),
+              renderActionButton(project, healthAction, "queue", "Queue staged commit preflight"),
+              renderActionButton(project, rollbackAction, "queue", "Queue rollback preview")
+            ]
+          : [
+              renderActionButton(project, healthAction, "queue", "Queue preflight"),
+              renderActionButton(project, preventiveAction, "queue", preventiveAction.label),
+              renderActionButton(project, verifyAction, "queue", "Queue drift verification")
+            ];
+      const modeTitle = activeMode === "reviews"
+        ? "Review Runbook"
+        : activeMode === "solve"
+          ? "Solve Runbook"
+          : "Preventive Runbook";
+      const modeSummary = activeMode === "reviews"
+        ? "Validate trust state, blast radius, and control freshness before execution."
+        : activeMode === "solve"
+          ? "Use verification and preflight controls to stage fast but safe commits."
+          : "Queue recurring trust checks and rollback templates before incidents.";
+      const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
+
+      return `
+        ${reviewModule}
+        <article class="module-card">
+          <h4>Decision Controls</h4>
+          <p>Queue, validate, then promote to live mode.</p>
+          <ul class="mini-list">${controlsHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Trust Boundary Checks</h4>
+          <p>Secrets, permission drift, and dependency posture.</p>
+          <ul class="mini-list">${trustHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Blast Radius Preview</h4>
+          <p>Expected scope and risk before commit.</p>
+          <ul class="mini-list">${blastHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Recent Control Activity</h4>
+          <p>Model and automation audit highlights.</p>
+          <ul class="mini-list">${auditHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>${esc(modeTitle)}</h4>
+          <p>${esc(modeSummary)}</p>
+          <div class="pro-actions">
+            ${modeActions.join("")}
+          </div>
+          <ul class="mini-list">
+            <li>Triggers: ${esc(security.liveActionTriggers || "n/a")}</li>
+            <li>Confirmation policy: ${esc(security.liveConfirmationPolicy || "n/a")}</li>
+            <li>Auto-fix scope: ${esc(security.autoFixScope || "n/a")}</li>
+          </ul>
+        </article>
+      `;
+    }
+
+    function renderGenericModules(project, mode) {
+      const activeMode = normalizeMode(mode);
+      const updates = projectUpdates(project.name);
+      const signals = state.data?.reliabilityRadar?.signals || [];
+      const backburner = state.data?.backburner || [];
+      const healthAction = {
+        key: "health_check",
+        label: "Queue health scan",
+        cmd: fallbackActionCommand(project, "health_check"),
+        classification: "internal_safe"
+      };
+      const verifyAction = {
+        key: "verify",
+        label: "Queue verification",
+        cmd: fallbackActionCommand(project, "verify"),
+        classification: "internal_safe"
+      };
+      const setupAction = {
+        key: "custom_setup",
+        label: "Queue framework setup",
+        cmd: fallbackActionCommand(project, "custom_setup"),
+        classification: "internal_safe"
+      };
+      const preventiveAction = {
+        key: "preventive_guardrail",
+        label: "Queue preventive guardrail",
+        cmd: fallbackActionCommand(project, "preventive_guardrail"),
+        classification: "internal_safe"
+      };
+
+      const updatesHtml = updates.map((entry) => `
+        <li>${esc(entry.item)} (${esc(relTime(entry.at))})</li>
+      `).join("") || "<li>No updates yet.</li>";
+
+      const signalHtml = signals.slice(0, 3).map((signal) => `
+        <li>${esc(signal.label)}: ${esc(signal.current)}${esc(signal.unit || "")} (${esc(signal.status || "n/a")})</li>
+      `).join("") || "<li>No signals.</li>";
+
+      const backburnerHtml = backburner.slice(0, 3).map((item) => `
+        <li>${esc(item.name)}: ${esc(item.note || "n/a")}</li>
+      `).join("") || "<li>No backlog items.</li>";
+      const setupTitle = activeMode === "reviews"
+        ? "Review Runbook"
+        : activeMode === "solve"
+          ? "Solve Runbook"
+          : "Preventive Runbook";
+      const setupSummary = activeMode === "reviews"
+        ? "Inspect health and evidence before introducing new framework logic."
+        : activeMode === "solve"
+          ? "Define an actionable framework path with verification before execution."
+          : "Queue setup and guardrails so this project can self-monitor.";
+      const setupActions = activeMode === "reviews"
+        ? [
+            renderActionButton(project, healthAction, "queue", "Queue health scan"),
+            renderActionButton(project, verifyAction, "queue", "Queue verification"),
+            renderActionButton(project, setupAction, "copy", "Copy setup cmd")
+          ]
+        : activeMode === "solve"
+          ? [
+              renderActionButton(project, verifyAction, "queue", "Queue verification"),
+              renderActionButton(project, setupAction, "queue", "Queue framework setup"),
+              renderActionButton(project, setupAction, "copy", "Copy setup cmd")
+            ]
+          : [
+              renderActionButton(project, setupAction, "queue", "Queue framework setup"),
+              renderActionButton(project, preventiveAction, "queue", preventiveAction.label),
+              renderActionButton(project, healthAction, "queue", "Queue health scan")
+            ];
+      const reviewModule = activeMode === "reviews" ? renderReviewQueueModule(project) : "";
+
+      return `
+        ${reviewModule}
+        <article class="module-card">
+          <h4>Project Pulse</h4>
+          <p>Recent updates connected to this mission.</p>
+          <ul class="mini-list">${updatesHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Cross-Project Signals</h4>
+          <p>Shared metrics affecting this area.</p>
+          <ul class="mini-list">${signalHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>Opportunity Backlog</h4>
+          <p>Ideas parked for a lower-pressure window.</p>
+          <ul class="mini-list">${backburnerHtml}</ul>
+        </article>
+        <article class="module-card">
+          <h4>${esc(setupTitle)}</h4>
+          <p>${esc(setupSummary)}</p>
+          <div class="pro-actions">
+            ${setupActions.join("")}
+          </div>
+          <ul class="mini-list">
+            <li>Define 3 project KPIs</li>
+            <li>Add 1 direct solve action</li>
+            <li>Add 1 preventive automation</li>
+          </ul>
+        </article>
+      `;
+    }
+
+    function renderProjectSection(project, index) {
+      const mode = projectModeFor(project);
+      const cards = projectCards(project, mode);
+      const reviewItems = mode === "reviews" ? deriveProjectReviewItems(project) : [];
+      const promotion = projectPromotionStep(project);
+      const approvedReview = reviewItems.find((item) => {
+        const key = reviewApprovalId(project.id, item.id, promotion?.from, promotion?.to);
+        return Boolean(state.reviewChecks[key]);
+      }) || null;
+      const primaryAction = resolveModePrimaryAction(project, mode, cards.solution.command || "");
+      if (primaryAction.key === "promote_review") {
+        if (!promotion) {
+          primaryAction.disabled = true;
+          primaryAction.disabledReason = "No branch promotion path configured for this project.";
+        } else if (!approvedReview) {
+          primaryAction.disabled = true;
+          primaryAction.disabledReason = "Approve one OpenClaw review item below to enable promotion.";
+        } else {
+          primaryAction.label = `Promote ${promotion.from} -> ${promotion.to}`;
+          primaryAction.disabled = false;
+          primaryAction.disabledReason = "";
+        }
+      }
+      const safeMode = String(state.data?.decisionConsole?.globalMode || "dry-run").toUpperCase();
+      const moduleBody = (
+        project.type === "outreach" ? renderOutreachModules(project, mode) :
+        project.type === "polymarket" ? renderPolymarketModules(project, mode) :
+        project.type === "ops" ? renderOpsModules(project, mode) :
+        renderGenericModules(project, mode)
+      );
+      const projectMeta = project.config
+        ? `Owner ${project.config.owner || "n/a"} | Priority ${project.config.priority || "n/a"} | ${project.config.automationMode || "n/a"}`
+        : "";
+      const projectMeta2 = project.config
+        ? `${project.config.metricsSource || "metrics n/a"} | ${project.config.refreshCadence || "cadence n/a"}`
+        : "";
+      const primaryAttrs = [
+        `class="go-live-btn ${esc(primaryAction.triggerClass)}"`,
+        `data-project-id="${esc(project.id)}"`,
+        `data-project-name="${esc(project.name)}"`,
+        `data-action-key="${esc(primaryAction.key)}"`,
+        `data-label="${esc(primaryAction.label)}"`,
+        `data-command="${esc(primaryAction.cmd)}"`
+      ];
+      if (primaryAction.key === "promote_review") {
+        primaryAttrs.push(`data-from-branch="${esc(promotion?.from || "")}"`);
+        primaryAttrs.push(`data-to-branch="${esc(promotion?.to || "")}"`);
+        primaryAttrs.push(`data-review-id="${esc(approvedReview?.id || "")}"`);
+      }
+      if (primaryAction.disabled) {
+        primaryAttrs.push("disabled");
+        primaryAttrs.push(`title="${esc(primaryAction.disabledReason || "Blocked by mode policy")}"`);
+      }
+
+      return `
+        <section class="project-shell reveal" id="project-${esc(project.id)}" data-theme="${index % 2 === 0 ? "light" : "dark"}">
+          <div class="project-head">
+            <div>
+              <h3 class="project-title">${esc(project.name)}</h3>
+              <p class="project-summary">${esc(project.summary || "No summary available.")}</p>
+              ${projectMeta ? `<p class="tiny-note">${esc(projectMeta)}</p>` : ""}
+              ${projectMeta2 ? `<p class="tiny-note">${esc(projectMeta2)}</p>` : ""}
+            </div>
+            <div>
+              <span class="status-chip ${statusClass(project.status)}">${esc(project.status || "unknown")}</span>
+              <div class="tiny-note" style="margin-top:6px;">Updated ${esc(relTime(project.lastUpdate))}</div>
+            </div>
+          </div>
+          <div class="mode-switch project-mode">
+            <button class="mode-btn ${mode === "reviews" ? "active" : ""}" data-project-id="${esc(project.id)}" data-project-mode="reviews">Reviews</button>
+            <button class="mode-btn ${mode === "solve" ? "active" : ""}" data-project-id="${esc(project.id)}" data-project-mode="solve">Solve</button>
+            <button class="mode-btn ${mode === "prevent" ? "active" : ""}" data-project-id="${esc(project.id)}" data-project-mode="prevent">Prevent</button>
+          </div>
+          <div class="pair-shell">
+            <div class="pair-grid">
+              <article class="problem-card">
+                <div>
+                  <p class="pair-eyebrow">${esc(cards.meta.problemTag)}</p>
+                  <h4 class="pair-title">Problem</h4>
+                  <h5 class="pair-heading">${esc(cards.problem.title)}</h5>
+                  <p class="pair-body">${esc(cards.problem.body)}</p>
+                  <div class="tag-row">${cards.problem.tags.map((tag) => `<span class="tag">${esc(tag)}</span>`).join("")}</div>
+                </div>
+                <div class="pair-footer">
+                  <span class="tiny-note">${esc(cards.meta.impactLabel)}: ${esc(cards.problem.impact)}</span>
+                  <a class="tiny-btn" href="${esc(cards.problem.evidenceHref)}">Review context</a>
+                </div>
+              </article>
+              <article class="solution-card">
+                <div>
+                  <p class="pair-eyebrow">${esc(cards.meta.solutionTag)}</p>
+                  <h4 class="pair-title">Solution</h4>
+                  <h5 class="pair-heading">${esc(cards.solution.title)}</h5>
+                  <p class="pair-body">${esc(cards.solution.body)}</p>
+                  <div class="tag-row">${cards.solution.tags.map((tag) => `<span class="tag">${esc(tag)}</span>`).join("")}</div>
+                </div>
+                <div class="pair-footer">
+                  <span class="tiny-note">${esc(cards.solution.eta)} | ${esc(cards.meta.policyLabel)} | Console ${safeMode}</span>
+                  <div class="action-row">
+                    <a class="mini-btn" href="${esc(cards.solution.verifyHref)}" target="_blank" rel="noopener">${esc(cards.solution.verifyLabel)}</a>
+                    <button ${primaryAttrs.join(" ")}>${esc(primaryAction.label)}</button>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+          <div class="module-grid">${moduleBody}</div>
+        </section>
+      `;
+    }
+
+    function renderProjectSections() {
+      const projects = buildProjects();
+      state.renderedProjects = projects;
+      const el = document.getElementById("projectSections");
+      el.innerHTML = projects.map((project, index) => renderProjectSection(project, index)).join("");
+      refreshProjectOptions(projects);
+    }
+
+    function refreshProjectOptions(projects) {
+      const select = document.getElementById("todoProject");
+      if (!select) return;
+      const current = select.value;
+      const options = ["General", ...projects.map((project) => project.name)];
+      select.innerHTML = options.map((name) => `<option value="${esc(name)}">${esc(name)}</option>`).join("");
+      if (options.includes(current)) select.value = current;
+    }
+
+    function renderTodos() {
+      const list = document.getElementById("todoList");
+      const rows = [...state.todos].sort((a, b) => Number(a.done) - Number(b.done));
+      if (!rows.length) {
+        list.innerHTML = '<li class="empty">No tasks yet.</li>';
+        return;
+      }
+
+      list.innerHTML = rows.map((todo) => `
+        <li class="row-item">
+          <div class="row-main">
+            <input type="checkbox" class="todo-toggle" data-id="${esc(todo.id)}" ${todo.done ? "checked" : ""} />
+            <div>
+              <div class="row-title ${todo.done ? "done" : ""}">${esc(todo.text)}</div>
+              <div class="row-meta">${esc(todo.project || "General")} | added ${esc(relTime(todo.createdAt))}</div>
+            </div>
+          </div>
+          <button class="tiny-btn todo-delete" data-id="${esc(todo.id)}">Delete</button>
+        </li>
+      `).join("");
+    }
+
+    function upcomingAppointments() {
+      return [...state.appointments].sort((a, b) => new Date(a.when) - new Date(b.when));
+    }
+
+    function renderAppointments() {
+      const list = document.getElementById("appointmentList");
+      const rows = upcomingAppointments();
+      if (!rows.length) {
+        list.innerHTML = '<li class="empty">No appointments yet.</li>';
+        return;
+      }
+
+      list.innerHTML = rows.map((item) => `
+        <li class="row-item">
+          <div class="row-main">
+            <div>
+              <div class="row-title">${esc(item.title)}</div>
+              <div class="row-meta">${esc(fmtDateTime(item.when))} | ${esc(item.context || "General")}</div>
+            </div>
+          </div>
+          <button class="tiny-btn appointment-delete" data-id="${esc(item.id)}">Delete</button>
+        </li>
+      `).join("");
+    }
+
+    function renderProactive() {
+      const proactive = deriveProactiveItems(state.globalMode);
+      const list = document.getElementById("proactiveList");
+      list.innerHTML = proactive.map((item) => `
+        <article class="pro-card">
+          <span class="status-chip ${statusClass(item.status)}">${esc(item.status || "ok")}</span>
+          <h4>${esc(item.title)}</h4>
+          <p>${esc(item.summary)}</p>
+          <div class="pro-actions">
+            <button class="tiny-btn queue-command" data-action-key="${esc(item.actionKey || "queue")}" data-label="${esc(item.action)}" data-command="${esc(item.command || "")}">${esc(item.action)}</button>
+            <a class="tiny-btn" href="${esc(item.verifyHref)}" target="_blank" rel="noopener">Review link</a>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderActionJournal() {
+      const events = [...state.localAudit].sort((a, b) => new Date(b.ts) - new Date(a.ts)).slice(0, 18);
+      const list = document.getElementById("actionJournal");
+      if (!events.length) {
+        list.innerHTML = '<li class="empty">No actions logged yet.</li>';
+        return;
+      }
+      list.innerHTML = events.map((event) => `
+        <li class="journal-item">
+          <div>
+            <h4>${esc(event.action || "action")}</h4>
+            <p>${esc(event.detail || "No details")} | ${esc(event.actor || "operator")}</p>
+          </div>
+          <div class="row-meta">${esc(relTime(event.ts))}<br>${esc(event.result || "queued")}</div>
+        </li>
+      `).join("");
+    }
+
+    function renderTopBar() {
+      const stamp = document.getElementById("stamp");
+      const generatedAt = state.data?.generatedAt;
+      const schema = state.data?.schemaVersion || "n/a";
+      const tz = state.operatorConfig?.timezone || "America/New_York";
+      const calendarSource = state.operatorConfig?.calendarSource || "local-only";
+      const tasksSource = state.operatorConfig?.tasksSource || "local-only";
+      stamp.textContent = generatedAt
+        ? `Generated ${generatedAt} (${relTime(generatedAt)}) | Schema ${schema} | TZ ${tz} | Calendar ${calendarSource} | Tasks ${tasksSource}`
+        : "Snapshot unavailable";
+
+      const safeMode = String(state.data?.decisionConsole?.globalMode || "dry-run").toUpperCase();
+      document.getElementById("safeModePill").textContent = `Console: ${safeMode}`;
+      document.getElementById("securityPill").textContent = `Triggers: ${state.operatorConfig?.securityRules?.liveActionTriggers || "local-only"}`;
+      document.getElementById("execPill").textContent = `Exec: ${state.execToken ? "ARMED" : "LOCKED"}`;
+      document.getElementById("autoRefreshBtn").textContent = `Auto-refresh ${state.autoRefresh ? "ON" : "OFF"}`;
+      updateStreamPill();
+
+      document.querySelectorAll("[data-global-mode]").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-global-mode") === state.globalMode);
+      });
+    }
+
+    function renderMissionMetrics() {
+      const proactive = deriveProactiveItems(state.globalMode);
+      const activeProjects = buildProjects().length;
+      const queueItems = state.data?.attentionQueue?.summary?.total || 0;
+      const openTodos = state.todos.filter((todo) => !todo.done).length;
+      const nextAppointment = upcomingAppointments().find((item) => new Date(item.when).getTime() >= Date.now()) || upcomingAppointments()[0];
+
+      document.getElementById("mActiveProjects").textContent = String(activeProjects);
+      document.getElementById("mActiveProjectsSub").textContent = `${state.data?.headline?.globalStatus || "monitoring"} global health`;
+
+      document.getElementById("mOpenTasks").textContent = String(openTodos + queueItems);
+      document.getElementById("mOpenTasksSub").textContent = `${openTodos} personal tasks | ${queueItems} attention items`;
+
+      document.getElementById("mNextAppointment").textContent = nextAppointment ? fmtDateTime(nextAppointment.when) : "-";
+      document.getElementById("mNextAppointmentSub").textContent = nextAppointment ? nextAppointment.title : "No upcoming events";
+
+      document.getElementById("mAutonomous").textContent = String(proactive.length);
+      document.getElementById("mAutonomousSub").textContent = state.operatorConfig?.securityRules?.autoFixScope || "OpenClaw proactive opportunities";
+    }
+
+    function setupRevealObserver() {
+      if (state.revealObserver) state.revealObserver.disconnect();
+      const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const nodes = document.querySelectorAll(".reveal");
+      if (prefersReduced || state.revealBootstrapped) {
+        nodes.forEach((node) => node.classList.add("visible"));
+        return;
+      }
+
+      state.revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add("visible");
+          const theme = entry.target.getAttribute("data-theme");
+          if (theme) document.documentElement.dataset.navTheme = theme;
+        });
+      }, { threshold: 0.18 });
+
+      nodes.forEach((node) => state.revealObserver.observe(node));
+      state.revealBootstrapped = true;
+    }
+
+    function renderAll() {
+      renderTopBar();
+      renderMissionMetrics();
+      renderTodos();
+      renderAppointments();
+      renderProactive();
+      renderProjectSections();
+      renderActionJournal();
+      renderExecutionHistory();
+      setupRevealObserver();
+    }
+
+    function updateStreamPill() {
+      const pill = document.getElementById("streamPill");
+      if (!pill) return;
+      if (!state.stream.enabled) {
+        pill.textContent = "Stream: OFF";
+        return;
+      }
+      if (state.stream.connected) {
+        pill.textContent = `Stream: ON${state.stream.lastEventAt ? ` | ${relTime(state.stream.lastEventAt)}` : ""}`;
+        return;
+      }
+      pill.textContent = "Stream: RECONNECTING";
+    }
+
+    async function loadSnapshot() {
+      const response = await fetch(`./snapshot.json?ts=${Date.now()}`);
+      if (!response.ok) throw new Error("snapshot fetch failed");
+      return response.json();
+    }
+
+    async function refresh() {
+      const [snapshotResult, configResult] = await Promise.allSettled([loadSnapshot(), loadOperatorConfig()]);
+      if (configResult.status === "fulfilled") {
+        state.operatorConfig = configResult.value;
+      }
+      if (snapshotResult.status === "fulfilled") {
+        state.data = snapshotResult.value;
+        const initialVersion = String(state.data?.generatedAt || "");
+        if (initialVersion && !state.stream.lastSnapshotVersion) {
+          state.stream.lastSnapshotVersion = initialVersion;
+        }
+      } else {
+        console.error(snapshotResult.reason);
+        showToast("Snapshot unavailable");
+        if (!state.data) state.data = {};
+      }
+      renderAll();
+      await fetchExecutionHistory();
+    }
+
+    function setAutoRefresh(enabled) {
+      state.autoRefresh = !!enabled;
+      if (state.timer) clearInterval(state.timer);
+      if (state.autoRefresh) state.timer = setInterval(refresh, 30000);
+      renderTopBar();
+    }
+
+    function startLiveStream() {
+      if (typeof EventSource === "undefined") {
+        state.stream.enabled = false;
+        updateStreamPill();
+        return;
+      }
+
+      if (state.stream.source) {
+        try { state.stream.source.close(); } catch {}
+      }
+
+      state.stream.enabled = true;
+      const source = new EventSource("/api/stream");
+      state.stream.source = source;
+      updateStreamPill();
+
+      source.addEventListener("snapshot", (event) => {
+        try {
+          const payload = JSON.parse(event.data || "{}");
+          if (payload.snapshot) {
+            state.stream.connected = true;
+            state.stream.lastEventAt = new Date().toISOString();
+            const streamVersion = String(payload.mtimeMs || payload.snapshot.generatedAt || "");
+            const isDuplicate = Boolean(streamVersion) && streamVersion === state.stream.lastSnapshotVersion;
+            if (isDuplicate) {
+              updateStreamPill();
+              return;
+            }
+            if (streamVersion) {
+              state.stream.lastSnapshotVersion = streamVersion;
+            }
+            state.data = payload.snapshot;
+            renderAll();
+          }
+        } catch (error) {
+          console.error("stream parse failed", error);
+        }
+      });
+
+      source.onopen = () => {
+        state.stream.connected = true;
+        updateStreamPill();
+      };
+
+      source.onerror = () => {
+        state.stream.connected = false;
+        updateStreamPill();
+      };
+    }
+
+    function wireForms() {
+      const todoForm = document.getElementById("todoForm");
+      const appointmentForm = document.getElementById("appointmentForm");
+      const appointmentWhen = document.getElementById("appointmentWhen");
+      if (!appointmentWhen.value) {
+        const inTwoHours = new Date(Date.now() + (2 * 60 * 60 * 1000));
+        appointmentWhen.value = toInputDateTime(inTwoHours.toISOString());
+      }
+
+      todoForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const text = (document.getElementById("todoInput").value || "").trim();
+        const project = document.getElementById("todoProject").value || "General";
+        if (!text) return;
+        state.todos.unshift({
+          id: uid("todo"),
+          text,
+          project,
+          done: false,
+          createdAt: new Date().toISOString()
+        });
+        saveLocal(STORAGE_KEYS.todos, state.todos);
+        document.getElementById("todoInput").value = "";
+        renderTodos();
+        renderMissionMetrics();
+      });
+
+      appointmentForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        const title = (document.getElementById("appointmentTitle").value || "").trim();
+        const when = (document.getElementById("appointmentWhen").value || "").trim();
+        const context = (document.getElementById("appointmentContext").value || "").trim();
+        if (!title || !when) return;
+        const iso = new Date(when).toISOString();
+        state.appointments.push({
+          id: uid("appt"),
+          title,
+          when: iso,
+          context: context || "General"
+        });
+        saveLocal(STORAGE_KEYS.appointments, state.appointments);
+        document.getElementById("appointmentTitle").value = "";
+        document.getElementById("appointmentContext").value = "";
+        renderAppointments();
+        renderMissionMetrics();
+      });
+    }
+
+    function wireClicks() {
+      document.addEventListener("click", async (event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)) return;
+
+        if (target.id === "refreshBtn") {
+          refresh();
+          return;
+        }
+
+        if (target.id === "setExecTokenBtn") {
+          setExecToken();
+          return;
+        }
+
+        if (target.id === "refreshHistoryBtn") {
+          await fetchExecutionHistory();
+          showToast("Execution history refreshed");
+          return;
+        }
+
+        if (target.id === "autoRefreshBtn") {
+          setAutoRefresh(!state.autoRefresh);
+          return;
+        }
+
+        if (target.matches("[data-global-mode]")) {
+          const mode = target.getAttribute("data-global-mode");
+          if (!mode) return;
+          state.globalMode = normalizeMode(mode);
+          renderAll();
+          return;
+        }
+
+        if (target.matches("[data-project-mode]")) {
+          const mode = target.getAttribute("data-project-mode");
+          const projectId = target.getAttribute("data-project-id");
+          if (!mode || !projectId) return;
+          state.projectModes[projectId] = normalizeMode(mode);
+          saveLocal(STORAGE_KEYS.projectModes, state.projectModes);
+          renderProjectSections();
+          setupRevealObserver();
+          return;
+        }
+
+        if (target.classList.contains("todo-toggle")) {
+          const id = target.getAttribute("data-id");
+          state.todos = state.todos.map((todo) => (todo.id === id ? { ...todo, done: !todo.done } : todo));
+          saveLocal(STORAGE_KEYS.todos, state.todos);
+          renderTodos();
+          renderMissionMetrics();
+          return;
+        }
+
+        if (target.classList.contains("todo-delete")) {
+          const id = target.getAttribute("data-id");
+          state.todos = state.todos.filter((todo) => todo.id !== id);
+          saveLocal(STORAGE_KEYS.todos, state.todos);
+          renderTodos();
+          renderMissionMetrics();
+          return;
+        }
+
+        if (target.classList.contains("appointment-delete")) {
+          const id = target.getAttribute("data-id");
+          state.appointments = state.appointments.filter((item) => item.id !== id);
+          saveLocal(STORAGE_KEYS.appointments, state.appointments);
+          renderAppointments();
+          renderMissionMetrics();
+          return;
+        }
+
+        if (target.classList.contains("review-approve")) {
+          const reviewKey = target.getAttribute("data-review-key") || "";
+          if (!reviewKey) return;
+          const checked = target instanceof HTMLInputElement ? target.checked : !Boolean(state.reviewChecks[reviewKey]);
+          state.reviewChecks[reviewKey] = checked;
+          saveLocal(STORAGE_KEYS.reviewChecks, state.reviewChecks);
+          renderProjectSections();
+          showToast(checked ? "Review approved" : "Review unapproved");
+          return;
+        }
+
+        if (target.classList.contains("copy-command")) {
+          const command = target.getAttribute("data-command") || "";
+          if (!command) {
+            showToast("No command available");
+            return;
+          }
+          const ok = await copyText(command);
+          showToast(ok ? "Command copied" : "Copy failed");
+          return;
+        }
+
+        if (target.classList.contains("history-view")) {
+          const historyId = target.getAttribute("data-history-id") || "";
+          if (historyId) selectExecutionRow(historyId);
+          return;
+        }
+
+        if (target.classList.contains("history-retry")) {
+          const historyId = target.getAttribute("data-history-id") || "";
+          if (historyId) await retryHistoryRow(historyId);
+          return;
+        }
+
+        const historyRow = target.closest(".history-item");
+        if (historyRow instanceof HTMLElement) {
+          const historyId = historyRow.getAttribute("data-history-id") || "";
+          if (historyId) selectExecutionRow(historyId);
+          return;
+        }
+
+        if (target.classList.contains("queue-command")) {
+          const command = target.getAttribute("data-command") || "";
+          const label = target.getAttribute("data-label") || "Queued action";
+          const projectId = target.getAttribute("data-project-id") || "";
+          const actionKey = target.getAttribute("data-action-key") || "queue";
+          const project = projectId ? findRenderedProject(projectId) : null;
+          const action = project ? projectAction(project, actionKey, label, command) : { label, cmd: command, classification: "internal_diagnostic" };
+          const mode = project ? projectModeFor(project) : normalizeMode(state.globalMode);
+          const auditLabel = project ? `${project.name}:${action.label}` : label;
+          if (actionKey === "go_live") {
+            showToast("Use the execute action button for go-live commands.");
+            recordAudit(`blocked:${auditLabel}`, action.cmd || "no command", "blocked_wrong_control", { actionKey, mode });
+            return;
+          }
+          const modeGate = modeExecutionGate(mode, actionKey, action.classification);
+          if (!modeGate.allowed) {
+            showToast(modeGate.reason);
+            recordAudit(`blocked:${auditLabel}`, action.cmd || "no command", "blocked_by_mode", { actionKey, mode });
+            return;
+          }
+          const hasConfiguredAction = Boolean(project?.config?.actions?.[actionKey]);
+          if (hasConfiguredAction) {
+            try {
+              const payload = await executeProjectAction(project, actionKey, { confirmed: false });
+              const summary = executionSummary(payload);
+              const resultLabel = payload.ok ? `executed (${summary})` : `failed (${summary})`;
+              const detail = `${action.cmd || "no command"}${payload.result?.stderr ? ` | stderr: ${String(payload.result.stderr).slice(0, 180)}` : ""}`;
+              recordAudit(`run:${auditLabel}`, detail, resultLabel, {
+                projectId: project.id,
+                projectName: project.name,
+                actionKey,
+                actionLabel: action.label,
+                command: action.cmd,
+                classification: action.classification,
+                dryRun: Boolean(payload.dryRun),
+                result: payload.result
+              });
+              await fetchExecutionHistory();
+              showToast(payload.ok ? "Action executed" : "Action failed");
+            } catch (error) {
+              recordAudit(`run:${auditLabel}`, action.cmd || "no command", "execute_error");
+              showToast(String(error.message || error));
+            }
+            return;
+          }
+          recordAudit(`queue:${auditLabel}`, action.cmd || "no command", "queued");
+          showToast("Action queued");
+          return;
+        }
+
+        if (target.classList.contains("promote-review")) {
+          const projectId = target.getAttribute("data-project-id") || "";
+          const reviewId = target.getAttribute("data-review-id") || "";
+          const reviewKey = target.getAttribute("data-review-key") || "";
+          const fromBranch = target.getAttribute("data-from-branch") || "";
+          const toBranch = target.getAttribute("data-to-branch") || "";
+          if (reviewKey && !state.reviewChecks[reviewKey]) {
+            showToast("Approve review first.");
+            return;
+          }
+          const project = projectId ? findRenderedProject(projectId) : null;
+          if (!project?.config) {
+            showToast("Project config missing for promotion.");
+            return;
+          }
+          const policy = state.operatorConfig?.securityRules?.liveConfirmationPolicy || "confirmation required";
+          const ok = window.confirm(`${project.name}: promote reviewed deployment from ${fromBranch || "?"} to ${toBranch || "?"}?\n\nPolicy: ${policy}`);
+          if (!ok) {
+            recordAudit(`promote-cancelled:${project.name}`, `${fromBranch}->${toBranch}`, "cancelled", { projectId: project.id, reviewId });
+            return;
+          }
+          try {
+            const payload = await executeProjectAction(project, "promote_review", {
+              confirmed: true,
+              fromBranch,
+              toBranch,
+              reviewId
+            });
+            const summary = executionSummary(payload);
+            const resultLabel = payload.ok ? `promoted (${summary})` : `promotion_failed (${summary})`;
+            const detail = `${fromBranch || "?"} -> ${toBranch || "?"}${payload.result?.stderr ? ` | stderr: ${String(payload.result.stderr).slice(0, 180)}` : ""}`;
+            recordAudit(`promote:${project.name}`, detail, resultLabel, {
+              projectId: project.id,
+              projectName: project.name,
+              actionKey: "promote_review",
+              actionLabel: `Promote ${fromBranch} -> ${toBranch}`,
+              fromBranch,
+              toBranch,
+              reviewId,
+              classification: "internal_merge",
+              dryRun: Boolean(payload.dryRun),
+              result: payload.result
+            });
+            await fetchExecutionHistory();
+            showToast(payload.ok ? "Promotion executed" : "Promotion failed");
+          } catch (error) {
+            recordAudit(`promote:${project.name}`, `${fromBranch || "?"} -> ${toBranch || "?"}`, "promotion_error", { reviewId });
+            showToast(String(error.message || error));
+          }
+          return;
+        }
+
+        if (target.classList.contains("go-live")) {
+          const command = target.getAttribute("data-command") || "";
+          const actionKey = target.getAttribute("data-action-key") || "go_live";
+          const projectId = target.getAttribute("data-project-id") || "";
+          const projectName = target.getAttribute("data-project-name") || "project";
+          const fromBranch = target.getAttribute("data-from-branch") || "";
+          const toBranch = target.getAttribute("data-to-branch") || "";
+          const reviewId = target.getAttribute("data-review-id") || "";
+          const project = projectId ? findRenderedProject(projectId) : null;
+          const action = project ? projectAction(project, actionKey, "Go Live", command) : { label: "Go Live", cmd: command, classification: "external_irreversible" };
+          const mode = project ? projectModeFor(project) : normalizeMode(state.globalMode);
+          const modeGate = modeExecutionGate(mode, actionKey, action.classification);
+          if (!modeGate.allowed) {
+            showToast(modeGate.reason);
+            recordAudit(`blocked:${projectName}`, action.cmd || "no command", "blocked_by_mode", { actionKey, mode });
+            return;
+          }
+          const requiresConfirm = project ? actionNeedsConfirmation(project, actionKey) : true;
+          if (requiresConfirm) {
+            const policy = state.operatorConfig?.securityRules?.liveConfirmationPolicy || "confirmation required for external irreversible actions";
+            const consoleMode = String(state.data?.decisionConsole?.globalMode || "dry-run").toLowerCase();
+            const modeHint = consoleMode !== "live" ? `\n\nConsole mode is ${consoleMode.toUpperCase()}, but this action can still execute with confirmation.` : "";
+            const ok = window.confirm(`${projectName}: confirm "${action.label}"?\n\nPolicy: ${policy}${modeHint}`);
+            if (!ok) {
+              recordAudit(`go-live-cancelled:${projectName}`, action.cmd || "no command", "cancelled");
+              showToast("Go Live cancelled");
+              return;
+            }
+          }
+
+          if (project?.config) {
+            try {
+              const payload = await executeProjectAction(project, actionKey, { confirmed: requiresConfirm, fromBranch, toBranch, reviewId });
+              const summary = executionSummary(payload);
+              const resultLabel = payload.ok ? `executed (${summary})` : `failed (${summary})`;
+              const detail = `${action.cmd || "no command"}${payload.result?.stderr ? ` | stderr: ${String(payload.result.stderr).slice(0, 180)}` : ""}`;
+              recordAudit(`go-live:${projectName}`, detail, resultLabel, {
+                projectId: project.id,
+                projectName: project.name,
+                actionKey,
+                actionLabel: action.label,
+                command: action.cmd,
+                fromBranch,
+                toBranch,
+                reviewId,
+                classification: action.classification,
+                dryRun: Boolean(payload.dryRun),
+                result: payload.result
+              });
+              await fetchExecutionHistory();
+              showToast(payload.ok ? "Go Live executed" : "Go Live failed");
+            } catch (error) {
+              recordAudit(`go-live:${projectName}`, action.cmd || "no command", "execute_error");
+              showToast(String(error.message || error));
+            }
+          } else {
+            recordAudit(`go-live-intent:${projectName}`, action.cmd || "no command", "not_configured");
+            showToast("Project not configured for execution");
+          }
+          if (action.cmd) await copyText(action.cmd);
+          return;
+        }
+      });
+    }
+
+    function wireKeyboard() {
+      window.addEventListener("keydown", (event) => {
+        const key = event.key.toLowerCase();
+        if (key === "r") refresh();
+        if (key === "a") setAutoRefresh(!state.autoRefresh);
+      });
+    }
+
+    wireForms();
+    wireClicks();
+    wireKeyboard();
+    refresh();
+    startLiveStream();
+    setAutoRefresh(true);
+    setInterval(updateStreamPill, 10000);
+  </script>
 </body>
 </html>

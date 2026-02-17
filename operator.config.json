@@ -1,0 +1,83 @@
+{
+  "timezone": "America/New_York",
+  "calendarSource": "local-only",
+  "tasksSource": "local-only (OpenClaw cron + local project scripts/runtime artifacts)",
+  "projects": [
+    {
+      "name": "Outreach Pipeline",
+      "type": "outreach",
+      "repoPath": "/Users/j/Documents/Builds/Outreach",
+      "owner": "James (Halldon)",
+      "priority": "P1",
+      "automationMode": "auto-fix-allowed",
+      "branchFlow": [
+        "dev",
+        "main"
+      ],
+      "metricsSource": "file+db (output/.csv, output/.json, ui/runtime/outreach_os.db)",
+      "refreshCadence": "event-driven from jobs + periodic cron snapshots",
+      "actions": {
+        "health_check": {
+          "label": "Health Check",
+          "cmd": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py && python3 scripts/build_lock_readiness.py",
+          "classification": "internal_diagnostic"
+        },
+        "verify": {
+          "label": "Verify",
+          "cmd": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/validate_emails.py && python3 scripts/build_channel_queues.py",
+          "classification": "internal_diagnostic"
+        },
+        "go_live": {
+          "label": "Go Live",
+          "cmd": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/orchestrate_daily.py",
+          "classification": "external_irreversible"
+        },
+        "rollback": {
+          "label": "Rollback",
+          "cmd": "cd /Users/j/Documents/Builds/Outreach && python3 scripts/build_operational_snapshot.py",
+          "classification": "internal_safe"
+        }
+      }
+    },
+    {
+      "name": "Polymarket Bot (paper-first)",
+      "type": "polymarket",
+      "repoPath": "/Users/j/.openclaw/workspace/polymarket-bot",
+      "owner": "James",
+      "priority": "P1",
+      "automationMode": "auto-fix-allowed",
+      "branchFlow": [
+        "main"
+      ],
+      "metricsSource": "db+file (data/polymarket_bot.db, reports/*.json, dashboard/snapshot.json, runtime logs)",
+      "refreshCadence": "loop poll ~2s with hourly scoreboard summaries",
+      "actions": {
+        "health_check": {
+          "label": "Health Check",
+          "cmd": "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main status",
+          "classification": "internal_diagnostic"
+        },
+        "verify": {
+          "label": "Verify Guards",
+          "cmd": "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 scripts/verify_launch_guards.py && python3 scripts/build_dashboard_snapshot.py",
+          "classification": "internal_diagnostic"
+        },
+        "go_live": {
+          "label": "Run Paper Loop",
+          "cmd": "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main run --mode paper --loop",
+          "classification": "internal_paper"
+        },
+        "rollback": {
+          "label": "Kill Switch",
+          "cmd": "cd /Users/j/.openclaw/workspace/polymarket-bot && python3 -m polymarket_bot.main kill-switch",
+          "classification": "internal_safe"
+        }
+      }
+    }
+  ],
+  "securityRules": {
+    "liveActionTriggers": "James only (direct session + approved automations)",
+    "liveConfirmationPolicy": "required every time for true external irreversible actions; no confirmation required for local paper-mode/internal diagnostics/autofixes",
+    "autoFixScope": "local files/scripts/services only; external publish/send/live-trade requires explicit confirmation"
+  }
+}
