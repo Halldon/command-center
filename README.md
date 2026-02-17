@@ -128,6 +128,20 @@ Install Codex skill for repeatable use:
 bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts/install_codex_command_center_skill.sh
 ```
 
+## Heartbeat bridge (always-on)
+
+Install local launchd bridge (runs every 60s and emits heartbeats to control plane):
+
+```bash
+bash /Users/jameshalldon/Documents/Builds/Command\ Center/scripts/install_heartbeat_bridge_launchd.sh
+```
+
+Manual run:
+
+```bash
+python3 /Users/jameshalldon/Documents/Builds/Command\ Center/scripts/emit_project_heartbeats.py
+```
+
 ## Backup snapshot pipeline (secondary)
 
 Snapshot sync script remains available:
