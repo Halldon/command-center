@@ -204,7 +204,7 @@ function buildMeetingCloudEvent_(message, parsed, projectId, cfg) {
     specversion: "1.0",
     id: eventId,
     source: "google.meet.gmail",
-    type: "commandcenter.meeting_note",
+    type: "commandcenter.action",
     subject: projectId,
     time: sentAt,
     datacontenttype: "application/json",
@@ -212,6 +212,7 @@ function buildMeetingCloudEvent_(message, parsed, projectId, cfg) {
     channel: "google-meet-email",
     data: {
       kind: "meeting_note",
+      actionType: "meeting_note",
       projectId,
       source: "google-meet-email",
       channel: "google-meet-email",
