@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Command Center</title>
+  <link rel="icon" href="data:," />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -496,6 +497,232 @@
       display: flex;
       gap: 6px;
       flex-wrap: wrap;
+    }
+
+    .exec-grid,
+    .inbox-grid,
+    .intelligence-grid,
+    .agent-grid {
+      display: grid;
+      gap: 12px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .intelligence-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .exec-card,
+    .inbox-card,
+    .intel-card,
+    .agent-card {
+      border-radius: 18px;
+      border: 1px solid rgba(20, 24, 34, 0.12);
+      background: linear-gradient(180deg, rgba(249, 249, 248, 0.92), rgba(241, 241, 239, 0.9));
+      padding: 14px;
+    }
+
+    .exec-card h4,
+    .inbox-card h4,
+    .intel-card h4,
+    .agent-card h4 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+      font-weight: 720;
+    }
+
+    .exec-card p,
+    .inbox-card p,
+    .intel-card p,
+    .agent-card p {
+      margin: 6px 0 0;
+      font-size: 13px;
+      color: #5f6675;
+      line-height: 1.42;
+    }
+
+    .stack {
+      display: grid;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .command-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      gap: 8px;
+    }
+
+    .command-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .plan-list,
+    .inbox-list,
+    .planner-list,
+    .timeline-list,
+    .health-list,
+    .dependency-list,
+    .agent-list,
+    .transcript-list,
+    .decompose-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 7px;
+    }
+
+    .plan-item,
+    .inbox-item,
+    .planner-item,
+    .timeline-item,
+    .health-item,
+    .dependency-item,
+    .agent-item,
+    .transcript-item,
+    .decompose-item {
+      border: 1px solid rgba(20, 24, 35, 0.11);
+      border-radius: 12px;
+      padding: 9px 10px;
+      background: rgba(252, 252, 251, 0.88);
+    }
+
+    .inbox-item {
+      cursor: pointer;
+      transition: border-color 0.22s var(--ease-out), transform 0.22s var(--ease-out);
+    }
+
+    .inbox-item:hover {
+      transform: translateY(-1px);
+    }
+
+    .inbox-item.active {
+      border-color: rgba(33, 38, 49, 0.26);
+      box-shadow: inset 0 0 0 1px rgba(33, 38, 49, 0.13);
+    }
+
+    .item-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: flex-start;
+    }
+
+    .item-title {
+      margin: 0;
+      font-size: 13px;
+      font-weight: 720;
+      color: #1b202c;
+    }
+
+    .item-sub {
+      margin: 4px 0 0;
+      font-size: 11px;
+      color: #697084;
+      line-height: 1.45;
+    }
+
+    .triage-chip {
+      border: 1px solid rgba(24, 28, 38, 0.14);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 10px;
+      font-weight: 690;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      white-space: nowrap;
+    }
+
+    .triage-p0 {
+      color: #87263c;
+      background: rgba(179, 76, 99, 0.14);
+      border-color: rgba(179, 76, 99, 0.25);
+    }
+
+    .triage-p1 {
+      color: #81581a;
+      background: rgba(175, 126, 42, 0.16);
+      border-color: rgba(175, 126, 42, 0.26);
+    }
+
+    .triage-p2 {
+      color: #2f6548;
+      background: rgba(63, 132, 95, 0.13);
+      border-color: rgba(63, 132, 95, 0.24);
+    }
+
+    .triage-p3 {
+      color: #4f5565;
+      background: rgba(111, 122, 144, 0.1);
+      border-color: rgba(111, 122, 144, 0.2);
+    }
+
+    .draft-box {
+      border: 1px solid rgba(24, 28, 38, 0.14);
+      border-radius: 12px;
+      background: rgba(249, 249, 248, 0.92);
+      padding: 10px;
+      font-size: 12px;
+      color: #1d2332;
+      white-space: pre-wrap;
+      line-height: 1.45;
+      min-height: 92px;
+    }
+
+    .split {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .agent-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .agent-dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 7px;
+      vertical-align: middle;
+    }
+
+    .agent-pass {
+      background: #2d8a5c;
+      box-shadow: 0 0 0 4px rgba(45, 138, 92, 0.14);
+    }
+
+    .agent-warn {
+      background: #af7e2a;
+      box-shadow: 0 0 0 4px rgba(175, 126, 42, 0.14);
+    }
+
+    .agent-fail {
+      background: #b34c63;
+      box-shadow: 0 0 0 4px rgba(179, 76, 99, 0.14);
+    }
+
+    .focus-mode-active .focus-secondary {
+      opacity: 0.36;
+      filter: grayscale(0.22);
+    }
+
+    .voice-pill {
+      border: 1px solid rgba(24, 28, 38, 0.14);
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 11px;
+      color: #535a6a;
+      background: rgba(255, 255, 255, 0.75);
     }
 
     .project-lane {
@@ -1023,7 +1250,11 @@
       .pair-grid,
       .lane-grid,
       .module-grid,
-      .history-grid {
+      .history-grid,
+      .exec-grid,
+      .inbox-grid,
+      .agent-grid,
+      .intelligence-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1032,6 +1263,11 @@
       }
 
       .lane-form-appointments {
+        grid-template-columns: 1fr;
+      }
+
+      .command-row,
+      .split {
         grid-template-columns: 1fr;
       }
     }
@@ -1181,7 +1417,166 @@
         </div>
       </section>
 
-      <section class="panel reveal" data-theme="dark">
+      <section id="executiveSurfaceSection" class="panel reveal focus-priority" data-theme="light">
+        <div class="section-head">
+          <div>
+            <h3>Executive Command Surface</h3>
+            <p>Voice capture, natural-language commands, and dry-run action planning with explicit confirmations.</p>
+          </div>
+          <span id="voiceStatusPill" class="voice-pill">Voice: idle</span>
+        </div>
+        <div class="exec-grid">
+          <article class="exec-card">
+            <h4>Command Palette + Agent Router</h4>
+            <p>Parse intent, route to the right agent, preview the plan, then execute with policy gates.</p>
+            <div class="stack">
+              <div class="command-row">
+                <input id="commandInput" class="field" type="text" maxlength="220" placeholder="Ex: stabilize outreach, then prep go-live if checks pass" />
+                <button id="commandVoiceBtn" type="button" class="mini-btn">Voice Cmd</button>
+                <button id="thoughtCaptureBtn" type="button" class="mini-btn">Capture Thought</button>
+                <button id="commandParseBtn" type="button" class="mini-btn">Plan</button>
+              </div>
+              <div id="commandRoute" class="tiny-note">Agent route pending.</div>
+              <ul id="commandPlanList" class="plan-list"></ul>
+              <div class="command-actions">
+                <button id="commandDryRunBtn" type="button" class="mini-btn">Run Dry-Run</button>
+                <button id="commandExecuteBtn" type="button" class="solid-btn">Commit Plan</button>
+              </div>
+              <div id="commandRunOutput" class="draft-box">No command run yet.</div>
+            </div>
+          </article>
+
+          <article class="exec-card">
+            <h4>Transcript + External Quick Add</h4>
+            <p>Convert meeting notes into actions and ingest on-the-go items from SMS/Telegram/email manually.</p>
+            <div class="stack">
+              <textarea id="meetingTranscriptInput" class="field" rows="4" placeholder="Paste meeting transcript notes..."></textarea>
+              <div class="command-actions">
+                <button id="meetingParseBtn" type="button" class="mini-btn">Extract Actions</button>
+              </div>
+              <ul id="transcriptActionList" class="transcript-list"></ul>
+              <div class="split">
+                <select id="quickAddSource" class="field">
+                  <option value="telegram">Telegram</option>
+                  <option value="sms">SMS</option>
+                  <option value="email">Email</option>
+                  <option value="github">GitHub</option>
+                </select>
+                <select id="quickAddProject" class="field"></select>
+              </div>
+              <input id="quickAddMessage" class="field" type="text" maxlength="220" placeholder="Quick add item from mobile channel..." />
+              <div class="command-actions">
+                <button id="quickAddBtn" type="button" class="mini-btn">Add To Inbox</button>
+              </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="inboxPlannerSection" class="panel reveal focus-priority" data-theme="light">
+        <div class="section-head">
+          <div>
+            <h3>Unified Inbox + Planner</h3>
+            <p>Triage inbox, draft responses, schedule follow-ups, and auto-build your day plan.</p>
+          </div>
+          <div class="pro-actions">
+            <button id="focusModeBtn" class="mini-btn">Focus Mode OFF</button>
+          </div>
+        </div>
+        <div class="inbox-grid">
+          <article class="inbox-card">
+            <h4>Unified Inbox + Triage</h4>
+            <p id="inboxSummary">Loading inbox...</p>
+            <ul id="unifiedInboxList" class="inbox-list"></ul>
+          </article>
+
+          <article class="inbox-card">
+            <h4>Reply Drafts + Follow-ups</h4>
+            <p id="inboxDetail" class="tiny-note">Select an inbox item to generate reply drafts.</p>
+            <div id="inboxDraft" class="draft-box">No draft generated yet.</div>
+            <div class="split" style="margin-top:8px;">
+              <input id="sendWindowStart" class="field" type="time" />
+              <input id="sendWindowEnd" class="field" type="time" />
+            </div>
+            <select id="toneGuardrail" class="field" style="margin-top:8px;">
+              <option value="direct">Tone: Direct</option>
+              <option value="friendly">Tone: Friendly</option>
+              <option value="formal">Tone: Formal</option>
+            </select>
+            <div class="command-actions">
+              <button id="draftGenerateBtn" type="button" class="mini-btn">Generate Draft</button>
+              <button id="draftSendBtn" type="button" class="mini-btn">Approve + Queue</button>
+              <button id="draftFollowupBtn" type="button" class="mini-btn">Schedule Follow-up</button>
+              <button id="inboxDoneBtn" type="button" class="tiny-btn">Mark Resolved</button>
+            </div>
+          </article>
+
+          <article class="inbox-card">
+            <h4>AI Daily Planner + Decomposition</h4>
+            <p>Build a practical day plan from tasks, appointments, and inbox urgency.</p>
+            <div class="command-actions">
+              <button id="plannerGenerateBtn" type="button" class="mini-btn">Build Day Plan</button>
+            </div>
+            <ul id="dailyPlannerList" class="planner-list"></ul>
+            <input id="decomposeInput" class="field" type="text" maxlength="180" placeholder="Task to decompose..." />
+            <div class="command-actions">
+              <button id="decomposeBtn" type="button" class="tiny-btn">Decompose</button>
+            </div>
+            <ul id="decomposeList" class="decompose-list"></ul>
+          </article>
+
+          <article class="inbox-card">
+            <h4>End-of-Day Executive Summary</h4>
+            <p>Summarize completed work, risks, and next actions in one view.</p>
+            <div class="command-actions">
+              <button id="eodSummaryBtn" type="button" class="mini-btn">Generate EOD Summary</button>
+            </div>
+            <div id="eodSummaryOutput" class="draft-box">No summary yet.</div>
+          </article>
+        </div>
+      </section>
+
+      <section id="projectIntelligenceSection" class="panel reveal focus-priority" data-theme="dark">
+        <div class="section-head">
+          <div>
+            <h3>Project Intelligence</h3>
+            <p>Health scoring, dependency visibility, and incident timelines with root-cause hints.</p>
+          </div>
+        </div>
+        <div class="intelligence-grid">
+          <article class="intel-card">
+            <h4>Health Scoreboard</h4>
+            <p>Weighted score from status, check outcomes, queue pressure, and heartbeat integrity.</p>
+            <ul id="projectHealthList" class="health-list"></ul>
+          </article>
+          <article class="intel-card">
+            <h4>Dependency Map</h4>
+            <p>Cross-project dependencies that can create hidden execution bottlenecks.</p>
+            <ul id="dependencyMapList" class="dependency-list"></ul>
+          </article>
+          <article class="intel-card">
+            <h4>Incident Timeline</h4>
+            <p>Chronological issues + action history with root-cause hints.</p>
+            <ul id="incidentTimelineList" class="timeline-list"></ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="agentTeamSection" class="panel reveal focus-priority" data-theme="light">
+        <div class="section-head">
+          <div>
+            <h3>Validation Agent Team</h3>
+            <p>Subagents continuously validate UI, design language, copy clarity, and functional safety.</p>
+          </div>
+          <div class="pro-actions">
+            <button id="runAgentTeamBtn" class="mini-btn">Run Validation Sweep</button>
+          </div>
+        </div>
+        <p id="agentTeamStamp" class="tiny-note">No validation run yet.</p>
+        <ul id="agentTeamList" class="agent-list"></ul>
+      </section>
+
+      <section class="panel reveal focus-secondary" data-theme="dark">
         <div class="section-head">
           <div>
             <h3>OpenClaw 24/7 Proactive Feed</h3>
@@ -1193,7 +1588,7 @@
 
       <section id="projectSections" class="project-lane"></section>
 
-      <section class="panel reveal" data-theme="dark">
+      <section class="panel reveal focus-secondary" data-theme="dark">
         <div class="section-head">
           <div>
             <h3>Action Journal</h3>
@@ -1203,7 +1598,7 @@
         <ul id="actionJournal" class="journal-list"></ul>
       </section>
 
-      <section class="panel reveal" data-theme="light">
+      <section class="panel reveal focus-secondary" data-theme="light">
         <div class="section-head">
           <div>
             <h3>Execution History</h3>
@@ -4118,5 +4513,6 @@
     setAutoRefresh(false);
     setInterval(updateStreamPill, 10000);
   </script>
+  <script src="./executive_os.js"></script>
 </body>
 </html>

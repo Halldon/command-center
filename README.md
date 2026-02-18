@@ -166,3 +166,4 @@ Set token:
 - `/Users/jameshalldon/Documents/Builds/Command Center/docs/project-contract.md`
 - `/Users/jameshalldon/Documents/Builds/Command Center/docs/openclaw-agent-standards.md`
 - `/Users/jameshalldon/Documents/Builds/Command Center/docs/openclaw-command-center-bootstrap-prompt.md`
+- `/Users/jameshalldon/Documents/Builds/Command Center/docs/google-meet-auto-route.md`
