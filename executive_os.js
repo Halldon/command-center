@@ -8,7 +8,8 @@
     plan: "cc.v3.plan",
     decomposition: "cc.v3.decomposition",
     commandHistory: "cc.v3.commandHistory",
-    agentTeam: "cc.v3.agentTeam"
+    agentTeam: "cc.v3.agentTeam",
+    meetingSeen: "cc.v3.meetingSeen"
   };
 
   const DEFAULT_SEND_WINDOW = { start: "08:30", end: "18:00" };
@@ -23,6 +24,7 @@
     decomposition: loadLocal(STORAGE.decomposition, []),
     commandHistory: loadLocal(STORAGE.commandHistory, []),
     agentTeam: loadLocal(STORAGE.agentTeam, []),
+    meetingSeen: loadLocal(STORAGE.meetingSeen, {}),
     selectedInboxId: "",
     parsedCommand: null,
     operatorConfig: null,
@@ -203,6 +205,118 @@
     saveLocal(STORAGE.inbox, state.inbox);
   }
 
+  function cleanText(value) {
+    return String(value || "").replace(/\s+/g, " ").trim();
+  }
+
+  function safeHttpUrl(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    try {
+      const parsed = new URL(raw);
+      if (parsed.protocol === "http:" || parsed.protocol === "https:") return parsed.toString();
+      return "";
+    } catch (_) {
+      return "";
+    }
+  }
+
+  function normalizeActionItems(value) {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((item) => {
+        if (typeof item === "string") return cleanText(item);
+        if (item && typeof item === "object") {
+          return cleanText(item.text || item.title || item.item || item.action || "");
+        }
+        return "";
+      })
+      .filter(Boolean)
+      .slice(0, 8);
+  }
+
+  function isMeetingEvent(row) {
+    const eventType = String(row && row.lastEventType || "").toLowerCase();
+    const details = row && row.details && typeof row.details === "object" ? row.details : {};
+    const kind = String(details.kind || "").toLowerCase();
+    const source = String(details.source || details.channel || "").toLowerCase();
+    return /meeting|transcript|note/.test(eventType)
+      || kind === "meeting_note"
+      || /google.?meet|meeting/.test(source);
+  }
+
+  function ingestMeetingInboxRows() {
+    const projects = state.latestState
+      && state.latestState.realtime
+      && state.latestState.realtime.projects
+      && typeof state.latestState.realtime.projects === "object"
+      ? Object.values(state.latestState.realtime.projects)
+      : [];
+
+    let inboxChanged = false;
+    let seenChanged = false;
+    const seen = { ...state.meetingSeen };
+
+    for (const row of projects) {
+      const eventId = String(row && row.lastEventId || "").trim();
+      if (!eventId || seen[eventId]) continue;
+      if (!isMeetingEvent(row)) continue;
+
+      const details = row && row.details && typeof row.details === "object" ? row.details : {};
+      const meetingTitle = cleanText(details.meetingTitle || details.title || details.subject || "Untitled meeting");
+      const summary = cleanText(details.summary || details.notesSummary || details.body || "");
+      const actionItems = normalizeActionItems(details.actionItems || details.suggestedNextSteps || []);
+      const notesUrl = safeHttpUrl(details.notesUrl || details.link || details.docUrl || details.recordingUrl || "");
+      const bodyLines = [];
+      if (summary) bodyLines.push(summary);
+      if (actionItems.length) {
+        bodyLines.push("", "Suggested next steps:");
+        actionItems.forEach((item, index) => bodyLines.push(`${index + 1}. ${item}`));
+      }
+      if (notesUrl) {
+        bodyLines.push("", `Notes link: ${notesUrl}`);
+      }
+
+      state.inbox.unshift({
+        id: uid("inbox"),
+        source: "google-meet",
+        subject: `Meeting notes: ${meetingTitle}`,
+        body: bodyLines.join("\n").trim() || "Meeting notes received.",
+        project: String(row && row.name || details.projectName || "General"),
+        status: "open",
+        urgency: actionItems.length >= 4 ? "p1" : "p2",
+        requiresReply: false,
+        receivedAt: String(details.receivedAt || row.lastEventAt || nowIso()),
+        tags: ["meeting-note", actionItems.length ? "with-actions" : "summary-only"],
+        metadata: {
+          notesUrl,
+          eventId,
+          eventType: String(row && row.lastEventType || ""),
+          actionCount: actionItems.length
+        }
+      });
+      inboxChanged = true;
+      seen[eventId] = nowIso();
+      seenChanged = true;
+    }
+
+    if (inboxChanged) {
+      state.inbox = state.inbox.slice(0, 120);
+      saveLocal(STORAGE.inbox, state.inbox);
+    }
+    if (seenChanged) {
+      const recentSeen = Object.entries(seen)
+        .sort((a, b) => Date.parse(String(b[1] || 0)) - Date.parse(String(a[1] || 0)))
+        .slice(0, 600)
+        .reduce((acc, [id, ts]) => {
+          acc[id] = ts;
+          return acc;
+        }, {});
+      state.meetingSeen = recentSeen;
+      saveLocal(STORAGE.meetingSeen, state.meetingSeen);
+    }
+  }
+
   function ingestIncidentInboxRows() {
     const incidents = state.latestState && state.latestState.realtime && Array.isArray(state.latestState.realtime.incidents)
       ? state.latestState.realtime.incidents
@@ -314,7 +428,9 @@
 
     detail.textContent = `${row.source.toUpperCase()} | ${row.project || "General"} | ${row.status.toUpperCase()} | ${relTime(row.receivedAt)}`;
     const draft = state.drafts[row.id] || "";
-    draftBox.textContent = draft || row.body || "No detail available.";
+    const notesUrl = safeHttpUrl(row && row.metadata && row.metadata.notesUrl || "");
+    const notesTail = notesUrl ? `\n\nOpen notes: ${notesUrl}` : "";
+    draftBox.textContent = (draft || row.body || "No detail available.") + notesTail;
   }
 
   function buildDraft(row, tone) {
@@ -986,7 +1102,9 @@
       const response = await fetch(url);
       if (!response.ok) throw new Error(`state fetch failed (${response.status})`);
       state.latestState = await response.json();
+      ingestMeetingInboxRows();
       ingestIncidentInboxRows();
+      renderInbox();
       renderProjectHealth();
       renderDependencyMap();
       renderIncidentTimeline();
